@@ -1,0 +1,9 @@
+env
+*.app
+*.psd
+*.pyc
+server/storage
+.idea
+.DS_Store
+.ruff_cache
+.env
