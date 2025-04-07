@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   build: {
@@ -8,5 +9,5 @@ export default defineConfig({
   },
   base: process.env.NODE_ENV === "production" ? "/static/" : "/",
   root: ".",
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths()],
 });
