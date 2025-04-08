@@ -1,4 +1,3 @@
-import Medias from "../../components/Medias/Medias";
 import "./Home.scss";
 import { useEffect, useState, useRef } from "react";
 import {
