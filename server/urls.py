@@ -7,8 +7,8 @@ from django.conf.urls import include
 
 urlpatterns = [
     re_path(r"^admin/", admin.site.urls),
-    # re_path(r"^api/v1/auth/", include("oauth.urls")),
-    # re_path(r"^api/v1/accounts/", include("accounts.urls")),
+    re_path(r"^auth/", include("oauth.urls")),
+    re_path(r"^accounts/", include("accounts.urls")),
     re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings.STATIC_ROOT}),
     re_path(
         r"^media/object/(?P<path>.*)$",

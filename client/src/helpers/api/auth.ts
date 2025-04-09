@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_BASE_PATH,
   withCredentials: true,
 });
 
@@ -12,8 +12,9 @@ export const login = async ({
   email: string;
   password: string;
 }) => {
-  const response = await api.post("/auth/sign-in", {email, password}).catch(
-    (error) => {
+  const response = await api
+    .post("/auth/sign-in/", { email, password })
+    .catch((error) => {
       return error.response ? error.response : error;
     });
 
@@ -29,12 +30,12 @@ export const register = async ({
 }: {
   email: string;
   password: string;
-  name: string;
   username: string;
+  name: string;
   confirmPassword: string;
 }) => {
   const response = await api
-    .post("/auth/sign-up", {
+    .post("/auth/sign-up/", {
       email,
       password,
       name,
@@ -44,5 +45,6 @@ export const register = async ({
     .catch((error) => {
       return error.response ? error.response : error;
     });
+
   return { success: response.status === 200, ...response.data };
 };
