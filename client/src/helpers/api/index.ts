@@ -1,8 +1,10 @@
-import { login, register } from "./auth";
+import { login, register, logout, sync } from "./auth";
 
 export default {
   auth: {
     login,
     register,
+    logout,
+    sync,
   },
 };

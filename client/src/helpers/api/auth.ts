@@ -48,3 +48,14 @@ export const register = async ({
 
   return { success: response.status === 200, ...response.data };
 };
+
+export const logout = async () => {
+  return await api.post("/auth/sign-out/");
+};
+
+export const sync = async () => {
+  const response = await api.get("/auth/sync/").catch((error) => {
+    return error.response ? error.response : error;
+  });
+  return { success: response.status === 200, ...response.data };
+};

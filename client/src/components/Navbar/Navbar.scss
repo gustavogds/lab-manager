@@ -96,3 +96,34 @@
     }
   }
 }
+
+.profile-menu {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  background-color: #efffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  min-width: 140px;
+  border: solid 1px #bddddb;
+
+  button {
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    text-align: left;
+    cursor: pointer;
+    color: #333;
+    font-size: 14px;
+    width: 100%;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #d6eeed;
+    }
+  }
+}
