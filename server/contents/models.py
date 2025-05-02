@@ -110,8 +110,6 @@ class ContentStorage:
         return f"{digest[:2]}/{digest[2:]}{ext}"
 
     def save_blob(self, data, kind, ext, meta=None, digest=None):
-        from thumbs.models import Thumbnail
-
         if meta is None:
             meta = {}
 
@@ -132,9 +130,7 @@ class ContentStorage:
                 path=blob_path, defaults={"size": data.size, "meta": blob_meta}
             )
 
-            thumb_path = Thumbnail.save_blob_thumbnail(blob)
-            blob.thumb_path = thumb_path
-            blob.save(update_fields=["thumb_path"])
+            blob.save()
 
         return blob
 

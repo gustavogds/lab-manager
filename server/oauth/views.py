@@ -8,6 +8,7 @@ from accounts.models import User
 from oauth.models import AuthJWT
 from utils import JsonResponse
 from sitewide.decorators import methods_allowed, user_access_required
+from django.contrib.auth import authenticate, login, logout
 
 
 @methods_allowed(["POST"])
@@ -23,23 +24,21 @@ def sign_in(request):
     if not password:
         raise ValidationError("Password is required")
 
-    user = User.objects.filter(email=email).first()
-    if not user:
-        raise ValidationError("User not found")
+    user = authenticate(email=email, password=password)
+    if user is None:
+        raise ValidationError("Invalid credentials")
 
-    if not user.check_password(password):
-        raise ValidationError("Invalid password")
+    login(request, user)
 
-    jwt_token = AuthJWT.encode(
-        {"user_id": user.id, "exp": timezone.now() + timezone.timedelta(days=1)}
-    )
-
-    return JsonResponse(cookies={"auth": jwt_token})
+    return JsonResponse(content={"success": True})
 
 
-@methods_allowed(["POST"])
+@user_access_required(methods=["POST"])
 def sign_out(request):
-    return JsonResponse(cookies={"auth": ""})
+    if not request.user.is_authenticated:
+        raise ValidationError("User is not authenticated")
+    logout(request)
+    return JsonResponse(content={"success": True})
 
 
 @user_access_required(methods=["GET"])
@@ -50,7 +49,6 @@ def sync(request):
 @methods_allowed(["POST"])
 @transaction.atomic
 def sign_up(request):
-    print("Cheguei aqui")
     data = json.loads(request.body)
     name = data.get("name")
     email = data.get("email")

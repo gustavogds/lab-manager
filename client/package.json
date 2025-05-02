@@ -18,6 +18,7 @@
     "react-slick": "^0.30.3",
     "sass": "^1.86.3",
     "slick-carousel": "^1.8.1",
+    "universal-cookie": "^8.0.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "devDependencies": {

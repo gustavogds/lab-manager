@@ -1,33 +1,19 @@
 import Medias from "../../components/Medias/Medias";
 import Icons from "../../components/Icons/Icons";
 import "./Navbar.scss";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
-import api from "helpers/api";
+import { useGlobalData } from "helpers/context/globalContext";
+import AuthHandler from "helpers/services/AuthHandler";
+import { isEmptyObject } from "helpers/utils";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { user }: any = useGlobalData();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    api.auth
-      .sync()
-      .then((res: any) => {
-        if (res.data) {
-          setUser(res.data);
-        }
-      })
-      .catch(() => {
-        setUser(null);
-      });
-  }, []);
-
   const handleLogout = () => {
-    api.auth.logout().then(() => {
-      setUser(null);
-      navigate("/signin");
-    });
+    AuthHandler.logout();
   };
 
   return (
@@ -42,7 +28,7 @@ const Navbar = () => {
         </div>
 
         <div className="header-right">
-          {user && (
+          {!isEmptyObject(user.state) && (
             <span className="header-icon" onClick={() => navigate("/create")}>
               <Icons.SquareAdd />
             </span>
@@ -58,12 +44,12 @@ const Navbar = () => {
 
             {menuOpen && (
               <div className="profile-menu">
-                {user ? (
+                {!isEmptyObject(user.state) ? (
                   <>
                     <button onClick={() => navigate("/profile")}>
                       Profile
                     </button>
-                    <button onClick={handleLogout}>Sign Out</button>
+                    <button onClick={() => handleLogout()}>Sign Out</button>
                   </>
                 ) : (
                   <>

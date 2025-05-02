@@ -9,7 +9,7 @@ import carouselLandingPage from "assets/images/img1.png";
 import carouselSigninPage from "assets/images/img2.png";
 import carouselSignupPage from "assets/images/img3.png";
 import logo from "assets/images/logo.png";
-import api from "helpers/api";
+import AuthHandler from "helpers/services/AuthHandler";
 
 const images = [carouselLandingPage, carouselSigninPage, carouselSignupPage];
 
@@ -223,24 +223,11 @@ const Login = ({
   isSignUp?: boolean;
   isPasswordReset?: boolean;
 }) => {
-  const navigate = useNavigate();
   const onSubmit = (data: any) => {
     if (isSignUp) {
-      return api.auth.register(data).then((response: any) => {
-        if (response.success) {
-          navigate("/");
-        } else {
-          console.error(response);
-        }
-      });
+      AuthHandler.register(data.email, data.username, data.password);
     } else {
-      return api.auth.login(data).then((response: any) => {
-        if (response.success) {
-          navigate("/");
-        } else {
-          console.error(response);
-        }
-      });
+      AuthHandler.login(data.email, data.password);
     }
   };
 
