@@ -1,14 +1,12 @@
 import ujson as json
 
-from django.db import transaction
 from django.core.exceptions import ValidationError
-from django.utils import timezone
+from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from accounts.models import User
-from oauth.models import AuthJWT
 from utils import JsonResponse
 from sitewide.decorators import methods_allowed, user_access_required
-from django.contrib.auth import authenticate, login, logout
 
 
 @methods_allowed(["POST"])
@@ -46,26 +44,49 @@ def sync(request):
     return JsonResponse(content={"data": request.user.export()})
 
 
+@methods_allowed(["GET"])
+def whoami(request):
+    if not request.user.is_authenticated:
+        raise ValidationError("User is not authenticated")
+    return JsonResponse(content={"success": True, "data": request.user.export()})
+
+
 @methods_allowed(["POST"])
-@transaction.atomic
 def sign_up(request):
     data = json.loads(request.body)
-    name = data.get("name")
+
     email = data.get("email")
     password = data.get("password")
     username = data.get("username")
-    print(password)
-    print(data.get("confirmPassword"))
-    if password != data.get("confirmPassword"):
-        print("a")
-        raise ValidationError("Passwords do not match")
 
-    user = User.objects.create_user(name, email, password, username)
+    if not email:
+        raise ValidationError("Users must have an email address")
 
-    jwt_token = AuthJWT.encode(
-        {"user_id": user.id, "exp": timezone.now() + timezone.timedelta(days=1)}
-    )
+    if not username:
+        raise ValidationError("Users must have a name")
+
+    if not password:
+        raise ValidationError("Users must have a password")
+
+    if User.objects.filter(email=email).exists():
+        raise ValidationError("User with this email already exists")
+
+    user = User.objects.create_user(name=username, email=email, password=password)
+
+    user.set_password(password)
+    user.save()
+
+    login(request, user)
 
     return JsonResponse(
-        cookies={"auth": jwt_token},
+        content={
+            "success": True,
+        }
     )
+
+
+@ensure_csrf_cookie
+def session(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"isAuthenticated": False})
+    return JsonResponse({"isAuthenticated": True})

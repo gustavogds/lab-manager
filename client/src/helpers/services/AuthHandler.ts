@@ -1,8 +1,6 @@
-import { login, logout, register, sync } from "helpers/api/auth";
+import { login, logout, register, whoami } from "helpers/api/auth";
 import { loginUser, logoutUser } from "helpers/context/actions/user.js";
 // import { IGlobalDataUser } from "../Enum";
-
-// import { gettext as _ } from "helpers/i18n";
 
 export default class AuthHandler {
   static user: any;
@@ -66,7 +64,7 @@ export default class AuthHandler {
   };
 
   static sync = async () => {
-    const user = await sync();
+    const user = await whoami();
     loginUser(user.data)(AuthHandler.user.dispatch);
   };
 }
