@@ -8,8 +8,15 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
-    "X-CSRFToken": cookies.get("csrftoken"),
   },
+});
+
+api.interceptors.request.use((config) => {
+  const csrfToken = cookies.get("csrftoken");
+  if (csrfToken) {
+    config.headers["X-CSRFToken"] = csrfToken;
+  }
+  return config;
 });
 
 export const login = async ({
@@ -82,6 +89,19 @@ export const getSession = async () => {
   const response = await api.get("/auth/session/").catch((err) => {
     return err.response ? err.response : err;
   });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const saveProfile = async (formData: Record<string, any>) => {
+  const response = await api
+    .patch("/accounts/settings/", formData)
+    .catch((err) => {
+      return err.response ? err.response : err;
+    });
 
   return {
     success: response.status === 200,

@@ -46,8 +46,8 @@ const Navbar = () => {
               <div className="profile-menu">
                 {!isEmptyObject(user.state) ? (
                   <>
-                    <button onClick={() => navigate("/profile")}>
-                      Profile
+                    <button onClick={() => navigate("/settings/profile")}>
+                      Settings
                     </button>
                     <button onClick={() => handleLogout()}>Sign Out</button>
                   </>

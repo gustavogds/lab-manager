@@ -5,6 +5,9 @@ import Navbar from "components/Navbar/Navbar";
 import { Overlays } from "components/my-own-modal-handler";
 import Home from "./Home/Home";
 import Login from "./Login/Login";
+import SettingsLayout from "./Settings/SettingsLayout";
+import ProfileSettings from "./Settings/ProfileSettings";
+import LabSettings from "./Settings/LabSettings";
 import { isEmptyObject } from "helpers/utils";
 
 import { useEffect, useState } from "react";
@@ -43,14 +46,13 @@ const ProtectedRoute = ({
 
 const App = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/signin", "/signup"];
+  const hideNavbarRoutes = ["/signin", "/signup", "/password/reset"];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   const [readyToRender, setReadyToRender] = useState(false);
   const { user }: any = useGlobalData();
 
   useEffect(() => {
     (async () => {
-      console.log("App mounted");
       AuthHandler.user = user;
       await AuthHandler.sync();
       setReadyToRender(true);
@@ -92,6 +94,21 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/settings/*"
+            element={
+              !isEmptyObject(user.state) ? (
+                <SettingsLayout />
+              ) : (
+                <Navigate to="/signin" />
+              )
+            }
+          >
+            <Route path="profile" element={<ProfileSettings />} />
+            {user.state.role === "professor" && (
+              <Route path="lab" element={<LabSettings />} />
+            )}
+          </Route>
         </Routes>
       </div>
     </div>
