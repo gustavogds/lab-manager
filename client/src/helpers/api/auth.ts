@@ -46,8 +46,8 @@ export const register = async (
       password,
       username,
     })
-    .catch((err) => {
-      return err.response ? err.response : err;
+    .catch((error) => {
+      return error.response ? error.response : error;
     });
 
   return {
@@ -57,8 +57,8 @@ export const register = async (
 };
 
 export const logout = async () => {
-  const response = await api.post("/auth/sign-out/").catch((err) => {
-    return err.response ? err.response : err;
+  const response = await api.post("/auth/sign-out/").catch((error) => {
+    return error.response ? error.response : error;
   });
 
   return {
@@ -86,8 +86,8 @@ export const whoami = async () => {
 };
 
 export const getSession = async () => {
-  const response = await api.get("/auth/session/").catch((err) => {
-    return err.response ? err.response : err;
+  const response = await api.get("/auth/session/").catch((error) => {
+    return error.response ? error.response : error;
   });
 
   return {
@@ -99,8 +99,32 @@ export const getSession = async () => {
 export const saveProfile = async (formData: Record<string, any>) => {
   const response = await api
     .patch("/accounts/settings/", formData)
-    .catch((err) => {
-      return err.response ? err.response : err;
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const getLabSettings = async () => {
+  const response = await api.get("/core/settings/get/").catch((error) => {
+    return error.response ? error.response : error;
+  });
+
+  return {
+    success: response.status === 200,
+    data: response.data,
+  };
+};
+
+export const saveLabSettings = async (formData: Record<string, any>) => {
+  const response = await api
+    .patch("/core/settings/", formData)
+    .catch((error) => {
+      return error.response ? error.response : error;
     });
 
   return {
