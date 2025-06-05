@@ -10,19 +10,79 @@ import carouselSigninPage from "assets/images/img2.png";
 import carouselSignupPage from "assets/images/img3.png";
 import logo from "assets/images/logo.png";
 import AuthHandler from "helpers/services/AuthHandler";
+import { useState } from "react";
+import { ModalsHandler } from "components/my-own-modal-handler";
 
 const images = [carouselLandingPage, carouselSigninPage, carouselSignupPage];
 
 const SignUp = ({ onSubmit }: { onSubmit: any }) => {
   const navigate = useNavigate();
+  const [errors, setErrors] = useState<any>({});
+
   const handleSubmit = (event: any) => {
     event.preventDefault();
+    const email = event.target.email.value;
+    const username = event.target.username.value;
+    const name = event.target.name.value;
+    const role = event.target.role.value;
+    const password = event.target.password.value;
+    const confirmPassword = event.target["password-confirm"].value;
+    if (!email) {
+      setErrors((state: any) => ({ ...state, email: "Email is required" }));
+    } else {
+      setErrors((state: any) => ({ ...state, email: null }));
+    }
+    if (!username) {
+      setErrors((state: any) => ({
+        ...state,
+        username: "Username is required",
+      }));
+    } else {
+      setErrors((state: any) => ({ ...state, username: null }));
+    }
+    if (!name) {
+      setErrors((state: any) => ({ ...state, name: "Name is required" }));
+    } else {
+      setErrors((state: any) => ({ ...state, name: null }));
+    }
+    if (!role) {
+      setErrors((state: any) => ({ ...state, role: "Role is required" }));
+    } else {
+      setErrors((state: any) => ({ ...state, role: null }));
+    }
+    if (!password) {
+      setErrors((state: any) => ({
+        ...state,
+        password: "Password is required",
+      }));
+    } else {
+      setErrors((state: any) => ({ ...state, password: null }));
+    }
+    if (password !== confirmPassword) {
+      setErrors((state: any) => ({
+        ...state,
+        confirmPassword: "Passwords do not match",
+      }));
+    } else {
+      setErrors((state: any) => ({ ...state, confirmPassword: null }));
+    }
+    if (
+      errors.email ||
+      errors.username ||
+      errors.name ||
+      errors.role ||
+      errors.password ||
+      errors.confirmPassword
+    ) {
+      return;
+    }
     onSubmit({
-      email: event.target.email.value,
-      password: event.target.password.value,
-      username: event.target.username.value,
-      name: event.target.name.value,
-      confirmPassword: event.target["password-confirm"].value,
+      email,
+      username,
+      name,
+      role,
+      password,
+      confirmPassword,
     });
   };
 
@@ -39,23 +99,70 @@ const SignUp = ({ onSubmit }: { onSubmit: any }) => {
       </div>
       <span className="divider"></span>
       <div className="form-group">
-        <input type="text" id="email" placeholder="E-mail" />
+        <input
+          type="text"
+          id="email"
+          className={`${errors.email ? "error" : ""}`}
+          placeholder="E-mail"
+        />
+        {errors.email && <span className="error-message">{errors.email}</span>}
       </div>
       <div className="form-group">
-        <input type="text" id="username" placeholder="Username" />
+        <input
+          type="text"
+          id="username"
+          className={`${errors.username ? "error" : ""}`}
+          placeholder="Username"
+        />
+        {errors.username && (
+          <span className="error-message">{errors.username}</span>
+        )}
       </div>
       <div className="form-group">
-        <input type="text" id="name" placeholder="Full Name" />
+        <input
+          type="text"
+          id="name"
+          className={`${errors.name ? "error" : ""}`}
+          placeholder="Name"
+        />
+        {errors.name && <span className="error-message">{errors.name}</span>}
       </div>
       <div className="form-group">
-        <input type="password" id="password" placeholder="Password" />
+        <input
+          type="password"
+          id="password"
+          className={`${errors.password ? "error" : ""}`}
+          placeholder="Password"
+        />
+        {errors.password && (
+          <span className="error-message">{errors.password}</span>
+        )}
       </div>
       <div className="form-group">
         <input
           type="password"
           id="password-confirm"
+          className={`${errors.confirmPassword ? "error" : ""}`}
           placeholder="Confirm Password"
         />
+        {errors.confirmPassword && (
+          <span className="error-message">{errors.confirmPassword}</span>
+        )}
+      </div>
+      <div className="form-group">
+        <select
+          id="role"
+          className={`${errors.role ? "error" : ""}`}
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Select a role
+          </option>
+          <option value="professor">Professor</option>
+          <option value="student">Student</option>
+          <option value="collaborator">Collaborator</option>
+        </select>
+        {errors.role && <span className="error-message">{errors.role}</span>}
       </div>
       <span className="divider"></span>
       <div className="form-group">
@@ -67,11 +174,28 @@ const SignUp = ({ onSubmit }: { onSubmit: any }) => {
 
 const SignIn = ({ onSubmit }: { onSubmit: any }) => {
   const navigate = useNavigate();
+  const [errors, setErrors] = useState<any>({});
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
     const email = event.target.email.value;
     const password = event.target.password.value;
+    if (!email) {
+      setErrors((state: any) => ({ ...state, email: "Email is required" }));
+    } else {
+      setErrors((state: any) => ({ ...state, email: null }));
+    }
+    if (!password) {
+      setErrors((state: any) => ({
+        ...state,
+        password: "Password is required",
+      }));
+    } else {
+      setErrors((state: any) => ({ ...state, password: null }));
+    }
+    if (errors.email || errors.password) {
+      return;
+    }
     onSubmit({ email, password });
   };
 
@@ -88,10 +212,24 @@ const SignIn = ({ onSubmit }: { onSubmit: any }) => {
       </div>
       <span className="divider"></span>
       <div className="form-group">
-        <input type="text" id="email" placeholder="E-mail or Username" />
+        <input
+          type="text"
+          className={`${errors.email ? "error" : ""}`}
+          id="email"
+          placeholder="E-mail or Username"
+        />
+        {errors.email && <span className="error-message">{errors.email}</span>}
       </div>
       <div className="form-group">
-        <input type="password" id="password" placeholder="Password" />
+        <input
+          type="password"
+          className={`${errors.password ? "error" : ""}`}
+          id="password"
+          placeholder="Password"
+        />
+        {errors.password && (
+          <span className="error-message">{errors.password}</span>
+        )}
       </div>
       <span className="divider"></span>
       <div className="form-group">
@@ -223,11 +361,36 @@ const Login = ({
   isSignUp?: boolean;
   isPasswordReset?: boolean;
 }) => {
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     if (isSignUp) {
-      AuthHandler.register(data.email, data.username, data.password);
+      const result = await AuthHandler.register(
+        data.email,
+        data.username,
+        data.name,
+        data.password,
+        data.confirmPassword,
+        data.role
+      );
+      if (result.success) {
+        window.location.href = "/";
+      } else {
+        ModalsHandler.createNotification({
+          title: "Registration Failed",
+          message: result.message,
+          type: "error",
+        });
+      }
     } else {
-      AuthHandler.login(data.email, data.password);
+      const result = await AuthHandler.login(data.email, data.password);
+      if (result.success) {
+        window.location.href = "/";
+      } else {
+        ModalsHandler.createNotification({
+          title: "Login Failed",
+          message: result.message,
+          type: "error",
+        });
+      }
     }
   };
 

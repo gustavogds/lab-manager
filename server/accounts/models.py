@@ -10,7 +10,7 @@ from contents.models import Content, ContentKind, Mount
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, full_name, email, password, username, **kwargs):
+    def create_user(self, name, email, password, username, role, **kwargs):
         if not email:
             raise ValidationError("Users must have an email address")
         email = email.lower()
@@ -18,11 +18,18 @@ class UserManager(BaseUserManager):
         if not username:
             raise ValidationError("Users must have a username")
 
-        if not full_name:
-            raise ValidationError("Users must have a full name")
+        if not name:
+            raise ValidationError("Users must have a name")
 
         if not password:
             raise ValidationError("Users must have a password")
+
+        if not role:
+            raise ValidationError("Users must have a role")
+        if role not in ["professor", "student", "collaborator"]:
+            raise ValidationError(
+                "Invalid role. Must be one of: professor, student, collaborator"
+            )
 
         if User.objects.filter(email=email).exists():
             raise ValidationError("User with this email already exists")
@@ -40,8 +47,10 @@ class UserManager(BaseUserManager):
         user = self.model(
             username=username,
             email=email,
-            full_name=full_name,
+            name=name,
+            role=role,
             storage_root=root_folder,
+            is_approved=False,
         )
 
         if not password:
@@ -80,10 +89,28 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    full_name = models.CharField(max_length=50, null=True, blank=True)
-    date_of_birth = models.DateField(null=True, blank=True, default=timezone.now)
+
+    name = models.CharField(max_length=50, null=True, blank=True)
+    birthdate = models.DateField(null=True, blank=True, default=timezone.now)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    contact_email = models.CharField(max_length=50, null=True, blank=True)
+    social_media = models.CharField(max_length=50, null=True, blank=True)
+    lattes = models.CharField(max_length=50, null=True, blank=True)
+    is_public = models.BooleanField(default=True)
+    is_approved = models.BooleanField(default=False)
+
+    email_validated = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    role = models.CharField(
+        max_length=50,
+        choices=[
+            ("professor", "Professor"),
+            ("student", "Student"),
+            ("collaborator", "Collaborator"),
+        ],
+        default="collaborator",
+    )
 
     date_joined = models.DateTimeField(default=timezone.now)
 
@@ -99,12 +126,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         data = {
             "id": self.id,
             "username": self.username,
-            "full_name": self.full_name,
+            "name": self.name,
             "email": self.email,
-            "date_of_birth": self.date_of_birth.isoformat(),
+            "birthdate": self.birthdate.isoformat(),
             "is_staff": self.is_staff,
             "is_active": self.is_active,
             "date_joined": self.date_joined.isoformat(),
+            "role": self.role,
+            "is_public": self.is_public,
+            "phone": self.phone,
+            "contact_email": self.contact_email,
+            "social_media": self.social_media,
+            "lattes": self.lattes,
+            "email_validated": self.email_validated,
         }
 
         if include is None:

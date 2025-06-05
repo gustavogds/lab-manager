@@ -1,15 +1,20 @@
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import "./App.scss";
+import { isEmptyObject } from "helpers/utils";
+import { ModalsHandler, Overlays } from "components/my-own-modal-handler";
 import Navbar from "components/Navbar/Navbar";
-import { Overlays } from "components/my-own-modal-handler";
 import Home from "./Home/Home";
 import Login from "./Login/Login";
-import { isEmptyObject } from "helpers/utils";
+import SettingsLayout from "./Settings/SettingsLayout";
+import ProfileSettings from "./Settings/ProfileSettings";
+import LabSettings from "./Settings/LabSettings";
+import Approval from "./Approval/Approval";
 
 import { useEffect, useState } from "react";
 import AuthHandler from "helpers/services/AuthHandler";
 import { useGlobalData } from "helpers/context/globalContext";
+import Notification from "components/Modals/Notification/Notification";
 
 const PrivateRoute = ({
   user,
@@ -43,18 +48,19 @@ const ProtectedRoute = ({
 
 const App = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/signin", "/signup"];
+  const hideNavbarRoutes = ["/signin", "/signup", "/password/reset"];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   const [readyToRender, setReadyToRender] = useState(false);
   const { user }: any = useGlobalData();
 
   useEffect(() => {
     (async () => {
-      console.log("App mounted");
       AuthHandler.user = user;
       await AuthHandler.sync();
       setReadyToRender(true);
     })();
+    ModalsHandler.setup();
+    ModalsHandler.registerModal("Notification", Notification);
   }, []);
 
   if (!readyToRender) {
@@ -90,6 +96,33 @@ const App = () => {
               <ProtectedRoute user={user.state}>
                 <Login isPasswordReset={true} />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/*"
+            element={
+              !isEmptyObject(user.state) ? (
+                <SettingsLayout />
+              ) : (
+                <Navigate to="/signin" />
+              )
+            }
+          >
+            <Route path="profile" element={<ProfileSettings />} />
+            {user.state.role === "professor" && (
+              <Route path="lab" element={<LabSettings />} />
+            )}
+          </Route>
+          <Route
+            path="/approval"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <Approval />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
             }
           />
         </Routes>

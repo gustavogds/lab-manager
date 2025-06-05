@@ -3,12 +3,14 @@ from django.urls import re_path
 from django.views.static import serve
 from django.views.generic import TemplateView
 from django.conf import settings
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.conf.urls import include
 
 urlpatterns = [
     re_path(r"^admin/", admin.site.urls),
     re_path(r"^auth/", include("oauth.urls")),
     re_path(r"^accounts/", include("accounts.urls")),
+    re_path(r"^core/", include("core.urls")),
     re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings.STATIC_ROOT}),
     re_path(
         r"^media/object/(?P<path>.*)$",
@@ -34,5 +36,8 @@ if settings.DEBUG:
     ]
 
 urlpatterns += [
-    re_path(r"^(?!admin).*", TemplateView.as_view(template_name="base.html")),
+    re_path(
+        r"^(?!admin).*",
+        ensure_csrf_cookie(TemplateView.as_view(template_name="base.html")),
+    )
 ]

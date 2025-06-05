@@ -155,11 +155,21 @@
           }
         }
 
-        input {
+        input,
+        select {
           padding: 10px;
           border: solid 1px #ccc;
           border-radius: 3px;
           font-size: 17px;
+
+          &.error {
+            border-color: #ff0000;
+          }
+        }
+        .error-message {
+          color: #ff0000;
+          font-size: 14px;
+          margin-top: 5px;
         }
       }
     }
