@@ -26,25 +26,32 @@ export const login = async ({
   email: string;
   password: string;
 }) => {
-  const response = await api
-    .post("/auth/sign-in/", { email, password })
-    .catch((error) => {
-      return error.response ? error.response : error;
-    });
-
-  return { success: response.status === 200, ...response.data };
+  try {
+    const response = await api.post("/auth/sign-in/", { email, password });
+    return { success: true, ...response.data };
+  } catch (error: any) {
+    const errorMessage =
+      error?.response?.data?.error || "Unknown error occurred";
+    return { success: false, error: errorMessage };
+  }
 };
 
 export const register = async (
   email: string,
+  username: string,
+  name: string,
   password: string,
-  username: string
+  confirmPassword: string,
+  role: string
 ) => {
   const response = await api
     .post("/auth/sign-up/", {
       email,
-      password,
       username,
+      name,
+      password,
+      confirmPassword,
+      role,
     })
     .catch((error) => {
       return error.response ? error.response : error;

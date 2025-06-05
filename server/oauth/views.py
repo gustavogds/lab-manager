@@ -12,7 +12,6 @@ from sitewide.decorators import methods_allowed, user_access_required
 @methods_allowed(["POST"])
 def sign_in(request):
     data = json.loads(request.body)
-
     email = data.get("email")
     password = data.get("password")
 
@@ -25,6 +24,9 @@ def sign_in(request):
     user = authenticate(email=email, password=password)
     if user is None:
         raise ValidationError("Invalid credentials")
+
+    if not user.is_approved:
+        raise ValidationError("This account is not active yet.")
 
     login(request, user)
 
@@ -47,17 +49,23 @@ def sync(request):
 @methods_allowed(["GET"])
 def whoami(request):
     if not request.user.is_authenticated:
-        raise ValidationError("User is not authenticated")
+        return JsonResponse(
+            content={"success": True, "error": "Authentication required"},
+        )
     return JsonResponse(content={"success": True, "data": request.user.export()})
 
 
 @methods_allowed(["POST"])
 def sign_up(request):
     data = json.loads(request.body)
-
+    name = data.get("name")
     email = data.get("email")
     password = data.get("password")
     username = data.get("username")
+    role = data.get("role")
+
+    if password != data.get("confirmPassword"):
+        raise ValidationError("Passwords do not match")
 
     if not email:
         raise ValidationError("Users must have an email address")
@@ -68,15 +76,15 @@ def sign_up(request):
     if not password:
         raise ValidationError("Users must have a password")
 
+    if not role:
+        raise ValidationError("Role is required")
+
     if User.objects.filter(email=email).exists():
         raise ValidationError("User with this email already exists")
 
-    user = User.objects.create_user(name=username, email=email, password=password)
-
-    user.set_password(password)
-    user.save()
-
-    login(request, user)
+    User.objects.create_user(
+        name=name, email=email, password=password, username=username, role=role
+    )
 
     return JsonResponse(
         content={

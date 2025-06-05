@@ -1,7 +1,7 @@
 import Medias from "../../components/Medias/Medias";
 import Icons from "../../components/Icons/Icons";
 import "./Navbar.scss";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useGlobalData } from "helpers/context/globalContext";
 import AuthHandler from "helpers/services/AuthHandler";
@@ -11,10 +11,27 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { user }: any = useGlobalData();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
     AuthHandler.logout();
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
 
   return (
     <div className="navbar">
@@ -34,7 +51,11 @@ const Navbar = () => {
             </span>
           )}
 
-          <div className="profile-wrapper" style={{ position: "relative" }}>
+          <div
+            className="profile-wrapper"
+            style={{ position: "relative" }}
+            ref={menuRef}
+          >
             <span
               className="header-icon"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -49,6 +70,11 @@ const Navbar = () => {
                     <button onClick={() => navigate("/settings/profile")}>
                       Settings
                     </button>
+                    {user.state.role === "professor" && (
+                      <button onClick={() => navigate("/approval")}>
+                        Accounts Activation
+                      </button>
+                    )}
                     <button onClick={() => handleLogout()}>Sign Out</button>
                   </>
                 ) : (

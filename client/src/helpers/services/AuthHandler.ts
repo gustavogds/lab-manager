@@ -33,7 +33,6 @@ export default class AuthHandler {
 
   static login = async (email: string, password: string) => {
     const response = await login({ email, password });
-
     if (response.success) {
       await AuthHandler.sync();
 
@@ -44,17 +43,27 @@ export default class AuthHandler {
     } else {
       return {
         success: false,
-        message: "Something went wrong!",
+        message: response.error || "Something went wrong!",
       };
     }
   };
 
   static register = async (
     email: string,
+    username: string,
+    name: string,
     password: string,
-    username: string
+    confirmPassword: string,
+    role: string
   ) => {
-    const response = await register(email, password, username);
+    const response = await register(
+      email,
+      username,
+      name,
+      password,
+      confirmPassword,
+      role
+    );
 
     if (response.success) {
       await AuthHandler.sync();
@@ -66,7 +75,7 @@ export default class AuthHandler {
     } else {
       return {
         success: false,
-        message: "Something went wrong!",
+        message: response.error || "Something went wrong!",
       };
     }
   };

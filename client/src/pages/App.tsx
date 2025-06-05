@@ -1,18 +1,20 @@
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import "./App.scss";
+import { isEmptyObject } from "helpers/utils";
+import { ModalsHandler, Overlays } from "components/my-own-modal-handler";
 import Navbar from "components/Navbar/Navbar";
-import { Overlays } from "components/my-own-modal-handler";
 import Home from "./Home/Home";
 import Login from "./Login/Login";
 import SettingsLayout from "./Settings/SettingsLayout";
 import ProfileSettings from "./Settings/ProfileSettings";
 import LabSettings from "./Settings/LabSettings";
-import { isEmptyObject } from "helpers/utils";
+import Approval from "./Approval/Approval";
 
 import { useEffect, useState } from "react";
 import AuthHandler from "helpers/services/AuthHandler";
 import { useGlobalData } from "helpers/context/globalContext";
+import Notification from "components/Modals/Notification/Notification";
 
 const PrivateRoute = ({
   user,
@@ -57,6 +59,8 @@ const App = () => {
       await AuthHandler.sync();
       setReadyToRender(true);
     })();
+    ModalsHandler.setup();
+    ModalsHandler.registerModal("Notification", Notification);
   }, []);
 
   if (!readyToRender) {
@@ -109,6 +113,18 @@ const App = () => {
               <Route path="lab" element={<LabSettings />} />
             )}
           </Route>
+          <Route
+            path="/approval"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <Approval />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
         </Routes>
       </div>
     </div>

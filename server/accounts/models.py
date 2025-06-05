@@ -10,7 +10,7 @@ from contents.models import Content, ContentKind, Mount
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, name, email, password, username, **kwargs):
+    def create_user(self, name, email, password, username, role, **kwargs):
         if not email:
             raise ValidationError("Users must have an email address")
         email = email.lower()
@@ -23,6 +23,13 @@ class UserManager(BaseUserManager):
 
         if not password:
             raise ValidationError("Users must have a password")
+
+        if not role:
+            raise ValidationError("Users must have a role")
+        if role not in ["professor", "student", "collaborator"]:
+            raise ValidationError(
+                "Invalid role. Must be one of: professor, student, collaborator"
+            )
 
         if User.objects.filter(email=email).exists():
             raise ValidationError("User with this email already exists")
@@ -41,7 +48,9 @@ class UserManager(BaseUserManager):
             username=username,
             email=email,
             name=name,
+            role=role,
             storage_root=root_folder,
+            is_approved=False,
         )
 
         if not password:
@@ -88,6 +97,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     social_media = models.CharField(max_length=50, null=True, blank=True)
     lattes = models.CharField(max_length=50, null=True, blank=True)
     is_public = models.BooleanField(default=True)
+    is_approved = models.BooleanField(default=False)
 
     email_validated = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -97,9 +107,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=[
             ("professor", "Professor"),
             ("student", "Student"),
-            ("colaborator", "Collaborator"),
+            ("collaborator", "Collaborator"),
         ],
-        default="colaborator",
+        default="collaborator",
     )
 
     date_joined = models.DateTimeField(default=timezone.now)

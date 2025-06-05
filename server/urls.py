@@ -3,6 +3,7 @@ from django.urls import re_path
 from django.views.static import serve
 from django.views.generic import TemplateView
 from django.conf import settings
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.conf.urls import include
 
 urlpatterns = [
@@ -35,5 +36,8 @@ if settings.DEBUG:
     ]
 
 urlpatterns += [
-    re_path(r"^(?!admin).*", TemplateView.as_view(template_name="base.html")),
+    re_path(
+        r"^(?!admin).*",
+        ensure_csrf_cookie(TemplateView.as_view(template_name="base.html")),
+    )
 ]
