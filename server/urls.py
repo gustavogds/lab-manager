@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.conf.urls import include
+from django.conf.urls.static import static
 
 urlpatterns = [
     re_path(r"^admin/", admin.site.urls),
@@ -34,6 +35,7 @@ if settings.DEBUG:
             {"document_root": settings.STATIC_ROOT_CLIENT},
         ),
     ]
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += [
     re_path(

@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
+from os.path import exists
 from pathlib import Path
 from decouple import config
 
@@ -155,3 +157,9 @@ STATIC_ROOT_CLIENT = BASE_DIR / "client" / "src"
 
 CONTENT_ROOT = root("storage/private/objects")
 THUMB_ROOT = root("storage/private/thumbs")
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = root("storage/files")
+
+if not exists(MEDIA_ROOT):
+    os.makedirs(MEDIA_ROOT)

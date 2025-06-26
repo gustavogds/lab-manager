@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useGlobalData } from "helpers/context/globalContext";
-import AuthHandler from "helpers/services/AuthHandler";
+import { saveProfile } from "helpers/api/settings";
 import "./Settings.scss";
 
 const ProfileSettings = () => {
@@ -50,7 +50,7 @@ const ProfileSettings = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await AuthHandler.saveProfile(formData);
+    const response = await saveProfile(formData);
 
     if (response.success) {
       setMessage(response.message);

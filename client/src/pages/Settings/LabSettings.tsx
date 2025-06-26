@@ -1,12 +1,20 @@
 import { useState, useEffect } from "react";
-import AuthHandler from "helpers/services/AuthHandler";
 import "./Settings.scss";
 
+import { saveLabSettings, getLabSettings } from "helpers/api/settings";
+
 const LabSettings = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    lab_name: string;
+    address: string;
+    logo: File | null;
+    mission: string;
+    contact_email: string;
+    contact_phone: string;
+  }>({
     lab_name: "",
     address: "",
-    logo: "",
+    logo: null,
     mission: "",
     contact_email: "",
     contact_phone: "",
@@ -17,7 +25,7 @@ const LabSettings = () => {
 
   useEffect(() => {
     const fetchLabSettings = async () => {
-      const response = await AuthHandler.getLabSettings();
+      const response = await getLabSettings();
       if (response.success) {
         setFormData(response.data);
       }
@@ -43,7 +51,16 @@ const LabSettings = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await AuthHandler.saveLabSettings(formData);
+
+    const form = new FormData();
+    form.append("lab_name", formData.lab_name);
+    form.append("address", formData.address);
+    form.append("mission", formData.mission);
+    form.append("contact_email", formData.contact_email);
+    form.append("contact_phone", formData.contact_phone);
+    if (formData.logo) form.append("logo", formData.logo);
+
+    const response = await saveLabSettings(form);
 
     if (response.success) {
       setMessage(response.message);
@@ -83,7 +100,45 @@ const LabSettings = () => {
         </label>
         <label>
           Logo:
-          <input name="logo" value={formData.logo} onChange={handleChange} />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+
+              const formData = new FormData();
+              formData.append("logo", file);
+
+              try {
+                const response = await fetch("/core/settings/upload-logo/", {
+                  method: "POST",
+                  body: formData,
+                  credentials: "include",
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    logo: data.logo_url,
+                  }));
+                } else {
+                  console.error(data.error || "Upload failed");
+                }
+              } catch (err) {
+                console.error("Upload failed", err);
+              }
+            }}
+          />
+          {/* {formData.logo && (
+            <img
+              src={formData.logo}
+              alt="Logo preview"
+              style={{ maxHeight: 100, marginTop: 10 }}
+            />
+          )} */}
         </label>
         <label>
           Mission:
