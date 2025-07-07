@@ -257,7 +257,7 @@ const popModal = (layout: any) => (dispatch: any) => {
 const Overlays = () => {
   const {
     modals: {
-      state: { layouts, open: modalsOpen, modals: modalsRegistered, config },
+      state: { layouts, open: modalsOpen, modals: modalsRegistered },
     },
   }: any = useModal();
 
