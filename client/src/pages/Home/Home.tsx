@@ -3,7 +3,6 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import {
   FaInfoCircle,
   FaMapMarkerAlt,
@@ -25,7 +24,11 @@ import {
   listResearchAreas, 
   updateResearchArea,
   deleteResearchArea,
-  type ResearchArea 
+  listProjects,
+  updateProject,
+  deleteProject,
+  type ResearchArea,
+  type Project,
 } from "helpers/api/content";
 import { useGlobalData } from "helpers/context/globalContext";
 import { isEmptyObject } from "helpers/utils";
@@ -71,6 +74,7 @@ const Home = () => {
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [labSettings, setLabSettings] = useState<LabSettings | null>(null);
   const [researchAreas, setResearchAreas] = useState<ResearchArea[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const hashNavTimeout = useRef<number | null>(null);
   const { user }: any = useGlobalData();
   const isProfessor = !isEmptyObject(user.state) && user.state.role === "professor";
@@ -317,8 +321,16 @@ const Home = () => {
       }
     };
 
+    const fetchProjects = async () => {
+      const result = await listProjects();
+      if (result.success) {
+        setProjects(result.data);
+      }
+    };
+
     fetchSettings();
     fetchResearchAreas();
+    fetchProjects();
   }, []);
 
   useEffect(() => {
@@ -503,11 +515,145 @@ const Home = () => {
     }
   };
 
+  const openProjectEditor = async (project: Project) => {
+    const { promise } = ModalsHandler.createModal("ProjectEditor", {
+      project,
+    });
+
+    const result = await promise;
+    if (result === "cancel") {
+      return;
+    }
+
+    const values = result as {
+      title: string;
+      description: string;
+      members: any[];
+    };
+    const response = await updateProject(project.id, {
+      title: values.title,
+      description: values.description,
+      members: values.members.map((m: any) => m.id),
+    } as any);
+
+    if (response.success) {
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === project.id
+            ? {
+                ...p,
+                title: values.title,
+                description: values.description,
+                members: values.members,
+              }
+            : p
+        )
+      );
+
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: "Projeto atualizado com sucesso!",
+        type: "success",
+      });
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.message || "Falha ao atualizar projeto.",
+        type: "error",
+      });
+    }
+  };
+
+  const handleDeleteProject = async (project: Project) => {
+    const { promise } = ModalsHandler.createModal("Notification", {
+      title: "Confirmar exclusão",
+      message: `Tem certeza que deseja excluir o projeto "${project.title}"?`,
+      type: "warning",
+      confirmLabel: "Excluir",
+      cancelLabel: "Cancelar",
+    });
+
+    const result = await promise;
+    if (result === "cancel") {
+      return;
+    }
+
+    const response = await deleteProject(project.id);
+
+    if (response.success) {
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
+
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: "Projeto excluído com sucesso!",
+        type: "success",
+      });
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.error || "Falha ao excluir projeto.",
+        type: "error",
+      });
+    }
+  };
+
+  const handleToggleProjectVisibility = async (project: Project) => {
+    const newStatus = !project.is_active;
+    const response = await updateProject(project.id, {
+      is_active: newStatus,
+    });
+
+    if (response.success) {
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === project.id ? { ...p, is_active: newStatus } : p
+        )
+      );
+
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: newStatus
+          ? "Projeto ativado!"
+          : "Projeto desativado!",
+        type: "success",
+      });
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.message || "Falha ao atualizar visibilidade.",
+        type: "error",
+      });
+    }
+  };
+
+  const openProjectDetails = async (project: Project) => {
+    const { promise } = ModalsHandler.createModal("ProjectDetails", {
+      project: project,
+    });
+
+    await promise;
+  };
+
+  function Arrow(props: any) {
+    const { className, onClick, direction } = props;
+
+    return (
+      <button
+        type="button"
+        className={`${className} about-arrow about-arrow--${direction}`}
+        onClick={onClick}
+        aria-label={direction === "next" ? "Next" : "Previous"}
+      >
+        <span aria-hidden="true">{direction === "next" ? "›" : "‹"}</span>
+      </button>
+    );
+  }
+
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
       case "about":
         const sliderSettings = {
-          dots: true,
+          dots: false,
           infinite: true,
           speed: 500,
           slidesToShow: 1,
@@ -516,6 +662,8 @@ const Home = () => {
           autoplaySpeed: 5000,
           arrows: true,
           adaptiveHeight: true,
+          nextArrow: <Arrow direction="next" />,
+          prevArrow: <Arrow direction="prev" />,
         };
 
         return (
@@ -601,7 +749,74 @@ const Home = () => {
           </div>
         );
       case "projects":
-        return <p>{labSettings?.highlights || sectionDescriptions[sectionId]}</p>;
+        return (
+          <div className="projects-section">
+            {projects.length > 0 ? (
+              <div className="projects-list">
+                {projects.map((project) => (
+                  <div 
+                    key={project.id} 
+                    className="project-card clickable"
+                    onClick={() => openProjectDetails(project)}
+                  >
+                    <div className="card-content">
+                      <h3>{project.title}</h3>
+                      <p>{project.description}</p>
+                    </div>
+                    {isProfessor && (
+                      <div className="card-actions">
+                        <button
+                          className="toggle-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleProjectVisibility(project);
+                          }}
+                          title={project.is_active ? "Esconder" : "Mostrar"}
+                        >
+                          {project.is_active ? <FaEye /> : <FaEyeSlash />}
+                        </button>
+                        <button
+                          className="edit-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openProjectEditor(project);
+                          }}
+                          title="Editar"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="delete-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteProject(project);
+                          }}
+                          title="Excluir"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>
+                {isProfessor
+                  ? "Nenhum projeto cadastrado. Clique no botão + para adicionar."
+                  : "Nenhum projeto disponível no momento."}
+              </p>
+            )}
+            {isProfessor && (
+              <button
+                className="add-project-btn"
+                onClick={() => navigate("/create/project")}
+              >
+                <FaPlus /> Adicionar Projeto
+              </button>
+            )}
+          </div>
+        );
       case "researchers":
         return (
           <>
@@ -653,7 +868,7 @@ const Home = () => {
           <section key={id} id={id}>
             <div className="section-header">
               <h2>{label}</h2>
-              {isProfessor && id !== "research" && (
+              {isProfessor && id !== "research" && id !== "projects" && (
                 <button
                   className="section-edit"
                   type="button"

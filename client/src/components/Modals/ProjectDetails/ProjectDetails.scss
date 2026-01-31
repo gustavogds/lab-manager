@@ -1,0 +1,187 @@
+@import "../../../styles/variables";
+
+.project-details-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+}
+
+.project-details-content {
+  background: $neutral-white;
+  border-radius: $radius-xl;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: $neutral-muted;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: $primary-color-strong;
+  }
+}
+
+.project-details-body {
+  padding: 2rem;
+}
+
+.project-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid $neutral-border;
+
+  h2 {
+    color: $primary-color-strong;
+    font-size: 1.8rem;
+    margin: 0;
+    padding-right: 2rem;
+  }
+}
+
+.project-description {
+  margin-bottom: 2rem;
+
+  h3 {
+    color: $primary-color-strong;
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    color: $neutral-muted;
+    line-height: 1.7;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+}
+
+.project-members {
+  h3 {
+    color: $primary-color-strong;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .no-members {
+    color: $neutral-muted;
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+  }
+}
+
+.members-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.member-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: $neutral-surface;
+  border: 2px solid $neutral-border;
+  border-radius: $radius-lg;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: $primary-color;
+    box-shadow: $shadow-small;
+  }
+
+  .member-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: $neutral-white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid $neutral-border;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    svg {
+      width: 28px;
+      height: 28px;
+      color: $neutral-muted;
+    }
+  }
+
+  .member-info {
+    flex: 1;
+    min-width: 0;
+
+    h4 {
+      color: $primary-color-strong;
+      font-size: 1rem;
+      margin: 0 0 0.25rem;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    p {
+      color: $neutral-muted;
+      font-size: 0.9rem;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .project-details-content {
+    max-height: 95vh;
+  }
+
+  .project-details-body {
+    padding: 1.5rem;
+  }
+
+  .project-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .members-list {
+    grid-template-columns: 1fr;
+  }
+}

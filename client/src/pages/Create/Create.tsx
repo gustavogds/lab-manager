@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { FaFlask, FaPlus } from "react-icons/fa";
+import { FaFlask, FaPlus, FaProjectDiagram } from "react-icons/fa";
 import "./Create.scss";
 
 type CreateOption = {
@@ -21,6 +21,15 @@ const Create = () => {
       icon: <FaFlask />,
       action: () => {
         navigate("/create/research-area");
+      },
+    },
+    {
+      id: "project",
+      title: "Projeto",
+      description: "Criar um novo projeto de pesquisa",
+      icon: <FaProjectDiagram />,
+      action: () => {
+        navigate("/create/project");
       },
     },
     // Futuras opções podem ser adicionadas aqui

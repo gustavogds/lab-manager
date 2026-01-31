@@ -12,4 +12,5 @@ urlpatterns = [
     path("approve/", views.approve_user, name="approve_user"),
     path("reject/", views.reject_user, name="reject_user"),
     path("list-unapproved/", views.list_unapproved_users, name="list_unapproved_users"),
+    path("list-approved/", views.list_approved_users, name="list_approved_users"),
 ]

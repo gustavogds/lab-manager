@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router";
 import Slider from "react-slick";
 
 import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import "./Login.scss";
 import carouselLandingPage from "assets/images/img1.png";
 import carouselSigninPage from "assets/images/img2.png";

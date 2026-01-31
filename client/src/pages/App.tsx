@@ -12,12 +12,15 @@ import LabSettings from "./Settings/LabSettings";
 import Approval from "./Approval/Approval";
 import Create from "./Create/Create";
 import CreateResearchArea from "./Create/CreateResearchArea";
+import CreateProject from "./Create/CreateProject";
 
 import { useEffect, useState } from "react";
 import AuthHandler from "../helpers/services/AuthHandler";
 import { useGlobalData } from "../helpers/context/globalContext";
 import Notification from "../components/Modals/Notification/Notification";
 import SectionEditorModal from "../components/Modals/SectionEditor/SectionEditor";
+import ProjectDetails from "../components/Modals/ProjectDetails/ProjectDetails";
+import ProjectEditor from "../components/Modals/ProjectEditor/ProjectEditor";
 
 const PrivateRoute = ({
   user,
@@ -65,6 +68,8 @@ const App = () => {
     ModalsHandler.setup();
     ModalsHandler.registerModal("Notification", Notification);
     ModalsHandler.registerModal("SectionEditor", SectionEditorModal);
+    ModalsHandler.registerModal("ProjectDetails", ProjectDetails);
+    ModalsHandler.registerModal("ProjectEditor", ProjectEditor);
   }, []);
 
   if (!readyToRender) {
@@ -144,6 +149,16 @@ const App = () => {
             element={
               !isEmptyObject(user.state) ? (
                 <CreateResearchArea />
+              ) : (
+                <Navigate to="/signin" />
+              )
+            }
+          />
+          <Route
+            path="/create/project"
+            element={
+              !isEmptyObject(user.state) ? (
+                <CreateProject />
               ) : (
                 <Navigate to="/signin" />
               )

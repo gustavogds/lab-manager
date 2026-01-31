@@ -1,0 +1,203 @@
+.multi-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+
+  .multi-select-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .multi-select-container {
+    position: relative;
+    width: 100%;
+
+    .multi-select-input {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      min-height: 44px;
+      padding: 0.5rem 0.75rem;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: #1d8b83;
+      }
+
+      &:focus-within {
+        border-color: #1d8b83;
+        box-shadow: 0 0 0 3px rgba(29, 139, 131, 0.1);
+      }
+
+      .selected-items {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        flex: 1;
+        min-height: 30px;
+
+        .placeholder {
+          color: #999;
+          font-size: 0.95rem;
+        }
+
+        .selected-item {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.4rem 0.6rem;
+          background: #f0f8f7;
+          border-radius: 4px;
+          font-size: 0.9rem;
+          white-space: nowrap;
+          min-height: 36px;
+
+          .item-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+          }
+
+          span {
+            line-height: 1.5;
+          }
+
+          .remove-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            color: #1d8b83;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+
+            &:hover:not(:disabled) {
+              color: #e74c3c;
+            }
+
+            &:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+          }
+        }
+      }
+
+      .dropdown-arrow {
+        flex-shrink: 0;
+        font-size: 0.8rem;
+        color: #999;
+        transition: transform 0.2s ease;
+      }
+    }
+
+    .multi-select-dropdown {
+      position: absolute;
+      top: calc(100% + 0.2rem);
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #1d8b83;
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      max-height: 320px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      .search-input {
+        padding: 0.75rem;
+        border: none !important;
+        border-radius: 0 !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+        font-size: 0.9rem;
+        outline: none;
+
+        &:focus {
+          border-color: #e0e0e0 !important;
+        }
+        
+        &::placeholder {
+            color: #999;
+        }
+    }
+
+      .options-list {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+
+        .option-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem;
+          cursor: pointer;
+          transition: background 0.2s ease;
+          border-bottom: 1px solid #f0f0f0;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          &:hover {
+            background: #f9f9f9;
+          }
+
+          .option-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+          }
+
+          .option-info {
+            flex: 1;
+            min-width: 0;
+
+            .option-name {
+              font-size: 0.9rem;
+              font-weight: 500;
+              color: #333;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+
+            .option-email {
+              font-size: 0.8rem;
+              color: #999;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+        }
+
+        .no-options {
+          padding: 1rem;
+          text-align: center;
+          color: #999;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}

@@ -322,6 +322,55 @@
         }
       }
 
+      .about-carousel .about-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-radius: 999px;
+
+        background: rgba(139, 186, 183, 0.85); /* #8bbab7 */
+        color: #ffffff;
+
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        cursor: pointer;
+      }
+
+      .about-carousel .about-arrow:hover {
+        background: rgba(164, 203, 201, 0.95); /* #a4cbc9 */
+      }
+
+      .about-carousel .about-arrow:focus-visible {
+        outline: 3px solid #bddddb;
+        outline-offset: 3px;
+      }
+
+      .about-carousel .about-arrow--prev {
+        left: 10px;
+      }
+
+      .about-carousel .about-arrow--next {
+        right: 10px;
+      }
+
+      .about-carousel .about-arrow span {
+        font-size: 26px;
+        line-height: 1;
+        margin-top: -2px;
+      }
+
+      .about-carousel .slick-prev:before,
+      .about-carousel .slick-next:before {
+        content: "" !important;
+      }
+
       .section-header {
         display: flex;
         align-items: center;
@@ -503,6 +552,139 @@
   }
 
   .add-research-area-btn {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-color-strong 100%);
+    color: $neutral-white;
+    border: none;
+    border-radius: $radius-lg;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: box-shadow $transition-fast;
+    align-self: flex-start;
+    box-shadow: $shadow-small;
+
+    &:hover {
+      box-shadow: 0 6px 18px rgba(29, 139, 131, 0.3);
+    }
+  }
+}
+
+.projects-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .projects-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .project-card {
+    background: $neutral-white;
+    border: 2px solid $neutral-border;
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    transition: all $transition-fast;
+    box-shadow: $shadow-small;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        border-color: $primary-color;
+        box-shadow: $shadow-medium;
+
+        .card-content h3 {
+          color: $primary-color;
+        }
+
+        .card-actions {
+          opacity: 1;
+        }
+      }
+    }
+
+    .card-content {
+      flex: 1;
+
+      h3 {
+        color: $primary-color-strong;
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        transition: color $transition-fast;
+      }
+
+      p {
+        color: $neutral-muted;
+        line-height: 1.6;
+        margin: 0;
+      }
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: flex-end;
+      opacity: 0;
+      transition: opacity $transition-fast;
+
+      button {
+        background: $neutral-white;
+        border: 1px solid $btn-primary-border;
+        border-radius: $radius-round;
+        // padding:  $spacing-md;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        cursor: pointer;
+        transition: all $transition-fast;
+        font-size: 0.9rem;
+        font-weight: 600;
+
+        &.toggle-btn {
+          color: $btn-primary-color;
+
+          &:hover {
+            background: rgba(29, 139, 131, 0.08);
+            border-color: $btn-primary-color;
+          }
+        }
+
+        &.edit-btn {
+          color: $btn-primary-color;
+
+          &:hover {
+            background: rgba(29, 139, 131, 0.08);
+            border-color: $btn-primary-color;
+          }
+        }
+
+        &.delete-btn {
+          color: $btn-danger-color;
+
+          &:hover {
+            background: rgba(231, 76, 60, 0.08);
+            border-color: $btn-danger-color;
+          }
+        }
+      }
+    }
+  }
+
+  .add-project-btn {
     background: linear-gradient(135deg, $primary-color 0%, $primary-color-strong 100%);
     color: $neutral-white;
     border: none;

@@ -29,6 +29,22 @@ export type ResearchArea = {
   updated_at: string;
 };
 
+export type Project = {
+  id: number;
+  title: string;
+  description: string;
+  is_active: boolean;
+  order: number;
+  created_at: string;
+  updated_at: string;
+  members: Array<{
+    id: number;
+    name: string;
+    email: string;
+    profile_image: string | null;
+  }>;
+};
+
 export const createResearchArea = async (data: {
   title: string;
   description: string;
@@ -97,5 +113,97 @@ export const deleteResearchArea = async (areaId: number) => {
   return {
     success: response.status === 200,
     ...response.data,
+  };
+};
+
+export const createProject = async (data: {
+  title: string;
+  description: string;
+}) => {
+  const response = await api
+    .post("/content/projects/create/", data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const listProjects = async () => {
+  const response = await api
+    .get("/content/projects/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data.data || [],
+  };
+};
+
+export const getProject = async (projectId: number) => {
+  const response = await api
+    .get(`/content/projects/${projectId}/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data.data,
+  };
+};
+
+export const updateProject = async (
+  projectId: number,
+  data: Partial<Project>
+) => {
+  const response = await api
+    .patch(`/content/projects/${projectId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const deleteProject = async (projectId: number) => {
+  const response = await api
+    .delete(`/content/projects/${projectId}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+// User type for member management
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  profile_image: string | null;
+};
+
+export const listApprovedUsers = async () => {
+  const response = await api
+    .get("/accounts/list-approved/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data.users || [],
   };
 };

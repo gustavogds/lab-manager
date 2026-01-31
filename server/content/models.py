@@ -301,3 +301,42 @@ class ResearchArea(models.Model):
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
+
+
+class Project(models.Model):
+    title: str = models.CharField(max_length=255)
+    description: str = models.TextField()
+    members = models.ManyToManyField("accounts.User", related_name="projects", blank=True)
+    is_active: bool = models.BooleanField(default=True)
+    order: int = models.IntegerField(default=0)
+    created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
+    updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "title"]
+
+    def __str__(self):
+        return self.title
+
+    def __repr__(self):
+        return f"<Project pk={self.pk} title={self.title}>"
+
+    def export(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "is_active": self.is_active,
+            "order": self.order,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "members": [
+                {
+                    "id": member.id,
+                    "name": member.name,
+                    "email": member.email,
+                    "profile_image": member.profile_image.url if member.profile_image else None,
+                }
+                for member in self.members.filter(is_public=True)
+            ],
+        }

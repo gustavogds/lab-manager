@@ -121,3 +121,11 @@ def list_unapproved_users(request):
     unapproved_users = User.objects.filter(is_approved=False)
     users_data = [user.export() for user in unapproved_users]
     return JsonResponse({"users": users_data}, safe=False)
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_approved_users(request):
+    approved_users = User.objects.filter(is_approved=True)
+    users_data = [user.export() for user in approved_users]
+    return JsonResponse({"users": users_data}, safe=False)
