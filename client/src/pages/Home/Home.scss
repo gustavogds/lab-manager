@@ -748,6 +748,119 @@
   }
 }
 
+.contact-location-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+
+  .contact-column,
+  .location-column {
+    position: relative;
+    background: $neutral-white;
+    border: 2px solid $neutral-border;
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    box-shadow: $shadow-small;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+
+    &:hover {
+      border-color: $primary-color;
+      box-shadow: $shadow-medium;
+
+      .column-edit-btn {
+        opacity: 1;
+      }
+    }
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: $primary-color-strong;
+      font-size: 1.15rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+
+      svg {
+        font-size: 1rem;
+      }
+    }
+
+    .column-edit-btn {
+      position: absolute;
+      top: $spacing-md;
+      right: $spacing-md;
+      background: $neutral-white;
+      border: 1px solid $btn-primary-border;
+      border-radius: $radius-round;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: $btn-primary-color;
+      opacity: 0;
+      transition: all $transition-fast;
+
+      &:hover {
+        background: rgba(29, 139, 131, 0.08);
+        border-color: $btn-primary-color;
+      }
+    }
+
+    .column-content {
+      p {
+        color: $neutral-muted;
+        line-height: 1.7;
+        margin: 0.35rem 0;
+      }
+
+      .address-details {
+        color: $neutral-muted;
+        font-style: italic;
+        font-size: 0.95rem;
+      }
+
+      .empty-message {
+        color: $neutral-muted;
+        font-style: italic;
+      }
+    }
+  }
+
+  .location-column {
+    .map-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      background: linear-gradient(135deg, $primary-color 0%, $primary-color-strong 100%);
+      color: $neutral-white;
+      text-decoration: none;
+      border-radius: $radius-md;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: box-shadow $transition-fast;
+      box-shadow: $shadow-small;
+
+      &:hover {
+        box-shadow: 0 4px 14px rgba(29, 139, 131, 0.35);
+      }
+
+      svg {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .home {
     .content {

@@ -52,23 +52,22 @@ const sections = [
   { id: "projects", label: "Projetos", icon: <FaProjectDiagram /> },
   { id: "researchers", label: "Pesquisadores", icon: <FaUsers /> },
   { id: "partnerships", label: "Parcerias", icon: <FaHandshake /> },
-  { id: "contact", label: "Contato", icon: <FaEnvelope /> },
-  { id: "location", label: "Localização", icon: <FaMapMarkerAlt /> },
+  { id: "contact-location", label: "Contato & Localização", icon: <FaEnvelope /> },
 ];
 
 const sectionDescriptions: Record<string, string> = {
-  location: "Informacoes sobre a localizacao, endereco e como chegar.",
   research: "Resumo das principais linhas e areas de pesquisa do laboratorio.",
   projects: "Lista e descricao dos projetos em andamento e concluidos.",
   researchers: "Equipe, perfis dos pesquisadores e estudantes envolvidos.",
   partnerships: "Instituicoes parceiras e colaboracoes estrategicas.",
-  contact: "Canais de contato, redes sociais e formulario de mensagem.",
+  "contact-location": "Informacoes de contato e localizacao do laboratorio.",
 };
 
 type LabSettings = {
   mission?: string;
   address?: string;
-  city?: string;
+  address_details?: string;
+  maps_link?: string;
   areas?: string;
   highlights?: string;
   lead?: string;
@@ -132,36 +131,81 @@ const Home = () => {
         return response;
       },
     },
+    contact: {
+      title: "Editar contato",
+      fields: [
+        {
+          name: "email",
+          label: "Email",
+          type: "email",
+          placeholder: "contato@laboratorio.com",
+        },
+        {
+          name: "phone",
+          label: "Telefone",
+          type: "tel",
+          placeholder: "(00) 00000-0000",
+        },
+      ],
+      getInitialValues: (settings) => ({
+        email: settings?.email || "",
+        phone: settings?.phone || "",
+      }),
+      onSave: async (values) => {
+        const response = await saveLabSettings({
+          email: values.email,
+          phone: values.phone,
+        });
+        if (response.success) {
+          setLabSettings((prev) => ({
+            ...(prev || {}),
+            email: values.email,
+            phone: values.phone,
+          }));
+        }
+        return response;
+      },
+    },
     location: {
       title: "Editar localização",
       fields: [
         {
           name: "address",
           label: "Endereço",
-          type: "text",
-          placeholder: "Rua, número, bairro",
+          type: "textarea",
+          placeholder: "Endereço completo (rua, número, bairro, cidade, estado, CEP)",
+          rows: 3,
         },
         {
-          name: "city",
-          label: "Cidade",
+          name: "address_details",
+          label: "Outras informações",
           type: "text",
-          placeholder: "Cidade e estado",
+          placeholder: "Ex: Quarto andar, salas 403-406",
+        },
+        {
+          name: "maps_link",
+          label: "Link do Google Maps",
+          type: "text",
+          placeholder: "https://maps.google.com/...",
         },
       ],
       getInitialValues: (settings) => ({
         address: settings?.address || "",
-        city: settings?.city || "",
+        address_details: settings?.address_details || "",
+        maps_link: settings?.maps_link || "",
       }),
       onSave: async (values) => {
         const response = await saveLabSettings({
           address: values.address,
-          city: values.city,
+          address_details: values.address_details,
+          maps_link: values.maps_link,
         });
         if (response.success) {
           setLabSettings((prev) => ({
             ...(prev || {}),
             address: values.address,
-            city: values.city,
+            address_details: values.address_details,
+            maps_link: values.maps_link,
           }));
         }
         return response;
@@ -273,41 +317,6 @@ const Home = () => {
           setLabSettings((prev) => ({
             ...(prev || {}),
             partners: values.partners,
-          }));
-        }
-        return response;
-      },
-    },
-    contact: {
-      title: "Editar contato",
-      fields: [
-        {
-          name: "email",
-          label: "Email",
-          type: "email",
-          placeholder: "contato@laboratorio.com",
-        },
-        {
-          name: "phone",
-          label: "Telefone",
-          type: "tel",
-          placeholder: "(00) 00000-0000",
-        },
-      ],
-      getInitialValues: (settings) => ({
-        email: settings?.email || "",
-        phone: settings?.phone || "",
-      }),
-      onSave: async (values) => {
-        const response = await saveLabSettings({
-          email: values.email,
-          phone: values.phone,
-        });
-        if (response.success) {
-          setLabSettings((prev) => ({
-            ...(prev || {}),
-            email: values.email,
-            phone: values.phone,
           }));
         }
         return response;
@@ -833,16 +842,6 @@ const Home = () => {
             )}
           </>
         );
-      case "location":
-        return (
-          <>
-            {labSettings?.address && <p>{labSettings.address}</p>}
-            {labSettings?.city && <p>{labSettings.city}</p>}
-            {!labSettings?.address && !labSettings?.city && (
-              <p>{sectionDescriptions[sectionId]}</p>
-            )}
-          </>
-        );
       case "research":
         return (
           <div className="research-areas-section">
@@ -1015,15 +1014,72 @@ const Home = () => {
             )}
           </div>
         );
-      case "contact":
+      case "contact-location":
+        const hasAddress = !!labSettings?.address;
+        const hasContact = labSettings?.email || labSettings?.phone;
+
         return (
-          <>
-            {labSettings?.email && <p><strong>Email:</strong> {labSettings.email}</p>}
-            {labSettings?.phone && <p><strong>Telefone:</strong> {labSettings.phone}</p>}
-            {!labSettings?.email && !labSettings?.phone && (
-              <p>{sectionDescriptions[sectionId]}</p>
-            )}
-          </>
+          <div className="contact-location-section">
+            <div className="contact-column">
+              <h3><FaEnvelope /> Contato</h3>
+              {isProfessor && (
+                <button
+                  className="column-edit-btn"
+                  type="button"
+                  onClick={() => openSectionEditor("contact")}
+                  title="Editar contato"
+                >
+                  <FaEdit />
+                </button>
+              )}
+              <div className="column-content">
+                {labSettings?.email && (
+                  <p><strong>Email:</strong> {labSettings.email}</p>
+                )}
+                {labSettings?.phone && (
+                  <p><strong>Telefone:</strong> {labSettings.phone}</p>
+                )}
+                {!hasContact && (
+                  <p className="empty-message">Informações de contato não disponíveis.</p>
+                )}
+              </div>
+            </div>
+            <div className="location-column">
+              <h3><FaMapMarkerAlt /> Localização</h3>
+              {isProfessor && (
+                <button
+                  className="column-edit-btn"
+                  type="button"
+                  onClick={() => openSectionEditor("location")}
+                  title="Editar localização"
+                >
+                  <FaEdit />
+                </button>
+              )}
+              <div className="column-content">
+                {hasAddress ? (
+                  <>
+                    <p>{labSettings.address}</p>
+                    {labSettings?.address_details && (
+                      <p className="address-details">{labSettings.address_details}</p>
+                    )}
+                    {labSettings?.maps_link && (
+                      <a
+                        href={labSettings.maps_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="map-link-btn"
+                      >
+                        <FaMapMarkerAlt /> Ver no mapa
+                      </a>
+                    )}
+                  </>
+                ) : (
+                  <p className="empty-message">Endereço não disponível.</p>
+                )}
+              </div>
+            </div>
+          </div>
         );
       default:
         return <p>{sectionDescriptions[sectionId] || "Conteúdo em construção."}</p>;
@@ -1054,7 +1110,7 @@ const Home = () => {
           <section key={id} id={id}>
             <div className="section-header">
               <h2>{label}</h2>
-              {isProfessor && id !== "research" && id !== "projects" && id !== "researchers" && id !== "partnerships" && (
+              {isProfessor && id !== "research" && id !== "projects" && id !== "researchers" && id !== "partnerships" && id !== "contact-location" && (
                 <button
                   className="section-edit"
                   type="button"

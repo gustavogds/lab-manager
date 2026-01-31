@@ -3,8 +3,6 @@ from django.db import models
 
 class LabSettings(models.Model):
     lab_name = models.CharField(max_length=255, default="Lab Management System")
-    address = models.TextField(blank=True, null=True)
-    city = models.CharField(max_length=255, blank=True, null=True)
     logo = models.ImageField(upload_to="lab_logos/", blank=True, null=True)
     mission = models.TextField(blank=True, null=True)
     areas = models.TextField(blank=True, null=True)
@@ -14,6 +12,9 @@ class LabSettings(models.Model):
     partners = models.TextField(blank=True, null=True)
     contact_email = models.EmailField(blank=True, null=True)
     contact_phone = models.CharField(max_length=20, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    address_details = models.TextField(blank=True, null=True)
+    maps_link = models.URLField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return self.lab_name
@@ -31,7 +32,8 @@ class LabSettings(models.Model):
             "id": self.id,
             "lab_name": self.lab_name,
             "address": self.address,
-            "city": self.city,
+            "address_details": self.address_details,
+            "maps_link": self.maps_link,
             "logo": self.logo.url if self.logo else None,
             "mission": self.mission,
             "about_images": about_images,

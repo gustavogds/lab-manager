@@ -23,7 +23,8 @@ def update_lab_settings(request):
     allowed_fields = [
         "lab_name",
         "address",
-        "city",
+        "address_details",
+        "maps_link",
         "mission",
         "areas",
         "highlights",
