@@ -27,9 +27,14 @@ import {
   listProjects,
   updateProject,
   deleteProject,
+  listResearchers,
+  listAllResearchers,
+  updateResearchersConfig,
   type ResearchArea,
   type Project,
+  type Researcher,
 } from "helpers/api/content";
+import ResearcherCard from "components/ResearcherCard/ResearcherCard";
 import { useGlobalData } from "helpers/context/globalContext";
 import { isEmptyObject } from "helpers/utils";
 import { ModalsHandler } from "components/my-own-modal-handler";
@@ -75,6 +80,8 @@ const Home = () => {
   const [labSettings, setLabSettings] = useState<LabSettings | null>(null);
   const [researchAreas, setResearchAreas] = useState<ResearchArea[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [researchers, setResearchers] = useState<Researcher[]>([]);
+  const [allResearchers, setAllResearchers] = useState<Researcher[]>([]);
   const hashNavTimeout = useRef<number | null>(null);
   const { user }: any = useGlobalData();
   const isProfessor = !isEmptyObject(user.state) && user.state.role === "professor";
@@ -328,9 +335,27 @@ const Home = () => {
       }
     };
 
+    const fetchResearchers = async () => {
+      const result = await listResearchers();
+      if (result.success) {
+        setResearchers(result.data);
+      }
+    };
+
+    const fetchAllResearchers = async () => {
+      const result = await listAllResearchers();
+      if (result.success) {
+        setAllResearchers(result.data);
+      }
+    };
+
     fetchSettings();
     fetchResearchAreas();
     fetchProjects();
+    fetchResearchers();
+    if (isProfessor) {
+      fetchAllResearchers();
+    }
   }, []);
 
   useEffect(() => {
@@ -634,6 +659,57 @@ const Home = () => {
     await promise;
   };
 
+  const openResearcherDetails = async (researcher: Researcher) => {
+    const researcherProjects = projects.filter((project) =>
+      project.members.some((member) => member.id === researcher.id)
+    );
+
+    const { promise } = ModalsHandler.createModal("ResearcherDetails", {
+      researcher,
+      projects: researcherProjects,
+    });
+
+    await promise;
+  };
+
+  const openResearchersEditor = async () => {
+    const { promise } = ModalsHandler.createModal("ResearchersEditor", {
+      researchers: allResearchers,
+    });
+
+    const result = await promise;
+    if (result === "cancel") {
+      return;
+    }
+
+    const configData = result as Array<{ id: number; order: number; show: boolean }>;
+    const response = await updateResearchersConfig(configData);
+
+    if (response.success) {
+      const researchersResult = await listResearchers();
+      if (researchersResult.success) {
+        setResearchers(researchersResult.data);
+      }
+
+      const allResearchersResult = await listAllResearchers();
+      if (allResearchersResult.success) {
+        setAllResearchers(allResearchersResult.data);
+      }
+
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: "Configuração dos pesquisadores atualizada!",
+        type: "success",
+      });
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.message || "Falha ao atualizar configuração.",
+        type: "error",
+      });
+    }
+  };
+
   function Arrow(props: any) {
     const { className, onClick, direction } = props;
 
@@ -819,13 +895,21 @@ const Home = () => {
         );
       case "researchers":
         return (
-          <>
-            {labSettings?.lead && <p><strong>Responsável:</strong> {labSettings.lead}</p>}
-            {labSettings?.team && <p>{labSettings.team}</p>}
-            {!labSettings?.lead && !labSettings?.team && (
-              <p>{sectionDescriptions[sectionId]}</p>
+          <div className="researchers-section">
+            {researchers.length > 0 ? (
+              <div className="researchers-grid">
+                {researchers.map((researcher) => (
+                  <ResearcherCard
+                    key={researcher.id}
+                    researcher={researcher}
+                    onClick={() => openResearcherDetails(researcher)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p>Nenhum pesquisador disponível no momento.</p>
             )}
-          </>
+          </div>
         );
       case "partnerships":
         return <p>{labSettings?.partners || sectionDescriptions[sectionId]}</p>;
@@ -868,11 +952,21 @@ const Home = () => {
           <section key={id} id={id}>
             <div className="section-header">
               <h2>{label}</h2>
-              {isProfessor && id !== "research" && id !== "projects" && (
+              {isProfessor && id !== "research" && id !== "projects" && id !== "researchers" && (
                 <button
                   className="section-edit"
                   type="button"
                   onClick={() => openSectionEditor(id)}
+                >
+                  <FaEdit />
+                  Editar
+                </button>
+              )}
+              {isProfessor && id === "researchers" && (
+                <button
+                  className="section-edit"
+                  type="button"
+                  onClick={openResearchersEditor}
                 >
                   <FaEdit />
                   Editar

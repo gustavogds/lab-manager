@@ -1,0 +1,59 @@
+@import "../../styles/variables";
+
+.researcher-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  background: $neutral-white;
+  border: 1px solid $neutral-border;
+  border-radius: $radius-lg;
+  cursor: pointer;
+  transition: all $transition-fast;
+  text-align: center;
+
+  &:hover {
+    border-color: $primary-color;
+    box-shadow: $shadow-medium;
+    transform: translateY(-2px);
+  }
+
+  .researcher-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid $neutral-border;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $neutral-surface;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    svg {
+      width: 40px;
+      height: 40px;
+      color: $neutral-muted;
+    }
+  }
+
+  .researcher-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: $neutral-ink;
+    word-break: break-word;
+  }
+
+  .researcher-position {
+    margin: 0;
+    font-size: 14px;
+    color: $neutral-muted;
+  }
+}

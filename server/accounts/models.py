@@ -91,6 +91,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50, unique=True, null=True, blank=True)
 
     name = models.CharField(max_length=50, null=True, blank=True)
+    position = models.CharField(max_length=100, null=True, blank=True)
+    researcher_order = models.IntegerField(default=0)
+    show_in_researchers = models.BooleanField(default=True)
     birthdate = models.DateField(null=True, blank=True, default=timezone.now)
     phone = models.CharField(max_length=50, null=True, blank=True)
     contact_email = models.CharField(max_length=50, null=True, blank=True)
@@ -130,6 +133,9 @@ class User(AbstractBaseUser, PermissionsMixin):
             "id": self.id,
             "username": self.username,
             "name": self.name,
+            "position": self.position,
+            "researcher_order": self.researcher_order,
+            "show_in_researchers": self.show_in_researchers,
             "email": self.email,
             "birthdate": self.birthdate.isoformat(),
             "is_staff": self.is_staff,

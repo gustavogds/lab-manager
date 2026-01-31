@@ -21,6 +21,8 @@ import Notification from "../components/Modals/Notification/Notification";
 import SectionEditorModal from "../components/Modals/SectionEditor/SectionEditor";
 import ProjectDetails from "../components/Modals/ProjectDetails/ProjectDetails";
 import ProjectEditor from "../components/Modals/ProjectEditor/ProjectEditor";
+import ResearcherDetails from "../components/Modals/ResearcherDetails/ResearcherDetails";
+import ResearchersEditor from "../components/Modals/ResearchersEditor/ResearchersEditor";
 
 const PrivateRoute = ({
   user,
@@ -70,6 +72,8 @@ const App = () => {
     ModalsHandler.registerModal("SectionEditor", SectionEditorModal);
     ModalsHandler.registerModal("ProjectDetails", ProjectDetails);
     ModalsHandler.registerModal("ProjectEditor", ProjectEditor);
+    ModalsHandler.registerModal("ResearcherDetails", ResearcherDetails);
+    ModalsHandler.registerModal("ResearchersEditor", ResearchersEditor);
   }, []);
 
   if (!readyToRender) {

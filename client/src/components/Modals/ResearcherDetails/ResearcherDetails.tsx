@@ -1,0 +1,107 @@
+import "./ResearcherDetails.scss";
+import Icons from "components/Icons/Icons";
+import type { Researcher, Project } from "helpers/api/content";
+
+interface ResearcherDetailsProps {
+  researcher: Researcher;
+  projects: Project[];
+  onConfirm: () => void;
+}
+
+const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetailsProps) => {
+  return (
+    <div className="researcher-details-modal" onClick={onConfirm}>
+      <div className="researcher-details-content" onClick={(e) => e.stopPropagation()}>
+        <button className="close-button" onClick={onConfirm}>
+          ×
+        </button>
+
+        <div className="researcher-details-body">
+          <header className="researcher-header">
+            <div className="researcher-avatar">
+              {researcher.profile_image ? (
+                <img src={researcher.profile_image} alt={researcher.name} />
+              ) : (
+                <Icons.Profile />
+              )}
+            </div>
+            <div className="researcher-info">
+              <h2>{researcher.name}</h2>
+              {researcher.position && (
+                <p className="position">{researcher.position}</p>
+              )}
+            </div>
+          </header>
+
+          <section className="contact-section">
+            <h3>Contato</h3>
+            <div className="contact-list">
+              {researcher.email && (
+                <div className="contact-item">
+                  <span className="label">Email:</span>
+                  <a href={`mailto:${researcher.email}`}>{researcher.email}</a>
+                </div>
+              )}
+              {researcher.contact_email && researcher.contact_email !== researcher.email && (
+                <div className="contact-item">
+                  <span className="label">Email de contato:</span>
+                  <a href={`mailto:${researcher.contact_email}`}>{researcher.contact_email}</a>
+                </div>
+              )}
+              {researcher.phone && (
+                <div className="contact-item">
+                  <span className="label">Telefone:</span>
+                  <span>{researcher.phone}</span>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {(researcher.social_media || researcher.lattes) && (
+            <section className="links-section">
+              <h3>Links</h3>
+              <div className="links-list">
+                {researcher.lattes && (
+                  <a 
+                    href={researcher.lattes} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="link-item"
+                  >
+                    Currículo Lattes
+                  </a>
+                )}
+                {researcher.social_media && (
+                  <a 
+                    href={researcher.social_media} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="link-item"
+                  >
+                    Rede Social
+                  </a>
+                )}
+              </div>
+            </section>
+          )}
+
+          {projects.length > 0 && (
+            <section className="projects-section">
+              <h3>Projetos ({projects.length})</h3>
+              <div className="projects-list">
+                {projects.map((project) => (
+                  <div key={project.id} className="project-item">
+                    <h4>{project.title}</h4>
+                    <p>{project.description}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ResearcherDetails;

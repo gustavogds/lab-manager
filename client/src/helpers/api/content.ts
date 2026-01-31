@@ -193,7 +193,17 @@ export type User = {
   name: string;
   email: string;
   profile_image: string | null;
+  position?: string;
+  researcher_order?: number;
+  show_in_researchers?: boolean;
+  phone?: string;
+  contact_email?: string;
+  social_media?: string;
+  lattes?: string;
+  role?: string;
 };
+
+export type Researcher = User;
 
 export const listApprovedUsers = async () => {
   const response = await api
@@ -205,5 +215,46 @@ export const listApprovedUsers = async () => {
   return {
     success: response.status === 200,
     data: response.data.users || [],
+  };
+};
+
+export const listResearchers = async () => {
+  const response = await api
+    .get("/accounts/researchers/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data.users || [],
+  };
+};
+
+export const listAllResearchers = async () => {
+  const response = await api
+    .get("/accounts/researchers/all/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data.users || [],
+  };
+};
+
+export const updateResearchersConfig = async (
+  researchers: Array<{ id: number; order: number; show: boolean }>
+) => {
+  const response = await api
+    .patch("/accounts/researchers/config/", { researchers })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
   };
 };

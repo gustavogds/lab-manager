@@ -14,6 +14,7 @@ const ProfileSettings = () => {
 
   const [formData, setFormData] = useState({
     name: "",
+    position: "",
     phone: "",
     contact_email: "",
     social_media: "",
@@ -34,6 +35,7 @@ const ProfileSettings = () => {
   useEffect(() => {
     setFormData({
       name: initialData.name || "",
+      position: initialData.position || "",
       phone: initialData.phone || "",
       contact_email: initialData.contact_email || "",
       social_media: initialData.social_media || "",
@@ -168,6 +170,15 @@ const ProfileSettings = () => {
         <label>
           Nome:
           <input name="name" value={formData.name} onChange={handleChange} />
+        </label>
+        <label>
+          Posição/Cargo:
+          <input
+            name="position"
+            value={formData.position}
+            onChange={handleChange}
+            placeholder="Ex: Coordenador, Doutorando, Mestrando..."
+          />
         </label>
         <label>
           Telefone:
