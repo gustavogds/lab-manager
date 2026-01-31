@@ -3,7 +3,7 @@ from functools import wraps
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_http_methods
 
-from utils import JsonResponse
+from config.utils import JsonResponse
 
 
 def user_access_required(function=None, *, methods=None):

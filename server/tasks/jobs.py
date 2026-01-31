@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 def make_required_dirs():
-    from utils import safe_makedirs
+    from config.utils import safe_makedirs
 
     safe_makedirs(settings.FILE_UPLOAD_TEMP_ROOT)
     roots = map(os.path.abspath, [settings.CONTENT_ROOT, settings.THUMB_ROOT])

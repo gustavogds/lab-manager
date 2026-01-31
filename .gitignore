@@ -3,7 +3,11 @@ env
 *.psd
 *.pyc
 server/storage
+server/config/storage
+server/staticfiles
 .idea
 .DS_Store
 .ruff_cache
+.venv
 .env
+__pycache__

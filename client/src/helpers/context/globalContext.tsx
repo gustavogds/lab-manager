@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { GlobalData } from "helpers/services";
+// import { GlobalData } from "./helpers/services";
 import React from "react";
-import userReducer from "helpers/context/reducers/user";
+import userReducer from "./reducers/user";
 
 const GlobalDataContext = React.createContext({});
 

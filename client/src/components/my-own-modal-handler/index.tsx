@@ -1,5 +1,6 @@
-import React, { CSSProperties, Suspense, useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
 import { createPortal } from "react-dom";
+import type { CSSProperties } from "react";
 
 import "./index.scss";
 
@@ -310,7 +311,7 @@ const Overlays = () => {
   );
 };
 
-const Modal = ({ children, ...config }: any) => {
+const Modal = ({ children, className, ...config }: any) => {
   const _config = {
     modalSize: "md",
     headerTitle: "Modal",
@@ -341,7 +342,9 @@ const Modal = ({ children, ...config }: any) => {
 
   return (
     <div
-      className={`modal ${_config.modalSize}`}
+      className={["modal", _config.modalSize, className]
+        .filter(Boolean)
+        .join(" ")}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="modal-content">

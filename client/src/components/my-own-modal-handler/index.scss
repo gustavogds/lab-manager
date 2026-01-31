@@ -49,18 +49,6 @@
       border-radius: 4px;
       background-color: #fff;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.452);
-      &::before {
-        content: "";
-        width: 95%;
-        height: calc(100% + 20px);
-        position: absolute;
-        top: -10px;
-        left: 2.5%;
-        background-color: #fe3264;
-        border: solid 1px #fff;
-        border-radius: 4px;
-        z-index: -1;
-      }
       .modal-header {
         position: relative;
         padding: 15px;

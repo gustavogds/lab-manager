@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from accounts.models import User
-from utils import JsonResponse
+from config.utils import JsonResponse
 from sitewide.decorators import methods_allowed, user_access_required
 
 

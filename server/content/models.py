@@ -73,7 +73,7 @@ class ContentManager(models.Manager):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                UPDATE contents_content
+                UPDATE content_content
                 SET path = %s || path[%s:array_length(path, 1)]
                 WHERE path && ARRAY[%s]
                 """,
@@ -86,7 +86,7 @@ class ContentQuerySet(models.QuerySet):
         queryset = self
         return queryset.filter(
             path__overlap=RawSQL(
-                """ARRAY(SELECT "contents_mount"."content_id" FROM "contents_mount" WHERE "user_id" = %s)""",
+                """ARRAY(SELECT "content_mount"."content_id" FROM "content_mount" WHERE "user_id" = %s)""",
                 [user.id],
             )
         )
@@ -211,7 +211,7 @@ class Content(models.Model):
         if is_create:
             prev_path = self.path
             self.path = RawSQL(
-                "%s || ARRAY[currval('contents_content_id_seq')::integer]", [self.path]
+                "%s || ARRAY[currval('content_content_id_seq')::integer]", [self.path]
             )
 
         super().save(*args, **kwargs)
