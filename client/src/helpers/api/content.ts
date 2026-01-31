@@ -258,3 +258,101 @@ export const updateResearchersConfig = async (
     ...response.data,
   };
 };
+
+export type Partnership = {
+  id: number;
+  name: string;
+  logo: string | null;
+  link: string | null;
+  is_active: boolean;
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export const createPartnership = async (data: FormData) => {
+  const response = await api
+    .post("/content/partnerships/create/", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const listPartnerships = async () => {
+  const response = await api
+    .get("/content/partnerships/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data.data || [],
+  };
+};
+
+export const listAllPartnerships = async () => {
+  const response = await api
+    .get("/content/partnerships/all/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data.data || [],
+  };
+};
+
+export const updatePartnership = async (
+  partnershipId: number,
+  data: Partial<Partnership>
+) => {
+  const response = await api
+    .patch(`/content/partnerships/${partnershipId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const updatePartnershipsConfig = async (
+  partnerships: Array<{ id: number; order: number; is_active: boolean }>
+) => {
+  const response = await api
+    .patch("/content/partnerships/config/", { partnerships })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const deletePartnership = async (partnershipId: number) => {
+  const response = await api
+    .delete(`/content/partnerships/${partnershipId}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};

@@ -30,11 +30,17 @@ import {
   listResearchers,
   listAllResearchers,
   updateResearchersConfig,
+  listPartnerships,
+  listAllPartnerships,
+  updatePartnershipsConfig,
+  deletePartnership,
   type ResearchArea,
   type Project,
   type Researcher,
+  type Partnership,
 } from "helpers/api/content";
 import ResearcherCard from "components/ResearcherCard/ResearcherCard";
+import PartnershipBadge from "components/PartnershipBadge/PartnershipBadge";
 import { useGlobalData } from "helpers/context/globalContext";
 import { isEmptyObject } from "helpers/utils";
 import { ModalsHandler } from "components/my-own-modal-handler";
@@ -82,6 +88,8 @@ const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [researchers, setResearchers] = useState<Researcher[]>([]);
   const [allResearchers, setAllResearchers] = useState<Researcher[]>([]);
+  const [partnerships, setPartnerships] = useState<Partnership[]>([]);
+  const [allPartnerships, setAllPartnerships] = useState<Partnership[]>([]);
   const hashNavTimeout = useRef<number | null>(null);
   const { user }: any = useGlobalData();
   const isProfessor = !isEmptyObject(user.state) && user.state.role === "professor";
@@ -349,12 +357,28 @@ const Home = () => {
       }
     };
 
+    const fetchPartnerships = async () => {
+      const result = await listPartnerships();
+      if (result.success) {
+        setPartnerships(result.data);
+      }
+    };
+
+    const fetchAllPartnerships = async () => {
+      const result = await listAllPartnerships();
+      if (result.success) {
+        setAllPartnerships(result.data);
+      }
+    };
+
     fetchSettings();
     fetchResearchAreas();
     fetchProjects();
     fetchResearchers();
+    fetchPartnerships();
     if (isProfessor) {
       fetchAllResearchers();
+      fetchAllPartnerships();
     }
   }, []);
 
@@ -710,6 +734,57 @@ const Home = () => {
     }
   };
 
+  const openPartnershipsEditor = async () => {
+    const { promise } = ModalsHandler.createModal("PartnershipsEditor", {
+      partnerships: allPartnerships,
+    });
+
+    const result = await promise;
+    if (result === "cancel") {
+      return;
+    }
+
+    const configData = result as Array<{
+      id: number;
+      order: number;
+      is_active: boolean;
+      deleted: boolean;
+    }>;
+
+    const toDelete = configData.filter((p) => p.deleted);
+    const toUpdate = configData.filter((p) => !p.deleted);
+
+    for (const p of toDelete) {
+      await deletePartnership(p.id);
+    }
+
+    if (toUpdate.length > 0) {
+      await updatePartnershipsConfig(
+        toUpdate.map((p) => ({
+          id: p.id,
+          order: p.order,
+          is_active: p.is_active,
+        }))
+      );
+    }
+
+    const partnershipsResult = await listPartnerships();
+    if (partnershipsResult.success) {
+      setPartnerships(partnershipsResult.data);
+    }
+
+    const allPartnershipsResult = await listAllPartnerships();
+    if (allPartnershipsResult.success) {
+      setAllPartnerships(allPartnershipsResult.data);
+    }
+
+    ModalsHandler.createNotification({
+      title: "Sucesso",
+      message: "Parcerias atualizadas!",
+      type: "success",
+    });
+  };
+
   function Arrow(props: any) {
     const { className, onClick, direction } = props;
 
@@ -912,7 +987,34 @@ const Home = () => {
           </div>
         );
       case "partnerships":
-        return <p>{labSettings?.partners || sectionDescriptions[sectionId]}</p>;
+        return (
+          <div className="partnerships-section">
+            {partnerships.length > 0 ? (
+              <div className="partnerships-grid">
+                {partnerships.map((partnership) => (
+                  <PartnershipBadge
+                    key={partnership.id}
+                    partnership={partnership}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p>
+                {isProfessor
+                  ? "Nenhuma parceria cadastrada. Clique no botão + para adicionar."
+                  : "Nenhuma parceria disponível no momento."}
+              </p>
+            )}
+            {isProfessor && (
+              <button
+                className="add-partnership-btn"
+                onClick={() => navigate("/create/partnership")}
+              >
+                <FaPlus /> Adicionar Parceria
+              </button>
+            )}
+          </div>
+        );
       case "contact":
         return (
           <>
@@ -952,7 +1054,7 @@ const Home = () => {
           <section key={id} id={id}>
             <div className="section-header">
               <h2>{label}</h2>
-              {isProfessor && id !== "research" && id !== "projects" && id !== "researchers" && (
+              {isProfessor && id !== "research" && id !== "projects" && id !== "researchers" && id !== "partnerships" && (
                 <button
                   className="section-edit"
                   type="button"
@@ -967,6 +1069,16 @@ const Home = () => {
                   className="section-edit"
                   type="button"
                   onClick={openResearchersEditor}
+                >
+                  <FaEdit />
+                  Editar
+                </button>
+              )}
+              {isProfessor && id === "partnerships" && (
+                <button
+                  className="section-edit"
+                  type="button"
+                  onClick={openPartnershipsEditor}
                 >
                   <FaEdit />
                   Editar

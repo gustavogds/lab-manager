@@ -340,3 +340,34 @@ class Project(models.Model):
                 for member in self.members.filter(is_public=True)
             ],
         }
+
+
+class Partnership(models.Model):
+    name: str = models.CharField(max_length=255)
+    logo = models.ImageField(upload_to="partnership_logos/")
+    link: str = models.URLField(max_length=500, blank=True, null=True)
+    is_active: bool = models.BooleanField(default=True)
+    order: int = models.IntegerField(default=0)
+    created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
+    updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return f"<Partnership pk={self.pk} name={self.name}>"
+
+    def export(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "logo": self.logo.url if self.logo else None,
+            "link": self.link,
+            "is_active": self.is_active,
+            "order": self.order,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }

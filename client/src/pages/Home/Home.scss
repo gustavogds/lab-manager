@@ -714,6 +714,40 @@
   }
 }
 
+.partnerships-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .partnerships-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    justify-content: center;
+  }
+
+  .add-partnership-btn {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-color-strong 100%);
+    color: $neutral-white;
+    border: none;
+    border-radius: $radius-lg;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: box-shadow $transition-fast;
+    align-self: flex-start;
+    box-shadow: $shadow-small;
+
+    &:hover {
+      box-shadow: 0 6px 18px rgba(29, 139, 131, 0.3);
+    }
+  }
+}
+
 @media (max-width: 1024px) {
   .home {
     .content {

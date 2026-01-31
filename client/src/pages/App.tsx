@@ -13,6 +13,7 @@ import Approval from "./Approval/Approval";
 import Create from "./Create/Create";
 import CreateResearchArea from "./Create/CreateResearchArea";
 import CreateProject from "./Create/CreateProject";
+import CreatePartnership from "./Create/CreatePartnership";
 
 import { useEffect, useState } from "react";
 import AuthHandler from "../helpers/services/AuthHandler";
@@ -23,6 +24,7 @@ import ProjectDetails from "../components/Modals/ProjectDetails/ProjectDetails";
 import ProjectEditor from "../components/Modals/ProjectEditor/ProjectEditor";
 import ResearcherDetails from "../components/Modals/ResearcherDetails/ResearcherDetails";
 import ResearchersEditor from "../components/Modals/ResearchersEditor/ResearchersEditor";
+import PartnershipsEditor from "../components/Modals/PartnershipsEditor/PartnershipsEditor";
 
 const PrivateRoute = ({
   user,
@@ -74,6 +76,7 @@ const App = () => {
     ModalsHandler.registerModal("ProjectEditor", ProjectEditor);
     ModalsHandler.registerModal("ResearcherDetails", ResearcherDetails);
     ModalsHandler.registerModal("ResearchersEditor", ResearchersEditor);
+    ModalsHandler.registerModal("PartnershipsEditor", PartnershipsEditor);
   }, []);
 
   if (!readyToRender) {
@@ -163,6 +166,16 @@ const App = () => {
             element={
               !isEmptyObject(user.state) ? (
                 <CreateProject />
+              ) : (
+                <Navigate to="/signin" />
+              )
+            }
+          />
+          <Route
+            path="/create/partnership"
+            element={
+              !isEmptyObject(user.state) ? (
+                <CreatePartnership />
               ) : (
                 <Navigate to="/signin" />
               )

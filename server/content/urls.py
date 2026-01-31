@@ -13,4 +13,10 @@ urlpatterns = [
     path("projects/<int:project_id>/", views.get_project, name="get_project"),
     path("projects/<int:project_id>/update/", views.update_project, name="update_project"),
     path("projects/<int:project_id>/delete/", views.delete_project, name="delete_project"),
+    path("partnerships/", views.list_partnerships, name="list_partnerships"),
+    path("partnerships/all/", views.list_all_partnerships, name="list_all_partnerships"),
+    path("partnerships/create/", views.create_partnership, name="create_partnership"),
+    path("partnerships/config/", views.update_partnerships_config, name="update_partnerships_config"),
+    path("partnerships/<int:partnership_id>/update/", views.update_partnership, name="update_partnership"),
+    path("partnerships/<int:partnership_id>/delete/", views.delete_partnership, name="delete_partnership"),
 ]

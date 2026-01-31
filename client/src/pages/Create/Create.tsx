@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { FaFlask, FaPlus, FaProjectDiagram } from "react-icons/fa";
+import { FaFlask, FaPlus, FaProjectDiagram, FaHandshake } from "react-icons/fa";
 import "./Create.scss";
 
 type CreateOption = {
@@ -32,7 +32,15 @@ const Create = () => {
         navigate("/create/project");
       },
     },
-    // Futuras opções podem ser adicionadas aqui
+    {
+      id: "partnership",
+      title: "Parceria",
+      description: "Adicionar uma nova instituição parceira",
+      icon: <FaHandshake />,
+      action: () => {
+        navigate("/create/partnership");
+      },
+    },
   ];
 
   return (
