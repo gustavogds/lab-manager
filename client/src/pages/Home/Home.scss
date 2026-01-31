@@ -1,3 +1,5 @@
+@import "../../styles/variables";
+
 .home {
   --home-ink: #1b2b2a;
   --home-muted: #4d6160;
@@ -339,20 +341,18 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.45rem 0.85rem;
-        border-radius: 999px;
-        border: 1px solid rgba(29, 139, 131, 0.35);
-        background: #ffffff;
-        color: var(--home-accent-strong);
+        border-radius: $radius-pill;
+        border: 1px solid $btn-primary-border;
+        background: $neutral-white;
+        color: $btn-primary-color;
         font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease,
-          background 0.2s ease, color 0.2s ease;
+        transition: box-shadow $transition-fast, background $transition-fast, color $transition-fast;
 
         &:hover {
-          background: var(--home-accent-strong);
-          color: #fff;
-          transform: translateY(-1px);
+          background: $btn-primary-hover-bg;
+          color: $neutral-white;
           box-shadow: 0 12px 20px rgba(29, 139, 131, 0.25);
         }
       }
@@ -397,6 +397,130 @@
   }
   .toggle-nav {
     display: none;
+  }
+}
+
+.research-areas-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .research-areas-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .research-area-card {
+    background: $neutral-white;
+    border: 2px solid $neutral-border;
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    transition: all $transition-fast;
+    box-shadow: $shadow-small;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    &:hover {
+      border-color: $primary-color;
+      box-shadow: $shadow-medium;
+
+      .card-actions {
+        opacity: 1;
+      }
+    }
+
+    .card-content {
+      flex: 1;
+
+      h3 {
+        color: $primary-color-strong;
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+      }
+
+      p {
+        color: $neutral-muted;
+        line-height: 1.6;
+        margin: 0;
+      }
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: flex-end;
+      opacity: 0;
+      transition: opacity $transition-fast;
+
+      button {
+        background: $neutral-white;
+        border: 1px solid $btn-primary-border;
+        border-radius: $radius-round;
+        // padding:  $spacing-md;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        cursor: pointer;
+        transition: all $transition-fast;
+        font-size: 0.9rem;
+        font-weight: 600;
+
+        &.toggle-btn {
+          color: $btn-primary-color;
+
+          &:hover {
+            background: rgba(29, 139, 131, 0.08);
+            border-color: $btn-primary-color;
+          }
+        }
+
+        &.edit-btn {
+          color: $btn-primary-color;
+
+          &:hover {
+            background: rgba(29, 139, 131, 0.08);
+            border-color: $btn-primary-color;
+          }
+        }
+
+        &.delete-btn {
+          color: $btn-danger-color;
+
+          &:hover {
+            background: rgba(231, 76, 60, 0.08);
+            border-color: $btn-danger-color;
+          }
+        }
+      }
+    }
+  }
+
+  .add-research-area-btn {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-color-strong 100%);
+    color: $neutral-white;
+    border: none;
+    border-radius: $radius-lg;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: box-shadow $transition-fast;
+    align-self: flex-start;
+    box-shadow: $shadow-small;
+
+    &:hover {
+      box-shadow: 0 6px 18px rgba(29, 139, 131, 0.3);
+    }
   }
 }
 

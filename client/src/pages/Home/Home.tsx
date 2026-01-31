@@ -1,5 +1,6 @@
 import "./Home.scss";
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -14,8 +15,18 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaEdit,
+  FaPlus,
+  FaTrash,
+  FaEye,
+  FaEyeSlash,
 } from "react-icons/fa";
 import { getLabSettings, saveLabSettings } from "helpers/api/settings";
+import { 
+  listResearchAreas, 
+  updateResearchArea,
+  deleteResearchArea,
+  type ResearchArea 
+} from "helpers/api/content";
 import { useGlobalData } from "helpers/context/globalContext";
 import { isEmptyObject } from "helpers/utils";
 import { ModalsHandler } from "components/my-own-modal-handler";
@@ -55,9 +66,11 @@ type LabSettings = {
 };
 
 const Home = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<string>("about");
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [labSettings, setLabSettings] = useState<LabSettings | null>(null);
+  const [researchAreas, setResearchAreas] = useState<ResearchArea[]>([]);
   const hashNavTimeout = useRef<number | null>(null);
   const { user }: any = useGlobalData();
   const isProfessor = !isEmptyObject(user.state) && user.state.role === "professor";
@@ -297,7 +310,15 @@ const Home = () => {
       }
     };
 
+    const fetchResearchAreas = async () => {
+      const result = await listResearchAreas();
+      if (result.success) {
+        setResearchAreas(result.data);
+      }
+    };
+
     fetchSettings();
+    fetchResearchAreas();
   }, []);
 
   useEffect(() => {
@@ -358,6 +379,130 @@ const Home = () => {
     }
   };
 
+  const openResearchAreaEditor = async (area: ResearchArea) => {
+    const { promise } = ModalsHandler.createModal("SectionEditor", {
+      headerTitle: "Editar Área de Pesquisa",
+      fields: [
+        {
+          name: "title",
+          label: "Título",
+          type: "text",
+          placeholder: "Ex: Inteligência Artificial",
+          required: true,
+        },
+        {
+          name: "description",
+          label: "Descrição",
+          type: "textarea",
+          placeholder: "Descreva a área de pesquisa...",
+          rows: 6,
+          required: true,
+        },
+      ],
+      initialValues: {
+        title: area.title,
+        description: area.description,
+      },
+      confirmLabel: "Salvar",
+      cancelLabel: "Cancelar",
+    });
+
+    const result = await promise;
+    if (result === "cancel") {
+      return;
+    }
+
+    const values = result as Record<string, string>;
+    const response = await updateResearchArea(area.id, {
+      title: values.title,
+      description: values.description,
+    });
+
+    if (response.success) {
+      setResearchAreas((prev) =>
+        prev.map((a) =>
+          a.id === area.id
+            ? { ...a, title: values.title, description: values.description }
+            : a
+        )
+      );
+
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: "Área de pesquisa atualizada com sucesso!",
+        type: "success",
+      });
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.message || "Falha ao atualizar área de pesquisa.",
+        type: "error",
+      });
+    }
+  };
+
+  const handleDeleteResearchArea = async (area: ResearchArea) => {
+    const { promise } = ModalsHandler.createModal("Notification", {
+      title: "Confirmar exclusão",
+      message: `Tem certeza que deseja excluir a área "${area.title}"?`,
+      type: "warning",
+      confirmLabel: "Excluir",
+      cancelLabel: "Cancelar",
+    });
+
+    const result = await promise;
+    if (result === "cancel") {
+      return;
+    }
+
+    const response = await deleteResearchArea(area.id);
+
+    if (response.success) {
+      setResearchAreas((prev) => prev.filter((a) => a.id !== area.id));
+
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: "Área de pesquisa excluída com sucesso!",
+        type: "success",
+      });
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.error || "Falha ao excluir área de pesquisa.",
+        type: "error",
+      });
+    }
+  };
+
+  const handleToggleResearchAreaVisibility = async (area: ResearchArea) => {
+    const newStatus = !area.is_active;
+    const response = await updateResearchArea(area.id, {
+      is_active: newStatus,
+    });
+
+    if (response.success) {
+      setResearchAreas((prev) =>
+        prev.map((a) =>
+          a.id === area.id ? { ...a, is_active: newStatus } : a
+        )
+      );
+
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: newStatus
+          ? "Área de pesquisa ativada!"
+          : "Área de pesquisa desativada!",
+        type: "success",
+      });
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.message || "Falha ao atualizar visibilidade.",
+        type: "error",
+      });
+    }
+  };
+
   const renderSectionContent = (sectionId: string) => {
     switch (sectionId) {
       case "about":
@@ -400,7 +545,61 @@ const Home = () => {
           </>
         );
       case "research":
-        return <p>{labSettings?.areas || sectionDescriptions[sectionId]}</p>;
+        return (
+          <div className="research-areas-section">
+            {researchAreas.length > 0 ? (
+              <div className="research-areas-list">
+                {researchAreas.map((area) => (
+                  <div key={area.id} className="research-area-card">
+                    <div className="card-content">
+                      <h3>{area.title}</h3>
+                      <p>{area.description}</p>
+                    </div>
+                    {isProfessor && (
+                      <div className="card-actions">
+                        <button
+                          className="toggle-btn"
+                          onClick={() => handleToggleResearchAreaVisibility(area)}
+                          title={area.is_active ? "Esconder" : "Mostrar"}
+                        >
+                          {area.is_active ? <FaEye /> : <FaEyeSlash />}
+                        </button>
+                        <button
+                          className="edit-btn"
+                          onClick={() => openResearchAreaEditor(area)}
+                          title="Editar"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDeleteResearchArea(area)}
+                          title="Excluir"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>
+                {isProfessor
+                  ? "Nenhuma área de pesquisa cadastrada. Clique no botão + para adicionar."
+                  : "Nenhuma área de pesquisa disponível no momento."}
+              </p>
+            )}
+            {isProfessor && (
+              <button
+                className="add-research-area-btn"
+                onClick={() => navigate("/create/research-area")}
+              >
+                <FaPlus /> Adicionar Área de Pesquisa
+              </button>
+            )}
+          </div>
+        );
       case "projects":
         return <p>{labSettings?.highlights || sectionDescriptions[sectionId]}</p>;
       case "researchers":
@@ -454,7 +653,7 @@ const Home = () => {
           <section key={id} id={id}>
             <div className="section-header">
               <h2>{label}</h2>
-              {isProfessor && (
+              {isProfessor && id !== "research" && (
                 <button
                   className="section-edit"
                   type="button"

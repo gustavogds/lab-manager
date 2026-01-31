@@ -272,3 +272,32 @@ class Post(models.Model):
     @property
     def guid(self):
         return self.make_guid(self.pk)
+
+
+class ResearchArea(models.Model):
+    title: str = models.CharField(max_length=255)
+    description: str = models.TextField()
+    is_active: bool = models.BooleanField(default=True)
+    order: int = models.IntegerField(default=0)
+    created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
+    updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "title"]
+
+    def __str__(self):
+        return self.title
+
+    def __repr__(self):
+        return f"<ResearchArea pk={self.pk} title={self.title}>"
+
+    def export(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "is_active": self.is_active,
+            "order": self.order,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }

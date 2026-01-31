@@ -1,0 +1,128 @@
+.create-page {
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(135deg, #f5f9f8 0%, #e8f4f2 100%);
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.create-container {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.create-header {
+  text-align: center;
+  margin-bottom: 3rem;
+
+  h1 {
+    font-size: 2rem;
+    color: #2d7a73;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  p {
+    color: #6b9591;
+    font-size: 1.1rem;
+  }
+}
+
+.create-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.create-option-card {
+  background: white;
+  border: 2px solid #d0e8e6;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    border-color: #8bbab7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+    .option-arrow {
+      color: #2d7a73;
+    }
+  }
+
+  .option-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #a8d5d1 0%, #8bbab7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .option-content {
+    flex: 1;
+
+    h3 {
+      color: #2d7a73;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    p {
+      color: #6b9591;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+  }
+
+  .option-arrow {
+    color: #a8d5d1;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+  }
+}
+
+.no-options {
+  text-align: center;
+  padding: 3rem;
+  color: #6b9591;
+
+  p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .create-page {
+    padding: 1rem;
+  }
+
+  .create-options {
+    grid-template-columns: 1fr;
+  }
+
+  .create-option-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 1.5rem;
+
+    .option-content {
+      text-align: center;
+    }
+  }
+}

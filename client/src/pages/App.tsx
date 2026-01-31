@@ -10,6 +10,8 @@ import SettingsLayout from "./Settings/SettingsLayout";
 import ProfileSettings from "./Settings/ProfileSettings";
 import LabSettings from "./Settings/LabSettings";
 import Approval from "./Approval/Approval";
+import Create from "./Create/Create";
+import CreateResearchArea from "./Create/CreateResearchArea";
 
 import { useEffect, useState } from "react";
 import AuthHandler from "../helpers/services/AuthHandler";
@@ -124,6 +126,26 @@ const App = () => {
                 </PrivateRoute>
               ) : (
                 <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/create"
+            element={
+              !isEmptyObject(user.state) ? (
+                <Create />
+              ) : (
+                <Navigate to="/signin" />
+              )
+            }
+          />
+          <Route
+            path="/create/research-area"
+            element={
+              !isEmptyObject(user.state) ? (
+                <CreateResearchArea />
+              ) : (
+                <Navigate to="/signin" />
               )
             }
           />

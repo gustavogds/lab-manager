@@ -11,6 +11,7 @@ urlpatterns = [
     re_path(r"^auth/", include("oauth.urls")),
     re_path(r"^accounts/", include("accounts.urls")),
     re_path(r"^core/", include("core.urls")),
+    re_path(r"^content/", include("content.urls")),
     re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings.STATIC_ROOT}),
     re_path(
         r"^media/object/(?P<path>.*)$",
