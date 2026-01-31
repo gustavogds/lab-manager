@@ -51,6 +51,37 @@ def update_user_settings(request):
 
 @login_required
 @require_http_methods(["POST"])
+def upload_profile_image(request):
+    user = request.user
+
+    if "image" not in request.FILES:
+        return JsonResponse({"error": "Missing image file."}, status=400)
+
+    image = request.FILES["image"]
+    max_size = 2 * 1024 * 1024  # 2MB
+
+    if image.size > max_size:
+        return JsonResponse(
+            {"error": "Image exceeds maximum size of 2MB."}, status=400
+        )
+
+    if not image.content_type.startswith("image/"):
+        return JsonResponse({"error": "Invalid file type."}, status=400)
+
+    user.profile_image = image
+    user.save()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Profile image updated successfully.",
+            "profile_image": user.profile_image.url,
+        }
+    )
+
+
+@login_required
+@require_http_methods(["POST"])
 def approve_user(request):
     data = json.loads(request.body)
     user_id = data.get("id")

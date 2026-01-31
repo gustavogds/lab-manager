@@ -4,8 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Max
 
-from .models import LabSettings
+from .models import LabSettings, AboutImage
 from .forms import UploadedFileForm
 
 
@@ -22,17 +23,32 @@ def update_lab_settings(request):
     allowed_fields = [
         "lab_name",
         "address",
+        "city",
         "mission",
+        "areas",
+        "highlights",
+        "lead",
+        "team",
+        "partners",
         "contact_email",
         "contact_phone",
-        # "logo" vai precisar do upload de arquivos implementado
     ]
 
     updated = False
 
+    field_mapping = {
+        "email": "contact_email",
+        "phone": "contact_phone",
+    }
+
     for field in allowed_fields:
         if field in data:
             setattr(lab_settings, field, data[field] or None)
+            updated = True
+
+    for frontend_field, backend_field in field_mapping.items():
+        if frontend_field in data:
+            setattr(lab_settings, backend_field, data[frontend_field] or None)
             updated = True
 
     if updated:
@@ -44,7 +60,6 @@ def update_lab_settings(request):
     return JsonResponse({"success": False, "message": "No changes made"})
 
 
-@login_required
 @require_http_methods(["GET"])
 def get_lab_settings(request):
     lab_settings, _ = LabSettings.objects.get_or_create(pk=1)
@@ -86,3 +101,48 @@ def upload_lab_logo(request):
             "logo_url": lab_settings.logo.url,
         }
     )
+
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def upload_about_image(request):
+    if "image" not in request.FILES:
+        return JsonResponse({"error": "No image uploaded."}, status=400)
+
+    lab_settings, _ = LabSettings.objects.get_or_create(pk=1)
+    
+    max_order = AboutImage.objects.filter(lab_settings=lab_settings).aggregate(
+        Max("order")
+    )["order__max"] or 0
+    
+    about_image = AboutImage.objects.create(
+        lab_settings=lab_settings,
+        image=request.FILES["image"],
+        order=max_order + 1
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Image uploaded successfully.",
+            "image": {
+                "id": about_image.id,
+                "image": about_image.image.url,
+                "order": about_image.order
+            }
+        }
+    )
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_about_image(request, image_id):
+    try:
+        about_image = AboutImage.objects.get(id=image_id)
+        about_image.delete()
+        return JsonResponse(
+            {"success": True, "message": "Image deleted successfully."}
+        )
+    except AboutImage.DoesNotExist:
+        return JsonResponse({"error": "Image not found."}, status=404)

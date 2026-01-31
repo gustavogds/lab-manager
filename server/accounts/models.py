@@ -98,6 +98,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     lattes = models.CharField(max_length=50, null=True, blank=True)
     is_public = models.BooleanField(default=True)
     is_approved = models.BooleanField(default=False)
+    profile_image = models.ImageField(
+        upload_to="profile_images/", null=True, blank=True
+    )
 
     email_validated = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -139,6 +142,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             "social_media": self.social_media,
             "lattes": self.lattes,
             "email_validated": self.email_validated,
+            "profile_image": self.profile_image.url if self.profile_image else None,
         }
 
         if include is None:

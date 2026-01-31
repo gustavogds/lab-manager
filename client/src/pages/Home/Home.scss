@@ -211,6 +211,115 @@
         line-height: 1.75;
       }
 
+      .about-carousel {
+        width: 100%;
+        max-width: 900px;
+        margin: 2.5rem auto 0;
+        padding: 0 2rem;
+
+        .carousel-slide {
+          outline: none;
+
+          img {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            object-fit: contain;
+            border-radius: 16px;
+          }
+        }
+
+        .slick-dots {
+          bottom: -40px;
+
+          li {
+            margin: 0 4px;
+
+            button:before {
+              font-size: 10px;
+              color: rgba(29, 139, 131, 0.4);
+              opacity: 1;
+            }
+
+            &.slick-active button:before {
+              color: var(--home-accent-strong);
+              opacity: 1;
+            }
+          }
+        }
+
+        .slick-arrow {
+          width: 44px;
+          height: 44px;
+          z-index: 10;
+
+          &:before {
+            font-size: 44px;
+            opacity: 0.7;
+            color: var(--home-accent-strong);
+          }
+
+          &:hover:before {
+            opacity: 1;
+          }
+        }
+
+        .slick-prev {
+          left: -50px;
+        }
+
+        .slick-next {
+          right: -50px;
+        }
+
+        @media (max-width: 1024px) {
+          padding: 0 1rem;
+
+          .slick-prev {
+            left: -30px;
+          }
+
+          .slick-next {
+            right: -30px;
+          }
+
+          .slick-arrow {
+            width: 36px;
+            height: 36px;
+
+            &:before {
+              font-size: 36px;
+            }
+          }
+        }
+
+        @media (max-width: 640px) {
+          padding: 0;
+
+          .slick-prev {
+            left: 10px;
+          }
+
+          .slick-next {
+            right: 10px;
+          }
+
+          .slick-arrow {
+            width: 32px;
+            height: 32px;
+
+            &:before {
+              font-size: 32px;
+            }
+          }
+
+          .carousel-slide img {
+            max-height: 300px;
+            border-radius: 12px;
+          }
+        }
+      }
+
       .section-header {
         display: flex;
         align-items: center;

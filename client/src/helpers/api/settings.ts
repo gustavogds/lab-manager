@@ -32,6 +32,26 @@ export const saveProfile = async (formData: Record<string, any>) => {
   };
 };
 
+export const uploadProfileImage = async (file: File) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await api
+    .post("/accounts/settings/upload-profile-image/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
 export const getLabSettings = async () => {
   const response = await api.get("/core/settings/get/").catch((error) => {
     return error.response ? error.response : error;
@@ -46,6 +66,39 @@ export const getLabSettings = async () => {
 export const saveLabSettings = async (formData: Record<string, any>) => {
   const response = await api
     .patch("/core/settings/", formData)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const uploadAboutImage = async (file: File) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await api
+    .post("/core/settings/upload-about-image/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data,
+  };
+};
+
+export const deleteAboutImage = async (imageId: number) => {
+  const response = await api
+    .delete(`/core/settings/delete-about-image/${imageId}/`)
     .catch((error) => {
       return error.response ? error.response : error;
     });

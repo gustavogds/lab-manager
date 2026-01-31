@@ -1,5 +1,8 @@
 import "./Home.scss";
 import { useEffect, useState, useRef } from "react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import {
   FaInfoCircle,
   FaMapMarkerAlt,
@@ -20,12 +23,12 @@ import type { SectionEditorField } from "components/Modals/SectionEditor/Section
 
 const sections = [
   { id: "about", label: "Sobre", icon: <FaInfoCircle /> },
-  { id: "location", label: "Localização", icon: <FaMapMarkerAlt /> },
   { id: "research", label: "Áreas de Pesquisa", icon: <FaFlask /> },
   { id: "projects", label: "Projetos", icon: <FaProjectDiagram /> },
   { id: "researchers", label: "Pesquisadores", icon: <FaUsers /> },
   { id: "partnerships", label: "Parcerias", icon: <FaHandshake /> },
   { id: "contact", label: "Contato", icon: <FaEnvelope /> },
+  { id: "location", label: "Localização", icon: <FaMapMarkerAlt /> },
 ];
 
 const sectionDescriptions: Record<string, string> = {
@@ -39,11 +42,20 @@ const sectionDescriptions: Record<string, string> = {
 
 type LabSettings = {
   mission?: string;
+  address?: string;
+  city?: string;
+  areas?: string;
+  highlights?: string;
+  lead?: string;
+  team?: string;
+  partners?: string;
+  email?: string;
+  phone?: string;
+  about_images?: Array<{ id: number; image: string; order: number }>;
 };
 
 const Home = () => {
   const [activeSection, setActiveSection] = useState<string>("about");
-  // const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [labSettings, setLabSettings] = useState<LabSettings | null>(null);
   const hashNavTimeout = useRef<number | null>(null);
@@ -63,10 +75,15 @@ const Home = () => {
       fields: [
         {
           name: "mission",
-          label: "Missao",
+          label: "Missão",
           type: "textarea",
-          placeholder: "Descreva a missao do laboratorio",
+          placeholder: "Descreva a missão do laboratório",
           rows: 6,
+        },
+        {
+          name: "images",
+          label: "Imagens",
+          type: "image-upload",
         },
       ],
       getInitialValues: (settings) => ({
@@ -84,13 +101,13 @@ const Home = () => {
       },
     },
     location: {
-      title: "Editar localizacao",
+      title: "Editar localização",
       fields: [
         {
           name: "address",
-          label: "Endereco",
+          label: "Endereço",
           type: "text",
-          placeholder: "Rua, numero, bairro",
+          placeholder: "Rua, número, bairro",
         },
         {
           name: "city",
@@ -99,18 +116,49 @@ const Home = () => {
           placeholder: "Cidade e estado",
         },
       ],
+      getInitialValues: (settings) => ({
+        address: settings?.address || "",
+        city: settings?.city || "",
+      }),
+      onSave: async (values) => {
+        const response = await saveLabSettings({
+          address: values.address,
+          city: values.city,
+        });
+        if (response.success) {
+          setLabSettings((prev) => ({
+            ...(prev || {}),
+            address: values.address,
+            city: values.city,
+          }));
+        }
+        return response;
+      },
     },
     research: {
-      title: "Editar areas de pesquisa",
+      title: "Editar áreas de pesquisa",
       fields: [
         {
           name: "areas",
-          label: "Areas principais",
+          label: "Áreas principais",
           type: "textarea",
-          placeholder: "Liste as principais areas de pesquisa",
+          placeholder: "Liste as principais áreas de pesquisa",
           rows: 5,
         },
       ],
+      getInitialValues: (settings) => ({
+        areas: settings?.areas || "",
+      }),
+      onSave: async (values) => {
+        const response = await saveLabSettings({ areas: values.areas });
+        if (response.success) {
+          setLabSettings((prev) => ({
+            ...(prev || {}),
+            areas: values.areas,
+          }));
+        }
+        return response;
+      },
     },
     projects: {
       title: "Editar projetos",
@@ -123,15 +171,28 @@ const Home = () => {
           rows: 5,
         },
       ],
+      getInitialValues: (settings) => ({
+        highlights: settings?.highlights || "",
+      }),
+      onSave: async (values) => {
+        const response = await saveLabSettings({ highlights: values.highlights });
+        if (response.success) {
+          setLabSettings((prev) => ({
+            ...(prev || {}),
+            highlights: values.highlights,
+          }));
+        }
+        return response;
+      },
     },
     researchers: {
       title: "Editar pesquisadores",
       fields: [
         {
           name: "lead",
-          label: "Responsavel",
+          label: "Responsável",
           type: "text",
-          placeholder: "Nome do responsavel",
+          placeholder: "Nome do responsável",
         },
         {
           name: "team",
@@ -141,6 +202,24 @@ const Home = () => {
           rows: 5,
         },
       ],
+      getInitialValues: (settings) => ({
+        lead: settings?.lead || "",
+        team: settings?.team || "",
+      }),
+      onSave: async (values) => {
+        const response = await saveLabSettings({
+          lead: values.lead,
+          team: values.team,
+        });
+        if (response.success) {
+          setLabSettings((prev) => ({
+            ...(prev || {}),
+            lead: values.lead,
+            team: values.team,
+          }));
+        }
+        return response;
+      },
     },
     partnerships: {
       title: "Editar parcerias",
@@ -153,6 +232,19 @@ const Home = () => {
           rows: 4,
         },
       ],
+      getInitialValues: (settings) => ({
+        partners: settings?.partners || "",
+      }),
+      onSave: async (values) => {
+        const response = await saveLabSettings({ partners: values.partners });
+        if (response.success) {
+          setLabSettings((prev) => ({
+            ...(prev || {}),
+            partners: values.partners,
+          }));
+        }
+        return response;
+      },
     },
     contact: {
       title: "Editar contato",
@@ -170,6 +262,24 @@ const Home = () => {
           placeholder: "(00) 00000-0000",
         },
       ],
+      getInitialValues: (settings) => ({
+        email: settings?.email || "",
+        phone: settings?.phone || "",
+      }),
+      onSave: async (values) => {
+        const response = await saveLabSettings({
+          email: values.email,
+          phone: values.phone,
+        });
+        if (response.success) {
+          setLabSettings((prev) => ({
+            ...(prev || {}),
+            email: values.email,
+            phone: values.phone,
+          }));
+        }
+        return response;
+      },
     },
   };
 
@@ -227,6 +337,13 @@ const Home = () => {
       headerTitle: editor.title,
       fields: editor.fields,
       initialValues,
+      images: labSettings?.about_images || [],
+      onImagesChange: (images: Array<{ id: number; image: string; order: number }>) => {
+        setLabSettings((prev) => ({
+          ...(prev || {}),
+          about_images: images,
+        }));
+      },
       confirmLabel: "Salvar",
       cancelLabel: "Cancelar",
     });
@@ -238,6 +355,78 @@ const Home = () => {
 
     if (editor.onSave) {
       await editor.onSave(result as Record<string, string>);
+    }
+  };
+
+  const renderSectionContent = (sectionId: string) => {
+    switch (sectionId) {
+      case "about":
+        const sliderSettings = {
+          dots: true,
+          infinite: true,
+          speed: 500,
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          autoplay: true,
+          autoplaySpeed: 5000,
+          arrows: true,
+          adaptiveHeight: true,
+        };
+
+        return (
+          <>
+            <p>{labSettings?.mission || "Carregando missão..."}</p>
+            {labSettings?.about_images && labSettings.about_images.length > 0 && (
+              <div className="about-carousel">
+                <Slider {...sliderSettings}>
+                  {labSettings.about_images.map((image) => (
+                    <div key={image.id} className="carousel-slide">
+                      <img src={image.image} alt={`About ${image.order}`} />
+                    </div>
+                  ))}
+                </Slider>
+              </div>
+            )}
+          </>
+        );
+      case "location":
+        return (
+          <>
+            {labSettings?.address && <p>{labSettings.address}</p>}
+            {labSettings?.city && <p>{labSettings.city}</p>}
+            {!labSettings?.address && !labSettings?.city && (
+              <p>{sectionDescriptions[sectionId]}</p>
+            )}
+          </>
+        );
+      case "research":
+        return <p>{labSettings?.areas || sectionDescriptions[sectionId]}</p>;
+      case "projects":
+        return <p>{labSettings?.highlights || sectionDescriptions[sectionId]}</p>;
+      case "researchers":
+        return (
+          <>
+            {labSettings?.lead && <p><strong>Responsável:</strong> {labSettings.lead}</p>}
+            {labSettings?.team && <p>{labSettings.team}</p>}
+            {!labSettings?.lead && !labSettings?.team && (
+              <p>{sectionDescriptions[sectionId]}</p>
+            )}
+          </>
+        );
+      case "partnerships":
+        return <p>{labSettings?.partners || sectionDescriptions[sectionId]}</p>;
+      case "contact":
+        return (
+          <>
+            {labSettings?.email && <p><strong>Email:</strong> {labSettings.email}</p>}
+            {labSettings?.phone && <p><strong>Telefone:</strong> {labSettings.phone}</p>}
+            {!labSettings?.email && !labSettings?.phone && (
+              <p>{sectionDescriptions[sectionId]}</p>
+            )}
+          </>
+        );
+      default:
+        return <p>{sectionDescriptions[sectionId] || "Conteúdo em construção."}</p>;
     }
   };
 
@@ -276,13 +465,7 @@ const Home = () => {
                 </button>
               )}
             </div>
-            {id === "about" ? (
-              <p>{labSettings?.mission || "Carregando missao..."}</p>
-            ) : (
-              <>
-                <p>{sectionDescriptions[id] || "Conteudo em construcao."}</p>
-              </>
-            )}
+            {renderSectionContent(id)}
           </section>
         ))}
       </main>
