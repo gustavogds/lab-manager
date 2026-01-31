@@ -52,6 +52,26 @@ export const uploadProfileImage = async (file: File) => {
   };
 };
 
+export const uploadLabLogo = async (file: File) => {
+  const formData = new FormData();
+  formData.append("logo", file);
+
+  const response = await api
+    .post("/core/settings/upload-logo/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
 export const getLabSettings = async () => {
   const response = await api.get("/core/settings/get/").catch((error) => {
     return error.response ? error.response : error;

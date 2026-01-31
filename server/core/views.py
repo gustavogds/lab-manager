@@ -90,8 +90,19 @@ def upload_lab_logo(request):
     if "logo" not in request.FILES:
         return JsonResponse({"error": "No file uploaded."}, status=400)
 
+    logo = request.FILES["logo"]
+    max_size = 2 * 1024 * 1024  # 2MB
+
+    if logo.size > max_size:
+        return JsonResponse(
+            {"error": "Logo exceeds maximum size of 2MB."}, status=400
+        )
+
+    if not logo.content_type.startswith("image/"):
+        return JsonResponse({"error": "Invalid file type."}, status=400)
+
     lab_settings, _ = LabSettings.objects.get_or_create(pk=1)
-    lab_settings.logo = request.FILES["logo"]
+    lab_settings.logo = logo
     lab_settings.save()
 
     return JsonResponse(
