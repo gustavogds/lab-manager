@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import "./App.scss";
-import { isEmptyObject } from "helpers/utils";
-import { ModalsHandler, Overlays } from "components/my-own-modal-handler";
-import Navbar from "components/Navbar/Navbar";
+import { isEmptyObject } from "../helpers/utils";
+import { ModalsHandler, Overlays } from "../components/my-own-modal-handler";
+import Navbar from "../components/Navbar/Navbar";
 import Home from "./Home/Home";
 import Login from "./Login/Login";
 import SettingsLayout from "./Settings/SettingsLayout";
@@ -12,9 +12,10 @@ import LabSettings from "./Settings/LabSettings";
 import Approval from "./Approval/Approval";
 
 import { useEffect, useState } from "react";
-import AuthHandler from "helpers/services/AuthHandler";
-import { useGlobalData } from "helpers/context/globalContext";
-import Notification from "components/Modals/Notification/Notification";
+import AuthHandler from "../helpers/services/AuthHandler";
+import { useGlobalData } from "../helpers/context/globalContext";
+import Notification from "../components/Modals/Notification/Notification";
+import SectionEditorModal from "../components/Modals/SectionEditor/SectionEditor";
 
 const PrivateRoute = ({
   user,
@@ -61,6 +62,7 @@ const App = () => {
     })();
     ModalsHandler.setup();
     ModalsHandler.registerModal("Notification", Notification);
+    ModalsHandler.registerModal("SectionEditor", SectionEditorModal);
   }, []);
 
   if (!readyToRender) {

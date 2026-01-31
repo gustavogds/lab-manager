@@ -1,10 +1,9 @@
 from django.contrib import admin
-from django.urls import re_path
-from django.views.static import serve
-from django.views.generic import TemplateView
+from django.urls import include, re_path
 from django.conf import settings
+from django.views.static import serve
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.conf.urls import include
+from django.views.generic import TemplateView
 from django.conf.urls.static import static
 
 urlpatterns = [

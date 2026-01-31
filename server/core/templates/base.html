@@ -1,7 +1,8 @@
-{% load render_vite_bundle static %}
+{% load i18n render_vite_bundle static %}
 
 <!DOCTYPE html>
-<html lang="en">
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{LANGUAGE_CODE}}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,10 +12,10 @@
       href="{% static 'favicon.ico' %}"
     />
     <title>Lab Manager</title>
-
     {% if debug %}
     <script type="module" src="http://localhost:5173/@vite/client"></script>
     <script type="module">
+      console.log("Development mode: Vite HMR enabled");
       import RefreshRuntime from "http://localhost:5173/@react-refresh";
       if (RefreshRuntime) {
         RefreshRuntime.injectIntoGlobalHook(window);
@@ -22,6 +23,10 @@
         window.$RefreshSig$ = () => (type) => type;
         window.__vite_plugin_react_preamble_installed__ = true;
       }
+    </script>
+    {% else %}
+    <script>
+      console.log("Production mode: Vite HMR disabled");
     </script>
     {% endif %}
   </head>

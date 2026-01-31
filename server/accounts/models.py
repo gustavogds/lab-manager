@@ -6,11 +6,11 @@ from django.contrib.auth.models import (
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
-from contents.models import Content, ContentKind, Mount
+from content.models import Content, ContentKind, Mount
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, name, email, password, username, role, **kwargs):
+    def create_user(self, name, email, password, username, role="student", **kwargs):
         if not email:
             raise ValidationError("Users must have an email address")
         email = email.lower()
@@ -80,7 +80,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
 
     storage_root = models.ForeignKey(
-        "contents.Content",
+        "content.Content",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
