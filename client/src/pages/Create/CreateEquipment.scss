@@ -1,0 +1,177 @@
+@import "../../styles/variables";
+
+.create-equipment-page {
+  min-height: 100vh;
+  background: $neutral-surface;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.create-equipment-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: $primary-color;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-bottom: 1.5rem;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $primary-color-strong;
+  }
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $neutral-ink;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $neutral-muted;
+    margin: 0;
+  }
+}
+
+.success-message {
+  background-color: rgba($btn-success-color, 0.1);
+  border: 1px solid rgba($btn-success-color, 0.3);
+  color: $btn-success-color;
+  padding: 1rem;
+  border-radius: $radius-md;
+  margin-bottom: 1.5rem;
+}
+
+.error-message {
+  background-color: rgba($btn-danger-color, 0.1);
+  border: 1px solid rgba($btn-danger-color, 0.3);
+  color: $btn-danger-color;
+  padding: 1rem;
+  border-radius: $radius-md;
+  margin-bottom: 1.5rem;
+}
+
+.equipment-form {
+  background: $neutral-white;
+  border-radius: $radius-lg;
+  padding: 2rem;
+  box-shadow: $shadow-small;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+
+  > label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $neutral-ink;
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid $neutral-border;
+    border-radius: $radius-md;
+    font-size: 1rem;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+
+    &::placeholder {
+      color: $neutral-muted;
+    }
+  }
+
+  .field-hint {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: $neutral-muted;
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid $neutral-border;
+
+  button {
+    padding: 0.75rem 1.5rem;
+    border-radius: $radius-md;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .cancel-button {
+    background: $neutral-white;
+    border: 1px solid $neutral-border;
+    color: $neutral-muted;
+
+    &:hover:not(:disabled) {
+      background: $neutral-surface;
+      border-color: $neutral-muted;
+    }
+  }
+
+  .submit-button {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-color-strong 100%);
+    border: none;
+    color: $neutral-white;
+    box-shadow: $shadow-small;
+
+    &:hover:not(:disabled) {
+      box-shadow: $shadow-medium;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .create-equipment-page {
+    padding: 1rem;
+  }
+
+  .equipment-form {
+    padding: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
+  }
+}

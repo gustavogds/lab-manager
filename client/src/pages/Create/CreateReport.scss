@@ -1,0 +1,337 @@
+@import "../../styles/variables";
+
+.create-report-page {
+  min-height: 100vh;
+  background: $neutral-surface;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.create-report-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: $primary-color;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-bottom: 1.5rem;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $primary-color-strong;
+  }
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $neutral-ink;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $neutral-muted;
+    margin: 0;
+  }
+}
+
+.success-message {
+  background-color: rgba($btn-success-color, 0.1);
+  border: 1px solid rgba($btn-success-color, 0.3);
+  color: $btn-success-color;
+  padding: 1rem;
+  border-radius: $radius-md;
+  margin-bottom: 1.5rem;
+}
+
+.error-message {
+  background-color: rgba($btn-danger-color, 0.1);
+  border: 1px solid rgba($btn-danger-color, 0.3);
+  color: $btn-danger-color;
+  padding: 1rem;
+  border-radius: $radius-md;
+  margin-bottom: 1.5rem;
+}
+
+.report-form {
+  background: $neutral-white;
+  border-radius: $radius-lg;
+  padding: 2rem;
+  box-shadow: $shadow-small;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+
+  > label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $neutral-ink;
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid $neutral-border;
+    border-radius: $radius-md;
+    font-size: 1rem;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+
+    &::placeholder {
+      color: $neutral-muted;
+    }
+  }
+
+  .field-hint {
+    font-size: 0.85rem;
+    color: $neutral-muted;
+    margin: 0.25rem 0 0.75rem 0;
+  }
+}
+
+.format-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.format-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border: 2px solid $neutral-border;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: all $transition-fast;
+  position: relative;
+
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .format-label {
+    font-weight: 600;
+    font-size: 1rem;
+    color: $neutral-ink;
+  }
+
+  .format-description {
+    font-size: 0.8rem;
+    color: $neutral-muted;
+    line-height: 1.3;
+  }
+
+  &:hover {
+    border-color: rgba($primary-color, 0.4);
+    background: rgba($primary-color, 0.02);
+  }
+
+  &.selected {
+    border-color: $primary-color;
+    background: rgba($primary-color, 0.05);
+
+    .format-label {
+      color: $primary-color;
+    }
+  }
+}
+
+.sections-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+
+  label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $neutral-ink;
+  }
+
+  .select-all-btn {
+    background: none;
+    border: none;
+    color: $primary-color;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $primary-color-strong;
+      text-decoration: underline;
+    }
+  }
+}
+
+.section-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.section-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid $neutral-border;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: all $transition-fast;
+  user-select: none;
+
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid $neutral-border;
+    border-radius: 4px;
+    flex-shrink: 0;
+    position: relative;
+    transition: all $transition-fast;
+
+    &::after {
+      content: "";
+      position: absolute;
+      display: none;
+      left: 5px;
+      top: 1px;
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  .section-label {
+    font-size: 0.95rem;
+    color: $neutral-ink;
+    font-weight: 500;
+  }
+
+  &:hover {
+    border-color: rgba($primary-color, 0.4);
+    background: rgba($primary-color, 0.02);
+  }
+
+  &.selected {
+    border-color: $primary-color;
+    background: rgba($primary-color, 0.05);
+
+    .checkmark {
+      background: $primary-color;
+      border-color: $primary-color;
+
+      &::after {
+        display: block;
+      }
+    }
+
+    .section-label {
+      color: $primary-color;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid $neutral-border;
+
+  button {
+    padding: 0.75rem 1.5rem;
+    border-radius: $radius-md;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .cancel-button {
+    background: $neutral-white;
+    border: 1px solid $neutral-border;
+    color: $neutral-muted;
+
+    &:hover:not(:disabled) {
+      background: $neutral-surface;
+      border-color: $neutral-muted;
+    }
+  }
+
+  .submit-button {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-color-strong 100%);
+    border: none;
+    color: $neutral-white;
+    box-shadow: $shadow-small;
+
+    &:hover:not(:disabled) {
+      box-shadow: $shadow-medium;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .create-report-page {
+    padding: 1rem;
+  }
+
+  .report-form {
+    padding: 1.5rem;
+  }
+
+  .format-options {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
+  }
+}

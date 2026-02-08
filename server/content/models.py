@@ -307,6 +307,7 @@ class Project(models.Model):
     title: str = models.CharField(max_length=255)
     description: str = models.TextField()
     members = models.ManyToManyField("accounts.User", related_name="projects", blank=True)
+    members_order = models.JSONField(default=list, blank=True)
     is_active: bool = models.BooleanField(default=True)
     order: int = models.IntegerField(default=0)
     created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
@@ -322,6 +323,16 @@ class Project(models.Model):
         return f"<Project pk={self.pk} title={self.title}>"
 
     def export(self):
+        members_list = list(self.members.filter(is_public=True))
+        members_map = {member.id: member for member in members_list}
+        ordered_members = []
+        for member_id in self.members_order or []:
+            member = members_map.pop(member_id, None)
+            if member:
+                ordered_members.append(member)
+        if members_map:
+            ordered_members.extend([member for member in members_list if member.id in members_map])
+
         return {
             "id": self.id,
             "title": self.title,
@@ -337,7 +348,7 @@ class Project(models.Model):
                     "email": member.email,
                     "profile_image": member.profile_image.url if member.profile_image else None,
                 }
-                for member in self.members.filter(is_public=True)
+                for member in ordered_members
             ],
         }
 
@@ -366,6 +377,50 @@ class Partnership(models.Model):
             "name": self.name,
             "logo": self.logo.url if self.logo else None,
             "link": self.link,
+            "is_active": self.is_active,
+            "order": self.order,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
+class Equipment(models.Model):
+    name: str = models.CharField(max_length=255)
+    custom_id: str = models.CharField(max_length=100, unique=True)
+    location: str = models.CharField(max_length=255, blank=True, null=True)
+    assigned_to = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_equipment",
+    )
+    is_active: bool = models.BooleanField(default=True)
+    order: int = models.IntegerField(default=0)
+    created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
+    updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.custom_id})"
+
+    def __repr__(self):
+        return f"<Equipment pk={self.pk} custom_id={self.custom_id}>"
+
+    def export(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "custom_id": self.custom_id,
+            "location": self.location,
+            "assigned_to": {
+                "id": self.assigned_to.id,
+                "name": self.assigned_to.name,
+                "email": self.assigned_to.email,
+                "profile_image": self.assigned_to.profile_image.url if self.assigned_to.profile_image else None,
+            } if self.assigned_to else None,
             "is_active": self.is_active,
             "order": self.order,
             "created_at": self.created_at.isoformat(),

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { FaFlask, FaPlus, FaProjectDiagram, FaHandshake } from "react-icons/fa";
+import { FaFlask, FaPlus, FaProjectDiagram, FaHandshake, FaTools, FaFileAlt } from "react-icons/fa";
 import "./Create.scss";
 
 type CreateOption = {
@@ -39,6 +39,24 @@ const Create = () => {
       icon: <FaHandshake />,
       action: () => {
         navigate("/create/partnership");
+      },
+    },
+    {
+      id: "equipment",
+      title: "Equipamento",
+      description: "Registrar um novo material ou equipamento do laboratório",
+      icon: <FaTools />,
+      action: () => {
+        navigate("/create/equipment");
+      },
+    },
+    {
+      id: "report",
+      title: "Relatório",
+      description: "Gerar um relatório com os dados do laboratório",
+      icon: <FaFileAlt />,
+      action: () => {
+        navigate("/create/report");
       },
     },
   ];

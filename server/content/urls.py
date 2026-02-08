@@ -1,5 +1,6 @@
 from django.urls import path
 from content import views
+from content import reports
 
 
 urlpatterns = [
@@ -19,4 +20,11 @@ urlpatterns = [
     path("partnerships/config/", views.update_partnerships_config, name="update_partnerships_config"),
     path("partnerships/<int:partnership_id>/update/", views.update_partnership, name="update_partnership"),
     path("partnerships/<int:partnership_id>/delete/", views.delete_partnership, name="delete_partnership"),
+    path("equipment/", views.list_equipment, name="list_equipment"),
+    path("equipment/all/", views.list_all_equipment, name="list_all_equipment"),
+    path("equipment/create/", views.create_equipment, name="create_equipment"),
+    path("equipment/config/", views.update_equipment_config, name="update_equipment_config"),
+    path("equipment/<int:equipment_id>/update/", views.update_equipment, name="update_equipment"),
+    path("equipment/<int:equipment_id>/delete/", views.delete_equipment, name="delete_equipment"),
+    path("reports/generate/", reports.generate_report, name="generate_report"),
 ]

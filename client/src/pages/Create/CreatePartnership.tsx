@@ -79,7 +79,7 @@ const CreatePartnership = () => {
       setLogoPreview(null);
 
       setTimeout(() => {
-        navigate("/create");
+        navigate(-1);
       }, 1500);
     } else {
       setError(response.error || "Falha ao criar parceria.");
@@ -90,7 +90,7 @@ const CreatePartnership = () => {
   return (
     <div className="create-partnership-page">
       <div className="create-partnership-container">
-        <button className="back-button" onClick={() => navigate("/create")}>
+        <button className="back-button" onClick={() => navigate(-1)}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -166,7 +166,7 @@ const CreatePartnership = () => {
             <button
               type="button"
               className="cancel-button"
-              onClick={() => navigate("/create")}
+              onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
               Cancelar

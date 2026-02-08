@@ -57,12 +57,6 @@ const Navbar = () => {
         </div>
 
         <div className="header-right">
-          {!isEmptyObject(user.state) && (
-            <span className="header-icon" onClick={() => navigate("/create")}>
-              <Icons.SquareAdd />
-            </span>
-          )}
-
           <div
             className="profile-wrapper"
             style={{ position: "relative" }}
@@ -106,6 +100,16 @@ const Navbar = () => {
               </div>
             )}
           </div>
+          {!isEmptyObject(user.state) && user.state.role === "professor" && (
+            <span className="header-icon" onClick={() => navigate("/manage")}>
+              <Icons.FaSlidersH />
+            </span>
+          )}
+          {!isEmptyObject(user.state) && user.state.role === "professor" && (
+            <span className="header-icon" onClick={() => navigate("/create")}>
+              <Icons.FaPlus />
+            </span>
+          )}
         </div>
       </div>
     </div>

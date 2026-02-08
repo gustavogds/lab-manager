@@ -1,355 +1,352 @@
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { FaEnvelope, FaLock, FaUser, FaIdBadge, FaEye, FaEyeSlash } from "react-icons/fa";
 
-import Slider from "react-slick";
-
-import "slick-carousel/slick/slick.css";
 import "./Login.scss";
-import carouselLandingPage from "assets/images/img1.png";
-import carouselSigninPage from "assets/images/img2.png";
-import carouselSignupPage from "assets/images/img3.png";
-import logo from "assets/images/logo.png";
+import Medias from "components/Medias/Medias";
 import AuthHandler from "helpers/services/AuthHandler";
-import { useState } from "react";
+import { getLabSettings } from "helpers/api/settings";
 import { ModalsHandler } from "components/my-own-modal-handler";
 
-const images = [carouselLandingPage, carouselSigninPage, carouselSignupPage];
+const SignUp = ({
+  onSubmit,
+  isLoading,
+}: {
+  onSubmit: (data: any) => void;
+  isLoading: boolean;
+}) => {
+  const [formData, setFormData] = useState({
+    email: "",
+    username: "",
+    name: "",
+    role: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-const SignUp = ({ onSubmit }: { onSubmit: any }) => {
-  const navigate = useNavigate();
-  const [errors, setErrors] = useState<any>({});
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
-    const email = event.target.email.value;
-    const username = event.target.username.value;
-    const name = event.target.name.value;
-    const role = event.target.role.value;
-    const password = event.target.password.value;
-    const confirmPassword = event.target["password-confirm"].value;
-    if (!email) {
-      setErrors((state: any) => ({ ...state, email: "Email is required" }));
-    } else {
-      setErrors((state: any) => ({ ...state, email: null }));
-    }
-    if (!username) {
-      setErrors((state: any) => ({
-        ...state,
-        username: "Username is required",
-      }));
-    } else {
-      setErrors((state: any) => ({ ...state, username: null }));
-    }
-    if (!name) {
-      setErrors((state: any) => ({ ...state, name: "Name is required" }));
-    } else {
-      setErrors((state: any) => ({ ...state, name: null }));
-    }
-    if (!role) {
-      setErrors((state: any) => ({ ...state, role: "Role is required" }));
-    } else {
-      setErrors((state: any) => ({ ...state, role: null }));
-    }
-    if (!password) {
-      setErrors((state: any) => ({
-        ...state,
-        password: "Password is required",
-      }));
-    } else {
-      setErrors((state: any) => ({ ...state, password: null }));
-    }
-    if (password !== confirmPassword) {
-      setErrors((state: any) => ({
-        ...state,
-        confirmPassword: "Passwords do not match",
-      }));
-    } else {
-      setErrors((state: any) => ({ ...state, confirmPassword: null }));
-    }
-    if (
-      errors.email ||
-      errors.username ||
-      errors.name ||
-      errors.role ||
-      errors.password ||
-      errors.confirmPassword
-    ) {
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.email.trim()) newErrors.email = "E-mail é obrigatório.";
+    if (!formData.username.trim())
+      newErrors.username = "Nome de usuário é obrigatório.";
+    if (!formData.name.trim()) newErrors.name = "Nome completo é obrigatório.";
+    if (!formData.role) newErrors.role = "Selecione uma função.";
+    if (!formData.password) newErrors.password = "Senha é obrigatória.";
+    else if (formData.password.length < 6)
+      newErrors.password = "A senha deve ter pelo menos 6 caracteres.";
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "As senhas não coincidem.";
+    return newErrors;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    onSubmit({
-      email,
-      username,
-      name,
-      role,
-      password,
-      confirmPassword,
-    });
+    onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="form-header">
-        <img
-          src={logo}
-          alt="Lab Manager"
-          onClick={() => {
-            navigate("/");
-          }}
-        />
+    <form onSubmit={handleSubmit} noValidate>
+      <h2>Criar Conta</h2>
+      <p className="form-subtitle">Preencha os dados para se cadastrar</p>
+
+      <div className={`form-field ${errors.name ? "has-error" : ""}`}>
+        <label htmlFor="name">Nome Completo</label>
+        <div className="input-wrapper">
+          <FaUser className="input-icon" />
+          <input
+            id="name"
+            name="name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Seu nome completo"
+          />
+        </div>
+        {errors.name && <span className="field-error">{errors.name}</span>}
       </div>
-      <span className="divider"></span>
-      <div className="form-group">
-        <input
-          type="text"
-          id="email"
-          className={`${errors.email ? "error" : ""}`}
-          placeholder="E-mail"
-        />
-        {errors.email && <span className="error-message">{errors.email}</span>}
+
+      <div className={`form-field ${errors.email ? "has-error" : ""}`}>
+        <label htmlFor="email">E-mail</label>
+        <div className="input-wrapper">
+          <FaEnvelope className="input-icon" />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="seu@email.com"
+          />
+        </div>
+        {errors.email && <span className="field-error">{errors.email}</span>}
       </div>
-      <div className="form-group">
-        <input
-          type="text"
-          id="username"
-          className={`${errors.username ? "error" : ""}`}
-          placeholder="Username"
-        />
+
+      <div className={`form-field ${errors.username ? "has-error" : ""}`}>
+        <label htmlFor="username">Nome de Usuário</label>
+        <div className="input-wrapper">
+          <FaIdBadge className="input-icon" />
+          <input
+            id="username"
+            name="username"
+            type="text"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="nome_de_usuario"
+          />
+        </div>
         {errors.username && (
-          <span className="error-message">{errors.username}</span>
+          <span className="field-error">{errors.username}</span>
         )}
       </div>
-      <div className="form-group">
-        <input
-          type="text"
-          id="name"
-          className={`${errors.name ? "error" : ""}`}
-          placeholder="Name"
-        />
-        {errors.name && <span className="error-message">{errors.name}</span>}
-      </div>
-      <div className="form-group">
-        <input
-          type="password"
-          id="password"
-          className={`${errors.password ? "error" : ""}`}
-          placeholder="Password"
-        />
-        {errors.password && (
-          <span className="error-message">{errors.password}</span>
-        )}
-      </div>
-      <div className="form-group">
-        <input
-          type="password"
-          id="password-confirm"
-          className={`${errors.confirmPassword ? "error" : ""}`}
-          placeholder="Confirm Password"
-        />
-        {errors.confirmPassword && (
-          <span className="error-message">{errors.confirmPassword}</span>
-        )}
-      </div>
-      <div className="form-group">
+
+      <div className={`form-field ${errors.role ? "has-error" : ""}`}>
+        <label htmlFor="role">Função</label>
         <select
           id="role"
-          className={`${errors.role ? "error" : ""}`}
-          defaultValue=""
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
         >
           <option value="" disabled>
-            Select a role
+            Selecione uma função
           </option>
           <option value="professor">Professor</option>
-          <option value="student">Student</option>
-          <option value="collaborator">Collaborator</option>
+          <option value="student">Estudante</option>
+          <option value="collaborator">Colaborador</option>
         </select>
-        {errors.role && <span className="error-message">{errors.role}</span>}
+        {errors.role && <span className="field-error">{errors.role}</span>}
       </div>
-      <span className="divider"></span>
-      <div className="form-group">
-        <button type="submit">Sign Up</button>
+
+      <div className={`form-field ${errors.password ? "has-error" : ""}`}>
+        <label htmlFor="password">Senha</label>
+        <div className="input-wrapper">
+          <FaLock className="input-icon" />
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Mínimo 6 caracteres"
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword((v) => !v)}
+            tabIndex={-1}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
+        {errors.password && (
+          <span className="field-error">{errors.password}</span>
+        )}
       </div>
+
+      <div className={`form-field ${errors.confirmPassword ? "has-error" : ""}`}>
+        <label htmlFor="confirmPassword">Confirmar Senha</label>
+        <div className="input-wrapper">
+          <FaLock className="input-icon" />
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type={showConfirm ? "text" : "password"}
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Repita a senha"
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowConfirm((v) => !v)}
+            tabIndex={-1}
+          >
+            {showConfirm ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
+        {errors.confirmPassword && (
+          <span className="field-error">{errors.confirmPassword}</span>
+        )}
+      </div>
+
+      <button type="submit" className="submit-btn" disabled={isLoading}>
+        {isLoading ? "Criando conta..." : "Criar Conta"}
+      </button>
     </form>
   );
 };
 
-const SignIn = ({ onSubmit }: { onSubmit: any }) => {
+const SignIn = ({
+  onSubmit,
+  isLoading,
+}: {
+  onSubmit: (data: any) => void;
+  isLoading: boolean;
+}) => {
   const navigate = useNavigate();
-  const [errors, setErrors] = useState<any>({});
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
-    const email = event.target.email.value;
-    const password = event.target.password.value;
-    if (!email) {
-      setErrors((state: any) => ({ ...state, email: "Email is required" }));
-    } else {
-      setErrors((state: any) => ({ ...state, email: null }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
     }
-    if (!password) {
-      setErrors((state: any) => ({
-        ...state,
-        password: "Password is required",
-      }));
-    } else {
-      setErrors((state: any) => ({ ...state, password: null }));
-    }
-    if (errors.email || errors.password) {
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.email.trim())
+      newErrors.email = "E-mail ou nome de usuário é obrigatório.";
+    if (!formData.password) newErrors.password = "Senha é obrigatória.";
+    return newErrors;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    onSubmit({ email, password });
+    onSubmit(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="form-header">
-        <img
-          src={logo}
-          alt="Lab Manager"
-          onClick={() => {
-            navigate("/");
-          }}
-        />
+    <form onSubmit={handleSubmit} noValidate>
+      <h2>Entrar</h2>
+      <p className="form-subtitle">Acesse sua conta do laboratório</p>
+
+      <div className={`form-field ${errors.email ? "has-error" : ""}`}>
+        <label htmlFor="email">E-mail ou Nome de Usuário</label>
+        <div className="input-wrapper">
+          <FaEnvelope className="input-icon" />
+          <input
+            id="email"
+            name="email"
+            type="text"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="seu@email.com"
+          />
+        </div>
+        {errors.email && <span className="field-error">{errors.email}</span>}
       </div>
-      <span className="divider"></span>
-      <div className="form-group">
-        <input
-          type="text"
-          className={`${errors.email ? "error" : ""}`}
-          id="email"
-          placeholder="E-mail or Username"
-        />
-        {errors.email && <span className="error-message">{errors.email}</span>}
-      </div>
-      <div className="form-group">
-        <input
-          type="password"
-          className={`${errors.password ? "error" : ""}`}
-          id="password"
-          placeholder="Password"
-        />
+
+      <div className={`form-field ${errors.password ? "has-error" : ""}`}>
+        <label htmlFor="password">Senha</label>
+        <div className="input-wrapper">
+          <FaLock className="input-icon" />
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Sua senha"
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword((v) => !v)}
+            tabIndex={-1}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
         {errors.password && (
-          <span className="error-message">{errors.password}</span>
+          <span className="field-error">{errors.password}</span>
         )}
       </div>
-      <span className="divider"></span>
-      <div className="form-group">
-        <button type="submit">Sign In</button>
-      </div>
-      <div className="forgot-password">
-        <button
-          onClick={() => {
-            navigate("/password/reset");
-          }}
-        >
-          Forgotten Password?
-        </button>
-      </div>
+
+      <button type="submit" className="submit-btn" disabled={isLoading}>
+        {isLoading ? "Entrando..." : "Entrar"}
+      </button>
+
+      <button
+        type="button"
+        className="forgot-link"
+        onClick={() => navigate("/password/reset")}
+      >
+        Esqueceu sua senha?
+      </button>
     </form>
   );
 };
 
 const ForgotPassword = () => {
-  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
 
-  return (
-    <form>
-      <div className="form-header">
-        <img
-          src={logo}
-          alt="Life Pets"
-          onClick={() => {
-            navigate("/");
-          }}
-        />
-      </div>
-      <span className="divider"></span>
-      <div className="form-group">
-        <h4>Having trouble remembering your password?</h4>
-        <p>
-          Enter your username or email below and we'll send you a link to access
-          your account again.
-        </p>
-      </div>
-      <span className="divider"></span>
-      <div className="form-group">
-        <input type="text" id="email" placeholder="E-mail" />
-      </div>
-      <span className="divider"></span>
-      <div className="form-group">
-        <button type="submit">Submit</button>
-      </div>
-    </form>
-  );
-};
-
-const Carousel = () => {
-  const settings = {
-    dots: false,
-    infinite: true,
-    autoplay: true,
-    autoplaySpeed: 10000,
-    speed: 1500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: false,
-    fade: true,
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      setSent(true);
+    }
   };
 
   return (
-    <Slider {...settings}>
-      {images.map((image, index) => (
-        <div key={index}>
-          <img src={image} alt="" />
+    <form onSubmit={handleSubmit} noValidate>
+      <h2>Recuperar Senha</h2>
+      <p className="form-subtitle">
+        Informe seu e-mail e enviaremos um link para redefinir sua senha
+      </p>
+
+      {sent ? (
+        <div className="success-banner">
+          Se o e-mail estiver cadastrado, você receberá um link de recuperação em
+          breve.
         </div>
-      ))}
-    </Slider>
-  );
-};
+      ) : (
+        <>
+          <div className="form-field">
+            <label htmlFor="reset-email">E-mail</label>
+            <div className="input-wrapper">
+              <FaEnvelope className="input-icon" />
+              <input
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+              />
+            </div>
+          </div>
 
-const SideInformation = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  let buttonText: string;
-  let infoText: string;
-  let buttonPath: string;
-
-  if (location.pathname === "/password/reset") {
-    infoText = "Remembered the password?";
-    buttonText = "Sign In";
-    buttonPath = "/signin";
-  } else if (location.pathname === "/signup") {
-    infoText = "Already have an account?";
-    buttonText = "Sign In";
-    buttonPath = "/signin";
-  } else {
-    infoText = "Don't have an account?";
-    buttonText = "Sign Up";
-    buttonPath = "/signup";
-  }
-
-  return (
-    <div className="side-information">
-      <div className="side-information-carousel">
-        <Carousel />
-      </div>
-      <div className="side-information-header">
-        <h2>Laboratory Manager</h2>
-      </div>
-      <div className="side-information-body">
-        <p>Here you can manage you research laboratory.</p>
-        <p>blah blah blah</p>
-        <p>
-          {infoText}{" "}
-          <button
-            onClick={() => {
-              navigate(buttonPath);
-            }}
-          >
-            <strong>{buttonText}</strong>
+          <button type="submit" className="submit-btn">
+            Enviar Link
           </button>
-        </p>
-      </div>
-    </div>
+        </>
+      )}
+    </form>
   );
 };
 
@@ -360,7 +357,24 @@ const Login = ({
   isSignUp?: boolean;
   isPasswordReset?: boolean;
 }) => {
+  const navigate = useNavigate();
+  const [labLogo, setLabLogo] = useState("");
+  const [labName, setLabName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchLab = async () => {
+      const response = await getLabSettings();
+      if (response.success) {
+        if (response.data.logo) setLabLogo(response.data.logo);
+        if (response.data.lab_name) setLabName(response.data.lab_name);
+      }
+    };
+    fetchLab();
+  }, []);
+
   const onSubmit = async (data: any) => {
+    setIsLoading(true);
     if (isSignUp) {
       const result = await AuthHandler.register(
         data.email,
@@ -370,22 +384,32 @@ const Login = ({
         data.confirmPassword,
         data.role
       );
+      setIsLoading(false);
       if (result.success) {
-        window.location.href = "/";
+        ModalsHandler.createNotification({
+          title: "Conta Criada",
+          message:
+            "Sua conta foi criada com sucesso! Aguarde a aprovação de um administrador.",
+          type: "success",
+        });
+        setTimeout(() => {
+          navigate("/signin");
+        }, 2000);
       } else {
         ModalsHandler.createNotification({
-          title: "Registration Failed",
+          title: "Erro no Cadastro",
           message: result.message,
           type: "error",
         });
       }
     } else {
       const result = await AuthHandler.login(data.email, data.password);
+      setIsLoading(false);
       if (result.success) {
         window.location.href = "/";
       } else {
         ModalsHandler.createNotification({
-          title: "Login Failed",
+          title: "Erro no Login",
           message: result.message,
           type: "error",
         });
@@ -393,24 +417,52 @@ const Login = ({
     }
   };
 
-  let currentPage;
+  const isSignUpPage = !!isSignUp;
+
+  let switchText: string;
+  let switchLabel: string;
+  let switchPath: string;
+
   if (isPasswordReset) {
-    currentPage = <ForgotPassword />;
+    switchText = "Lembrou a senha?";
+    switchLabel = "Entrar";
+    switchPath = "/signin";
+  } else if (isSignUpPage) {
+    switchText = "Já possui uma conta?";
+    switchLabel = "Entrar";
+    switchPath = "/signin";
   } else {
-    currentPage = isSignUp ? (
-      <SignUp onSubmit={onSubmit} />
-    ) : (
-      <SignIn onSubmit={onSubmit} />
-    );
+    switchText = "Não possui uma conta?";
+    switchLabel = "Cadastrar";
+    switchPath = "/signup";
   }
 
   return (
-    <div className="login">
-      <div className="login-body">
-        <div className="body-section">
-          <SideInformation />
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-brand">
+          <img
+            src={labLogo || Medias.Logo}
+            alt={labName || "Lab Manager"}
+            onClick={() => navigate("/")}
+          />
+          {labName && <h1>{labName}</h1>}
         </div>
-        <div className="body-section">{currentPage}</div>
+
+        <div className="login-form-area">
+          {isPasswordReset ? (
+            <ForgotPassword />
+          ) : isSignUpPage ? (
+            <SignUp onSubmit={onSubmit} isLoading={isLoading} />
+          ) : (
+            <SignIn onSubmit={onSubmit} isLoading={isLoading} />
+          )}
+        </div>
+
+        <div className="login-switch">
+          <span>{switchText}</span>
+          <button onClick={() => navigate(switchPath)}>{switchLabel}</button>
+        </div>
       </div>
     </div>
   );

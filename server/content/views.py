@@ -5,7 +5,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Max
 
-from .models import ResearchArea, Project, Partnership
+from .models import ResearchArea, Project, Partnership, Equipment
+from accounts.models import User
 
 
 @login_required
@@ -157,7 +158,16 @@ def create_project(request):
         from accounts.models import User
         try:
             user_objects = User.objects.filter(id__in=members, is_approved=True)
+            approved_ids = set(user_objects.values_list("id", flat=True))
+            ordered_members = []
+            seen_ids = set()
+            for member_id in members:
+                if member_id in approved_ids and member_id not in seen_ids:
+                    ordered_members.append(member_id)
+                    seen_ids.add(member_id)
             project.members.set(user_objects)
+            project.members_order = ordered_members
+            project.save(update_fields=["members_order"])
         except Exception:
             pass
 
@@ -224,7 +234,15 @@ def update_project(request, project_id):
                     from accounts.models import User
                     try:
                         user_objects = User.objects.filter(id__in=new_members, is_approved=True)
+                        approved_ids = set(user_objects.values_list("id", flat=True))
+                        ordered_members = []
+                        seen_ids = set()
+                        for member_id in new_members:
+                            if member_id in approved_ids and member_id not in seen_ids:
+                                ordered_members.append(member_id)
+                                seen_ids.add(member_id)
                         project.members.set(user_objects)
+                        project.members_order = ordered_members
                         updated = True
                     except Exception:
                         pass
@@ -412,3 +430,170 @@ def delete_partnership(request, partnership_id):
         )
     except Partnership.DoesNotExist:
         return JsonResponse({"error": "Partnership not found."}, status=404)
+
+
+@login_required
+@require_http_methods(["POST"])
+def create_equipment(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    name = data.get("name", "").strip()
+    custom_id = data.get("custom_id", "").strip()
+    location = data.get("location", "").strip() or None
+
+    if not name:
+        return JsonResponse({"error": "Nome é obrigatório."}, status=400)
+
+    if not custom_id:
+        return JsonResponse({"error": "ID do equipamento é obrigatório."}, status=400)
+
+    if Equipment.objects.filter(custom_id=custom_id).exists():
+        return JsonResponse({"error": "Já existe um equipamento com este ID."}, status=400)
+
+    max_order = Equipment.objects.aggregate(Max("order"))["order__max"] or 0
+
+    equipment = Equipment.objects.create(
+        name=name,
+        custom_id=custom_id,
+        location=location,
+        order=max_order + 1,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Equipamento criado com sucesso.",
+            "data": equipment.export(),
+        }
+    )
+
+
+@require_http_methods(["GET"])
+def list_equipment(request):
+    if request.user.is_authenticated and hasattr(request.user, "role") and request.user.role == "professor":
+        items = Equipment.objects.all()
+    else:
+        items = Equipment.objects.filter(is_active=True)
+
+    return JsonResponse(
+        {
+            "success": True,
+            "data": [item.export() for item in items],
+        }
+    )
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_all_equipment(request):
+    items = Equipment.objects.all()
+    return JsonResponse(
+        {
+            "success": True,
+            "data": [item.export() for item in items],
+        }
+    )
+
+
+@login_required
+@require_http_methods(["PATCH"])
+def update_equipment(request, equipment_id):
+    try:
+        equipment = Equipment.objects.get(id=equipment_id)
+    except Equipment.DoesNotExist:
+        return JsonResponse({"error": "Equipment not found."}, status=404)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    allowed_fields = ["name", "custom_id", "location", "is_active", "order"]
+    updated = False
+
+    for field in allowed_fields:
+        if field in data:
+            new_value = data[field]
+            if field == "custom_id" and new_value != equipment.custom_id:
+                if Equipment.objects.filter(custom_id=new_value).exists():
+                    return JsonResponse({"error": "Já existe um equipamento com este ID."}, status=400)
+            current_value = getattr(equipment, field)
+            if current_value != new_value:
+                setattr(equipment, field, new_value)
+                updated = True
+
+    if "assigned_to" in data:
+        assigned_to_id = data["assigned_to"]
+        if assigned_to_id is None:
+            if equipment.assigned_to is not None:
+                equipment.assigned_to = None
+                updated = True
+        else:
+            try:
+                user = User.objects.get(id=assigned_to_id)
+                if equipment.assigned_to_id != user.id:
+                    equipment.assigned_to = user
+                    updated = True
+            except User.DoesNotExist:
+                return JsonResponse({"error": "Usuário não encontrado."}, status=404)
+
+    if updated:
+        equipment.save()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Equipamento atualizado com sucesso.",
+                "data": equipment.export(),
+            }
+        )
+
+    return JsonResponse(
+        {"success": False, "message": "Nenhuma alteração foi feita."}
+    )
+
+
+@login_required
+@require_http_methods(["PATCH"])
+def update_equipment_config(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    equipment_config = data.get("equipment", [])
+
+    for config in equipment_config:
+        equipment_id = config.get("id")
+        order = config.get("order")
+        is_active = config.get("is_active")
+
+        try:
+            equipment = Equipment.objects.get(id=equipment_id)
+            if order is not None:
+                equipment.order = order
+            if is_active is not None:
+                equipment.is_active = is_active
+            equipment.save()
+        except Equipment.DoesNotExist:
+            continue
+
+    return JsonResponse({"success": True, "message": "Equipamentos atualizados."})
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_equipment(request, equipment_id):
+    try:
+        equipment = Equipment.objects.get(id=equipment_id)
+        equipment.delete()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Equipamento deletado com sucesso.",
+            }
+        )
+    except Equipment.DoesNotExist:
+        return JsonResponse({"error": "Equipment not found."}, status=404)

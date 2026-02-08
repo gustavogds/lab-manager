@@ -356,3 +356,127 @@ export const deletePartnership = async (partnershipId: number) => {
     ...response.data,
   };
 };
+
+export type Equipment = {
+  id: number;
+  name: string;
+  custom_id: string;
+  location: string | null;
+  assigned_to: {
+    id: number;
+    name: string;
+    email: string;
+    profile_image: string | null;
+  } | null;
+  is_active: boolean;
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export const createEquipment = async (data: {
+  name: string;
+  custom_id: string;
+  location?: string;
+}) => {
+  const response = await api
+    .post("/content/equipment/create/", data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const listEquipment = async () => {
+  const response = await api
+    .get("/content/equipment/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, data: response.data.data || [] };
+};
+
+export const listAllEquipment = async () => {
+  const response = await api
+    .get("/content/equipment/all/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, data: response.data.data || [] };
+};
+
+export const updateEquipment = async (
+  equipmentId: number,
+  data: Partial<Equipment>
+) => {
+  const response = await api
+    .patch(`/content/equipment/${equipmentId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const updateEquipmentConfig = async (
+  equipment: Array<{ id: number; order: number; is_active: boolean }>
+) => {
+  const response = await api
+    .patch("/content/equipment/config/", { equipment })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const deleteEquipment = async (equipmentId: number) => {
+  const response = await api
+    .delete(`/content/equipment/${equipmentId}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const generateReport = async (data: {
+  name: string;
+  format: "pdf" | "xlsx";
+  sections: string[];
+}) => {
+  try {
+    const response = await api.post("/content/reports/generate/", data, {
+      responseType: "blob",
+    });
+
+    const contentType = response.headers["content-type"] || "";
+    if (contentType.includes("application/json")) {
+      const text = await (response.data as Blob).text();
+      const json = JSON.parse(text);
+      return { success: false, error: json.error || "Erro ao gerar relatório." };
+    }
+
+    const ext = data.format === "xlsx" ? "xlsx" : "pdf";
+    const safeName = data.name.replace(/ /g, "_");
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${safeName}.${ext}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    return { success: true };
+  } catch (error: any) {
+    if (error.response?.data instanceof Blob) {
+      try {
+        const text = await error.response.data.text();
+        const json = JSON.parse(text);
+        return { success: false, error: json.error || "Erro ao gerar relatório." };
+      } catch {
+        return { success: false, error: "Erro ao gerar relatório." };
+      }
+    }
+    return { success: false, error: "Erro ao gerar relatório." };
+  }
+};

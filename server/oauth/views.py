@@ -21,9 +21,16 @@ def sign_in(request):
     if not password:
         raise ValidationError("Password is required")
 
-    user = authenticate(email=email, password=password)
+    identifier = email.strip()
+    if "@" in identifier:
+        auth_email = identifier
+    else:
+        user_match = User.objects.filter(username__iexact=identifier).first()
+        auth_email = user_match.email if user_match else identifier
+
+    user = authenticate(email=auth_email, password=password)
     if user is None:
-        raise ValidationError("Invalid credentials")
+        raise ValidationError("Usuário ou senha inválidos")
 
     if not user.is_approved:
         raise ValidationError("This account is not active yet.")

@@ -49,9 +49,8 @@ const CreateResearchArea = () => {
       // Limpar formulário
       setFormData({ title: "", description: "" });
       
-      // Voltar para /create após 1.5s
       setTimeout(() => {
-        navigate("/create");
+        navigate(-1);
       }, 1500);
     } else {
       setError(response.error || "Falha ao criar área de pesquisa.");
@@ -62,7 +61,7 @@ const CreateResearchArea = () => {
   return (
     <div className="create-research-area-page">
       <div className="create-research-area-container">
-        <button className="back-button" onClick={() => navigate("/create")}>
+        <button className="back-button" onClick={() => navigate(-1)}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -106,7 +105,7 @@ const CreateResearchArea = () => {
             <button
               type="button"
               className="cancel-button"
-              onClick={() => navigate("/create")}
+              onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
               Cancelar

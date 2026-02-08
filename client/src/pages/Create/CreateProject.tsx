@@ -72,7 +72,7 @@ const CreateProject = () => {
       setFormData({ title: "", description: "", members: [] });
       
       setTimeout(() => {
-        navigate("/create");
+        navigate(-1);
       }, 1500);
     } else {
       setError(response.error || "Falha ao criar projeto.");
@@ -83,7 +83,7 @@ const CreateProject = () => {
   return (
     <div className="create-project-page">
       <div className="create-project-container">
-        <button className="back-button" onClick={() => navigate("/create")}>
+        <button className="back-button" onClick={() => navigate(-1)}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -137,7 +137,7 @@ const CreateProject = () => {
             <button
               type="button"
               className="cancel-button"
-              onClick={() => navigate("/create")}
+              onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
               Cancelar

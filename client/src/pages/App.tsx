@@ -14,6 +14,13 @@ import Create from "./Create/Create";
 import CreateResearchArea from "./Create/CreateResearchArea";
 import CreateProject from "./Create/CreateProject";
 import CreatePartnership from "./Create/CreatePartnership";
+import CreateEquipment from "./Create/CreateEquipment";
+import CreateReport from "./Create/CreateReport";
+import Manage from "./Manage/Manage";
+import ManageEquipment from "./Manage/ManageEquipment";
+import ManageResearchAreas from "./Manage/ManageResearchAreas";
+import ManageProjects from "./Manage/ManageProjects";
+import ManagePartnerships from "./Manage/ManagePartnerships";
 
 import { useEffect, useState } from "react";
 import AuthHandler from "../helpers/services/AuthHandler";
@@ -25,6 +32,10 @@ import ProjectEditor from "../components/Modals/ProjectEditor/ProjectEditor";
 import ResearcherDetails from "../components/Modals/ResearcherDetails/ResearcherDetails";
 import ResearchersEditor from "../components/Modals/ResearchersEditor/ResearchersEditor";
 import PartnershipsEditor from "../components/Modals/PartnershipsEditor/PartnershipsEditor";
+import EquipmentEditor from "../components/Modals/EquipmentEditor/EquipmentEditor";
+import ResearchAreaEditor from "../components/Modals/ResearchAreaEditor/ResearchAreaEditor";
+import ProjectManageEditor from "../components/Modals/ProjectManageEditor/ProjectManageEditor";
+import PartnershipManageEditor from "../components/Modals/PartnershipManageEditor/PartnershipManageEditor";
 
 const PrivateRoute = ({
   user,
@@ -77,6 +88,10 @@ const App = () => {
     ModalsHandler.registerModal("ResearcherDetails", ResearcherDetails);
     ModalsHandler.registerModal("ResearchersEditor", ResearchersEditor);
     ModalsHandler.registerModal("PartnershipsEditor", PartnershipsEditor);
+    ModalsHandler.registerModal("EquipmentEditor", EquipmentEditor);
+    ModalsHandler.registerModal("ResearchAreaEditor", ResearchAreaEditor);
+    ModalsHandler.registerModal("ProjectManageEditor", ProjectManageEditor);
+    ModalsHandler.registerModal("PartnershipManageEditor", PartnershipManageEditor);
   }, []);
 
   if (!readyToRender) {
@@ -144,40 +159,132 @@ const App = () => {
           <Route
             path="/create"
             element={
-              !isEmptyObject(user.state) ? (
-                <Create />
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <Create />
+                </PrivateRoute>
               ) : (
-                <Navigate to="/signin" />
+                <Navigate to="/" />
               )
             }
           />
           <Route
             path="/create/research-area"
             element={
-              !isEmptyObject(user.state) ? (
-                <CreateResearchArea />
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <CreateResearchArea />
+                </PrivateRoute>
               ) : (
-                <Navigate to="/signin" />
+                <Navigate to="/" />
               )
             }
           />
           <Route
             path="/create/project"
             element={
-              !isEmptyObject(user.state) ? (
-                <CreateProject />
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <CreateProject />
+                </PrivateRoute>
               ) : (
-                <Navigate to="/signin" />
+                <Navigate to="/" />
               )
             }
           />
           <Route
             path="/create/partnership"
             element={
-              !isEmptyObject(user.state) ? (
-                <CreatePartnership />
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <CreatePartnership />
+                </PrivateRoute>
               ) : (
-                <Navigate to="/signin" />
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/create/equipment"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <CreateEquipment />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/create/report"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <CreateReport />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/manage"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <Manage />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/manage/equipment"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <ManageEquipment />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/manage/research-areas"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <ManageResearchAreas />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/manage/projects"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <ManageProjects />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/manage/partnerships"
+            element={
+              user.state.role === "professor" ? (
+                <PrivateRoute user={user.state}>
+                  <ManagePartnerships />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
               )
             }
           />
