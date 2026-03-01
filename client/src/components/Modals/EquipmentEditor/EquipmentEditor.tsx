@@ -1,27 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { listApprovedUsers, updateEquipment, deleteEquipment } from "helpers/api/content";
-import type { Equipment, User } from "helpers/api/content";
-import { FaTimes } from "react-icons/fa";
+import type { Equipment, User, Room } from "helpers/api/content";
+
 import { ModalsHandler } from "components/my-own-modal-handler";
+import MultiSelect from "components/MultiSelect/MultiSelect";
 import "pages/Manage/ManageContent.scss";
 
 interface EquipmentEditorProps {
   equipment: Equipment;
+  rooms: Room[];
   onConfirm: () => void;
   onCancel?: () => void;
 }
 
 const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
   equipment,
+  rooms,
   onConfirm,
   onCancel,
 }) => {
   const [formData, setFormData] = useState({
     name: equipment.name,
     custom_id: equipment.custom_id,
-    location: equipment.location || "",
-    assigned_to: equipment.assigned_to?.id || null as number | null,
+    room_id: equipment.room?.id ?? (null as number | null),
+    assigned_to: equipment.assigned_to?.id || (null as number | null),
   });
+  const [selectedUsers, setSelectedUsers] = useState<
+    Array<{ id: number; name: string; email?: string; profile_image?: string | null }>
+  >(equipment.users || []);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -43,6 +49,14 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRoomChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      room_id: value ? Number(value) : null,
+    }));
   };
 
   const handleAssignedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -71,8 +85,9 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     const payload: Record<string, any> = {
       name: formData.name,
       custom_id: formData.custom_id,
-      location: formData.location.trim() || null,
+      room_id: formData.room_id,
       assigned_to: formData.assigned_to,
+      users: selectedUsers.map((u) => u.id),
     };
 
     const response = await updateEquipment(equipment.id, payload);
@@ -81,9 +96,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     if (response.success) {
       ModalsHandler.createNotification({
         title: "Sucesso",
-        message: equipment.is_active
-          ? "Equipamento desativado!"
-          : "Equipamento ativado!",
+        message: "Equipamento atualizado com sucesso!",
         type: "success",
       });
       onConfirm();
@@ -107,6 +120,13 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     setIsSaving(false);
 
     if (response.success) {
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: equipment.is_active
+          ? "Equipamento desativado!"
+          : "Equipamento ativado!",
+        type: "success",
+      });
       onConfirm();
       onCancel?.();
     } else {
@@ -146,7 +166,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
 
   return (
     <div
-      className="content-editor-overlay"
+      className="modal-overlay-shared"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleCancel();
@@ -154,17 +174,17 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
       }}
     >
       <div
-        className="content-editor-modal"
+        className="modal-panel"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="editor-header">
+        <div className="modal-header-shared">
           <h2>Editar Equipamento</h2>
-          <button className="close-btn" onClick={handleCancel}>
-            <FaTimes />
+          <button className="btn-close-modal" onClick={handleCancel}>
+            ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="editor-form">
+        <form onSubmit={handleSubmit} className="modal-body-shared">
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
@@ -199,16 +219,20 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
           </div>
 
           <div className="form-field">
-            <label htmlFor="eq-location">Localização</label>
-            <input
-              id="eq-location"
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="Ex: Sala 401"
-              maxLength={255}
-            />
+            <label htmlFor="eq-room">Sala</label>
+            <select
+              id="eq-room"
+              name="room_id"
+              value={formData.room_id ?? ""}
+              onChange={handleRoomChange}
+            >
+              <option value="">Nenhuma</option>
+              {rooms.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-field">
@@ -232,11 +256,30 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
             )}
           </div>
 
-          <div className="editor-actions">
+          <div className="form-field">
+            {isLoading ? (
+              <p>Carregando usuários...</p>
+            ) : (
+              <MultiSelect
+                label="Usuários"
+                options={availableUsers.map((u) => ({
+                  id: u.id,
+                  name: u.name,
+                  email: u.email,
+                  profile_image: u.profile_image || null,
+                }))}
+                selected={selectedUsers}
+                onChange={setSelectedUsers}
+                placeholder="Selecione os usuários..."
+              />
+            )}
+          </div>
+
+          <div className="modal-actions">
             <div className="left-actions">
               <button
                 type="button"
-                className="danger-btn"
+                className="btn-danger"
                 onClick={handleDelete}
                 disabled={isSaving}
               >
@@ -244,7 +287,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
               </button>
               <button
                 type="button"
-                className="toggle-btn"
+                className="btn-toggle"
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
@@ -252,10 +295,10 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
               </button>
             </div>
             <div className="right-actions">
-              <button type="button" className="cancel-btn" onClick={handleCancel}>
+              <button type="button" className="btn-cancel" onClick={handleCancel}>
                 Cancelar
               </button>
-              <button type="submit" className="confirm-btn" disabled={isSaving}>
+              <button type="submit" className="btn-confirm" disabled={isSaving}>
                 {isSaving ? "Salvando..." : "Salvar"}
               </button>
             </div>

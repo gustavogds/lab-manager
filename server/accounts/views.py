@@ -119,7 +119,7 @@ def reject_user(request):
 @login_required
 @require_http_methods(["GET"])
 def list_unapproved_users(request):
-    unapproved_users = User.objects.filter(is_approved=False)
+    unapproved_users = User.objects.filter(is_approved=False, email_validated=True)
     users_data = [user.export() for user in unapproved_users]
     return JsonResponse({"users": users_data}, safe=False)
 
@@ -171,6 +171,7 @@ def update_researchers_config(request):
         user_id = config.get("id")
         order = config.get("order")
         show = config.get("show")
+        is_former = config.get("is_former_member")
 
         try:
             user = User.objects.get(id=user_id)
@@ -178,6 +179,8 @@ def update_researchers_config(request):
                 user.researcher_order = order
             if show is not None:
                 user.show_in_researchers = show
+            if is_former is not None:
+                user.is_former_member = is_former
             user.save()
         except User.DoesNotExist:
             continue

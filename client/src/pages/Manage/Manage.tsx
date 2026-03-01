@@ -53,18 +53,18 @@ const Manage = () => {
   ];
 
   return (
-    <div className="manage-page">
-      <div className="manage-container">
-        <header className="manage-header">
+    <div className="page-layout">
+      <div className="page-container">
+        <header className="page-header">
           <h1>Gerenciar</h1>
           <p>Selecione o que deseja gerenciar</p>
         </header>
 
-        <div className="manage-options">
+        <div className="option-cards-grid">
           {manageOptions.map((option) => (
             <div
               key={option.id}
-              className="manage-option-card"
+              className="option-card"
               onClick={option.action}
             >
               <div className="option-icon">{option.icon}</div>

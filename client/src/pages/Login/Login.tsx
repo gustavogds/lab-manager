@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect } from "react";
 import { FaEnvelope, FaLock, FaUser, FaIdBadge, FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -198,6 +198,29 @@ const SignUp = ({
   );
 };
 
+const VERIFIED_MESSAGES: Record<string, { title: string; message: string; type: "success" | "info" | "error" }> = {
+  success: {
+    title: "E-mail Verificado",
+    message: "Seu e-mail foi verificado com sucesso! Aguarde a aprovação de um administrador para acessar sua conta.",
+    type: "success",
+  },
+  expired: {
+    title: "Link Expirado",
+    message: "O link de verificação expirou ou é inválido. Crie uma nova conta para receber um novo link.",
+    type: "error",
+  },
+  invalid: {
+    title: "Link Inválido",
+    message: "O link de verificação é inválido.",
+    type: "error",
+  },
+  already: {
+    title: "E-mail Já Verificado",
+    message: "Seu e-mail já foi verificado anteriormente.",
+    type: "info",
+  },
+};
+
 const SignIn = ({
   onSubmit,
   isLoading,
@@ -206,9 +229,18 @@ const SignIn = ({
   isLoading: boolean;
 }) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const verified = searchParams.get("verified");
+    if (verified && VERIFIED_MESSAGES[verified]) {
+      ModalsHandler.createNotification(VERIFIED_MESSAGES[verified]);
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -389,12 +421,12 @@ const Login = ({
         ModalsHandler.createNotification({
           title: "Conta Criada",
           message:
-            "Sua conta foi criada com sucesso! Aguarde a aprovação de um administrador.",
+            "Sua conta foi criada com sucesso! Verifique seu e-mail para ativar o cadastro.",
           type: "success",
         });
         setTimeout(() => {
           navigate("/signin");
-        }, 2000);
+        }, 3000);
       } else {
         ModalsHandler.createNotification({
           title: "Erro no Cadastro",

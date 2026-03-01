@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Modal } from "components/my-own-modal-handler";
 import { uploadAboutImage, deleteAboutImage } from "helpers/api/settings";
 import "./SectionEditor.scss";
@@ -57,14 +57,6 @@ const SectionEditorModal = ({
   );
   const [localImages, setLocalImages] = useState(images);
   const [uploading, setUploading] = useState(false);
-
-  useEffect(() => {
-    setValues(buildInitialValues(fields, initialValues));
-  }, [fields, initialValues]);
-
-  useEffect(() => {
-    setLocalImages(images);
-  }, [images]);
 
   const handleChange = (name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));

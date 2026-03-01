@@ -70,9 +70,9 @@ const CreateReport = () => {
   };
 
   return (
-    <div className="create-report-page">
-      <div className="create-report-container">
-        <button className="back-button" onClick={() => navigate(-1)}>
+    <div className="page-layout">
+      <div className="page-container">
+        <button className="btn-back" onClick={() => navigate(-1)}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -81,8 +81,8 @@ const CreateReport = () => {
           <p>Configure e gere um relatório com os dados do laboratório</p>
         </header>
 
-        {message && <div className="success-message">{message}</div>}
-        {error && <div className="error-message">{error}</div>}
+        {message && <div className="msg-success">{message}</div>}
+        {error && <div className="msg-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="report-form">
           <div className="form-field">
@@ -161,7 +161,7 @@ const CreateReport = () => {
           <div className="form-actions">
             <button
               type="button"
-              className="cancel-button"
+              className="btn-cancel"
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
@@ -169,7 +169,7 @@ const CreateReport = () => {
             </button>
             <button
               type="submit"
-              className="submit-button"
+              className="btn-confirm"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Gerando..." : "Gerar Relatório"}

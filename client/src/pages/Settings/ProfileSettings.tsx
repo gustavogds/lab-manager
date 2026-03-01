@@ -142,8 +142,8 @@ const ProfileSettings = () => {
   return (
     <div className="profile-settings">
       <h1>Configurações de Perfil</h1>
-      {message && <div className="success-message">{message}</div>}
-      {error && <div className="error-message">{error}</div>}
+      {message && <div className="msg-success">{message}</div>}
+      {error && <div className="msg-error">{error}</div>}
       <form onSubmit={handleSubmit} className="profile-settings__form">
         <label>
           Imagem de Perfil:
@@ -232,7 +232,7 @@ const ProfileSettings = () => {
           />
           Perfil Público
         </label>
-        <button type="submit" className="save-button">
+        <button type="submit" className="btn-confirm">
           Salvar Alterações
         </button>
       </form>

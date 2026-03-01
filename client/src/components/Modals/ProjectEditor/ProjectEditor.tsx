@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { listApprovedUsers } from "helpers/api/content";
 import type { Project, User } from "helpers/api/content";
 import MultiSelect from "components/MultiSelect/MultiSelect";
-import { FaTimes } from "react-icons/fa";
+
 import "./ProjectEditor.scss";
 
 interface ProjectEditorProps {
@@ -69,22 +69,22 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
 
   return (
     <div 
-      className="project-editor-overlay"
+      className="modal-overlay-shared"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleCancel();
         }
       }}
     >
-      <div className="project-editor-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="editor-header">
+      <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header-shared">
           <h2>Editar Projeto</h2>
-          <button className="close-btn" onClick={handleCancel}>
-            <FaTimes />
+          <button className="btn-close-modal" onClick={handleCancel}>
+            ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="editor-form">
+        <form onSubmit={handleSubmit} className="modal-body-shared">
           <div className="form-field">
             <label htmlFor="title">Título *</label>
             <input
@@ -125,11 +125,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
             )}
           </div>
 
-          <div className="editor-actions">
-            <button type="button" className="cancel-btn" onClick={handleCancel}>
+          <div className="modal-actions">
+            <button type="button" className="btn-cancel" onClick={handleCancel}>
               Cancelar
             </button>
-            <button type="submit" className="confirm-btn">
+            <button type="submit" className="btn-confirm">
               Salvar
             </button>
           </div>

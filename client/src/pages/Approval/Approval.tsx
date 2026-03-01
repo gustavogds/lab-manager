@@ -68,13 +68,13 @@ const Approval = () => {
               </div>
               <div className="approval-actions">
                 <button
-                  className="btn approve-btn"
+                  className="btn-approve"
                   onClick={() => handleApprove(user.id)}
                 >
                   Approve
                 </button>
                 <button
-                  className="btn reject-btn"
+                  className="btn-reject"
                   onClick={() => handleReject(user.id)}
                 >
                   Reject

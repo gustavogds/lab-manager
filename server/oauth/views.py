@@ -3,8 +3,10 @@ import ujson as json
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.shortcuts import redirect
 
 from accounts.models import User
+from accounts.verification import send_verification_email, verify_token
 from config.utils import JsonResponse
 from sitewide.decorators import methods_allowed, user_access_required
 
@@ -32,8 +34,11 @@ def sign_in(request):
     if user is None:
         raise ValidationError("Usuário ou senha inválidos")
 
+    if not user.email_validated:
+        raise ValidationError("Verifique seu e-mail antes de continuar.")
+
     if not user.is_approved:
-        raise ValidationError("This account is not active yet.")
+        raise ValidationError("Sua conta ainda não foi aprovada por um administrador.")
 
     login(request, user)
 
@@ -89,9 +94,11 @@ def sign_up(request):
     if User.objects.filter(email=email).exists():
         raise ValidationError("User with this email already exists")
 
-    User.objects.create_user(
+    user = User.objects.create_user(
         name=name, email=email, password=password, username=username, role=role
     )
+
+    send_verification_email(user)
 
     return JsonResponse(
         content={
@@ -105,3 +112,28 @@ def session(request):
     if not request.user.is_authenticated:
         return JsonResponse({"isAuthenticated": False})
     return JsonResponse({"isAuthenticated": True})
+
+
+@methods_allowed(["GET"])
+def verify_email(request):
+    token = request.GET.get("token")
+    if not token:
+        return redirect("/signin?verified=invalid")
+
+    data = verify_token(token)
+    if data is None:
+        return redirect("/signin?verified=expired")
+
+    email = data.get("email")
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return redirect("/signin?verified=invalid")
+
+    if user.email_validated:
+        return redirect("/signin?verified=already")
+
+    user.email_validated = True
+    user.save()
+
+    return redirect("/signin?verified=success")

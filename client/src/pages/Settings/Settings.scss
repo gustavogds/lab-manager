@@ -76,22 +76,6 @@
       gap: 0.5rem;
     }
 
-    .save-button {
-      margin-top: 2rem;
-      align-self: flex-start;
-      background-color: #8bbab7;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-
-      &:hover {
-        background-color: #6ca5a2;
-      }
-    }
   }
 
   .profile-image-field {
@@ -142,24 +126,6 @@
     small {
       color: #666;
     }
-  }
-
-  .success-message {
-    color: #155724;
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-  }
-
-  .error-message {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin-bottom: 1rem;
   }
 
   // Estilos para o react-datepicker

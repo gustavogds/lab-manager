@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { createEquipment } from "helpers/api/content";
+import { createEquipment, listRooms } from "helpers/api/content";
+import type { Room } from "helpers/api/content";
 import { FaArrowLeft } from "react-icons/fa";
 import "./CreateEquipment.scss";
 
@@ -9,13 +10,26 @@ const CreateEquipment = () => {
   const [formData, setFormData] = useState({
     name: "",
     custom_id: "",
-    location: "",
+    room_id: "" as string,
   });
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const fetchRooms = async () => {
+      const response = await listRooms();
+      if (response.success) {
+        setRooms(response.data);
+      }
+    };
+    fetchRooms();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -36,12 +50,12 @@ const CreateEquipment = () => {
     setError("");
     setMessage("");
 
-    const payload: { name: string; custom_id: string; location?: string } = {
+    const payload: { name: string; custom_id: string; room_id?: number | null } = {
       name: formData.name,
       custom_id: formData.custom_id,
     };
-    if (formData.location.trim()) {
-      payload.location = formData.location;
+    if (formData.room_id) {
+      payload.room_id = Number(formData.room_id);
     }
 
     const response = await createEquipment(payload);
@@ -50,7 +64,7 @@ const CreateEquipment = () => {
     if (response.success) {
       setMessage(response.message || "Equipamento criado com sucesso!");
       setError("");
-      setFormData({ name: "", custom_id: "", location: "" });
+      setFormData({ name: "", custom_id: "", room_id: "" });
       setTimeout(() => {
         navigate(-1);
       }, 1500);
@@ -61,17 +75,17 @@ const CreateEquipment = () => {
   };
 
   return (
-    <div className="create-equipment-page">
-      <div className="create-equipment-container">
-        <button className="back-button" onClick={() => navigate(-1)}>
+    <div className="page-layout">
+      <div className="page-container">
+        <button className="btn-back" onClick={() => navigate(-1)}>
           <FaArrowLeft /> Voltar
         </button>
         <header className="page-header">
           <h1>Novo Equipamento</h1>
           <p>Preencha os campos abaixo para registrar um novo material ou equipamento</p>
         </header>
-        {message && <div className="success-message">{message}</div>}
-        {error && <div className="error-message">{error}</div>}
+        {message && <div className="msg-success">{message}</div>}
+        {error && <div className="msg-error">{error}</div>}
         <form onSubmit={handleSubmit} className="equipment-form">
           <div className="form-field">
             <label htmlFor="name">Nome do Equipamento *</label>
@@ -101,21 +115,25 @@ const CreateEquipment = () => {
             <small className="field-hint">Identificador único do equipamento no laboratório</small>
           </div>
           <div className="form-field">
-            <label htmlFor="location">Localização (opcional)</label>
-            <input
-              id="location"
-              type="text"
-              name="location"
-              value={formData.location}
+            <label htmlFor="room_id">Sala (opcional)</label>
+            <select
+              id="room_id"
+              name="room_id"
+              value={formData.room_id}
               onChange={handleChange}
-              placeholder="Ex: Sala 401"
-              maxLength={255}
-            />
+            >
+              <option value="">Nenhuma</option>
+              {rooms.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="form-actions">
             <button
               type="button"
-              className="cancel-button"
+              className="btn-cancel"
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
@@ -123,7 +141,7 @@ const CreateEquipment = () => {
             </button>
             <button
               type="submit"
-              className="submit-button"
+              className="btn-confirm"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Criando..." : "Criar Equipamento"}

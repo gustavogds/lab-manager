@@ -81,9 +81,9 @@ const CreateProject = () => {
   };
 
   return (
-    <div className="create-project-page">
-      <div className="create-project-container">
-        <button className="back-button" onClick={() => navigate(-1)}>
+    <div className="page-layout">
+      <div className="page-container">
+        <button className="btn-back" onClick={() => navigate(-1)}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -92,8 +92,8 @@ const CreateProject = () => {
           <p>Preencha os campos abaixo para criar um novo projeto</p>
         </header>
 
-        {message && <div className="success-message">{message}</div>}
-        {error && <div className="error-message">{error}</div>}
+        {message && <div className="msg-success">{message}</div>}
+        {error && <div className="msg-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="project-form">
           <div className="form-field">
@@ -136,7 +136,7 @@ const CreateProject = () => {
           <div className="form-actions">
             <button
               type="button"
-              className="cancel-button"
+              className="btn-cancel"
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
@@ -144,7 +144,7 @@ const CreateProject = () => {
             </button>
             <button
               type="submit"
-              className="submit-button"
+              className="btn-confirm"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Criando..." : "Criar Projeto"}

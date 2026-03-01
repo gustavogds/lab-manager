@@ -12,12 +12,8 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
   return (
     <div className="researcher-details-modal" onClick={onConfirm}>
       <div className="researcher-details-content" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onConfirm}>
-          ×
-        </button>
-
-        <div className="researcher-details-body">
-          <header className="researcher-header">
+        <header className="modal-header-shared researcher-header">
+          <div className="researcher-header-info">
             <div className="researcher-avatar">
               {researcher.profile_image ? (
                 <img src={researcher.profile_image} alt={researcher.name} />
@@ -31,8 +27,13 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
                 <p className="position">{researcher.position}</p>
               )}
             </div>
-          </header>
+          </div>
+          <button className="btn-close-modal" onClick={onConfirm}>
+            ×
+          </button>
+        </header>
 
+        <div className="researcher-details-body">
           <section className="contact-section">
             <h3>Contato</h3>
             <div className="contact-list">

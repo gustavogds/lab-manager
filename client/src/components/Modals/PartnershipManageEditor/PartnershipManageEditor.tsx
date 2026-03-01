@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { updatePartnership, deletePartnership } from "helpers/api/content";
 import type { Partnership } from "helpers/api/content";
-import { FaTimes } from "react-icons/fa";
+
 import { ModalsHandler } from "components/my-own-modal-handler";
 import "pages/Manage/ManageContent.scss";
 
@@ -120,7 +120,7 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
 
   return (
     <div
-      className="content-editor-overlay"
+      className="modal-overlay-shared"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleCancel();
@@ -128,17 +128,17 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
       }}
     >
       <div
-        className="content-editor-modal"
+        className="modal-panel"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="editor-header">
+        <div className="modal-header-shared">
           <h2>Editar Parceria</h2>
-          <button className="close-btn" onClick={handleCancel}>
-            <FaTimes />
+          <button className="btn-close-modal" onClick={handleCancel}>
+            ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="editor-form">
+        <form onSubmit={handleSubmit} className="modal-body-shared">
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
@@ -179,11 +179,11 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
             </div>
           )}
 
-          <div className="editor-actions">
+          <div className="modal-actions">
             <div className="left-actions">
               <button
                 type="button"
-                className="danger-btn"
+                className="btn-danger"
                 onClick={handleDelete}
                 disabled={isSaving}
               >
@@ -191,7 +191,7 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
               </button>
               <button
                 type="button"
-                className="toggle-btn"
+                className="btn-toggle"
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
@@ -199,10 +199,10 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
               </button>
             </div>
             <div className="right-actions">
-              <button type="button" className="cancel-btn" onClick={handleCancel}>
+              <button type="button" className="btn-cancel" onClick={handleCancel}>
                 Cancelar
               </button>
-              <button type="submit" className="confirm-btn" disabled={isSaving}>
+              <button type="submit" className="btn-confirm" disabled={isSaving}>
                 {isSaving ? "Salvando..." : "Salvar"}
               </button>
             </div>

@@ -81,7 +81,7 @@ const ManageResearchAreas = () => {
   return (
     <div className="manage-content-page">
       <div className="manage-content-container">
-        <button className="back-button" onClick={() => navigate("/manage")}>
+        <button className="btn-back" onClick={() => navigate("/manage")}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -92,7 +92,7 @@ const ManageResearchAreas = () => {
           </div>
           {!isLoading && hasAreas && (
             <button
-              className="add-button"
+              className="btn-add btn-sm"
               onClick={() => navigate("/create/research-area")}
             >
               <FaPlus /> Nova Área de Pesquisa

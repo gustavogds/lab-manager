@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Max
 
-from .models import ResearchArea, Project, Partnership, Equipment
+from .models import ResearchArea, Project, Partnership, Equipment, Room
 from accounts.models import User
 
 
@@ -324,10 +324,7 @@ def create_partnership(request):
 
 @require_http_methods(["GET"])
 def list_partnerships(request):
-    if request.user.is_authenticated and hasattr(request.user, "role") and request.user.role == "professor":
-        partnerships = Partnership.objects.all()
-    else:
-        partnerships = Partnership.objects.filter(is_active=True)
+    partnerships = Partnership.objects.filter(is_active=True)
 
     return JsonResponse(
         {
@@ -442,7 +439,7 @@ def create_equipment(request):
 
     name = data.get("name", "").strip()
     custom_id = data.get("custom_id", "").strip()
-    location = data.get("location", "").strip() or None
+    room_id = data.get("room_id")
 
     if not name:
         return JsonResponse({"error": "Nome é obrigatório."}, status=400)
@@ -453,12 +450,19 @@ def create_equipment(request):
     if Equipment.objects.filter(custom_id=custom_id).exists():
         return JsonResponse({"error": "Já existe um equipamento com este ID."}, status=400)
 
+    room = None
+    if room_id:
+        try:
+            room = Room.objects.get(id=room_id)
+        except Room.DoesNotExist:
+            return JsonResponse({"error": "Sala não encontrada."}, status=404)
+
     max_order = Equipment.objects.aggregate(Max("order"))["order__max"] or 0
 
     equipment = Equipment.objects.create(
         name=name,
         custom_id=custom_id,
-        location=location,
+        room=room,
         order=max_order + 1,
     )
 
@@ -474,9 +478,9 @@ def create_equipment(request):
 @require_http_methods(["GET"])
 def list_equipment(request):
     if request.user.is_authenticated and hasattr(request.user, "role") and request.user.role == "professor":
-        items = Equipment.objects.all()
+        items = Equipment.objects.select_related("room", "assigned_to").prefetch_related("users").all()
     else:
-        items = Equipment.objects.filter(is_active=True)
+        items = Equipment.objects.select_related("room", "assigned_to").prefetch_related("users").filter(is_active=True)
 
     return JsonResponse(
         {
@@ -489,7 +493,7 @@ def list_equipment(request):
 @login_required
 @require_http_methods(["GET"])
 def list_all_equipment(request):
-    items = Equipment.objects.all()
+    items = Equipment.objects.select_related("room", "assigned_to").prefetch_related("users").all()
     return JsonResponse(
         {
             "success": True,
@@ -511,7 +515,7 @@ def update_equipment(request, equipment_id):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON."}, status=400)
 
-    allowed_fields = ["name", "custom_id", "location", "is_active", "order"]
+    allowed_fields = ["name", "custom_id", "is_active", "order"]
     updated = False
 
     for field in allowed_fields:
@@ -524,6 +528,21 @@ def update_equipment(request, equipment_id):
             if current_value != new_value:
                 setattr(equipment, field, new_value)
                 updated = True
+
+    if "room_id" in data:
+        room_id = data["room_id"]
+        if room_id is None:
+            if equipment.room is not None:
+                equipment.room = None
+                updated = True
+        else:
+            try:
+                room = Room.objects.get(id=room_id)
+                if equipment.room_id != room.id:
+                    equipment.room = room
+                    updated = True
+            except Room.DoesNotExist:
+                return JsonResponse({"error": "Sala não encontrada."}, status=404)
 
     if "assigned_to" in data:
         assigned_to_id = data["assigned_to"]
@@ -539,6 +558,24 @@ def update_equipment(request, equipment_id):
                     updated = True
             except User.DoesNotExist:
                 return JsonResponse({"error": "Usuário não encontrado."}, status=404)
+
+    if "users" in data:
+        new_users = data["users"]
+        if isinstance(new_users, list):
+            try:
+                user_objects = User.objects.filter(id__in=new_users, is_approved=True)
+                approved_ids = set(user_objects.values_list("id", flat=True))
+                ordered_users = []
+                seen_ids = set()
+                for uid in new_users:
+                    if uid in approved_ids and uid not in seen_ids:
+                        ordered_users.append(uid)
+                        seen_ids.add(uid)
+                equipment.users.set(user_objects)
+                equipment.users_order = ordered_users
+                updated = True
+            except Exception:
+                pass
 
     if updated:
         equipment.save()
@@ -569,6 +606,7 @@ def update_equipment_config(request):
         equipment_id = config.get("id")
         order = config.get("order")
         is_active = config.get("is_active")
+        room_id = config.get("room_id")
 
         try:
             equipment = Equipment.objects.get(id=equipment_id)
@@ -576,6 +614,14 @@ def update_equipment_config(request):
                 equipment.order = order
             if is_active is not None:
                 equipment.is_active = is_active
+            if room_id is not None:
+                try:
+                    room = Room.objects.get(id=room_id)
+                    equipment.room = room
+                except Room.DoesNotExist:
+                    pass
+            elif "room_id" in config:
+                equipment.room = None
             equipment.save()
         except Equipment.DoesNotExist:
             continue
@@ -597,3 +643,99 @@ def delete_equipment(request, equipment_id):
         )
     except Equipment.DoesNotExist:
         return JsonResponse({"error": "Equipment not found."}, status=404)
+
+
+@login_required
+@require_http_methods(["POST"])
+def create_room(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    name = data.get("name", "").strip()
+
+    if not name:
+        return JsonResponse({"error": "Nome é obrigatório."}, status=400)
+
+    max_order = Room.objects.aggregate(Max("order"))["order__max"] or 0
+
+    room = Room.objects.create(
+        name=name,
+        order=max_order + 1,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Sala criada com sucesso.",
+            "data": room.export(),
+        }
+    )
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_rooms(request):
+    rooms = Room.objects.all()
+    return JsonResponse(
+        {
+            "success": True,
+            "data": [room.export() for room in rooms],
+        }
+    )
+
+
+@login_required
+@require_http_methods(["PATCH"])
+def update_room(request, room_id):
+    try:
+        room = Room.objects.get(id=room_id)
+    except Room.DoesNotExist:
+        return JsonResponse({"error": "Sala não encontrada."}, status=404)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    allowed_fields = ["name", "order"]
+    updated = False
+
+    for field in allowed_fields:
+        if field in data:
+            new_value = data[field]
+            current_value = getattr(room, field)
+            if current_value != new_value:
+                setattr(room, field, new_value)
+                updated = True
+
+    if updated:
+        room.save()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Sala atualizada com sucesso.",
+                "data": room.export(),
+            }
+        )
+
+    return JsonResponse(
+        {"success": False, "message": "Nenhuma alteração foi feita."}
+    )
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_room(request, room_id):
+    try:
+        room = Room.objects.get(id=room_id)
+        room.delete()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Sala deletada com sucesso.",
+            }
+        )
+    except Room.DoesNotExist:
+        return JsonResponse({"error": "Sala não encontrada."}, status=404)

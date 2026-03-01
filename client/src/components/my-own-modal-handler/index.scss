@@ -74,14 +74,11 @@
       .modal-footer {
         width: 100%;
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
+        gap: 0.75rem;
         padding: 10px 15px;
         border-top: solid 1px #e6e6e6;
-
-        .btn.pull-right {
-          margin-left: auto;
-        }
       }
     }
     &.xl {

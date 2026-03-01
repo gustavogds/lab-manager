@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 
@@ -273,6 +273,19 @@ const Overlays = () => {
     return scopes;
   }, [modalsOpen, layouts]);
 
+  const hasOpenModals = modalsOpen.some((m: any) => m.scope === "modals");
+
+  useEffect(() => {
+    if (hasOpenModals) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [hasOpenModals]);
+
   return createPortal(
     <Suspense fallback={<div>Loading...</div>}>
       {layouts &&
@@ -367,7 +380,7 @@ const Modal = ({ children, className, ...config }: any) => {
                 {_config.canCancel && (
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn-cancel"
                     onClick={() => _config.onCancel()}
                     disabled={_config.disableCancel}
                   >
@@ -377,7 +390,7 @@ const Modal = ({ children, className, ...config }: any) => {
                 {_config.canConfirm && (
                   <button
                     type="button"
-                    className="btn btn-primary pull-right"
+                    className="btn-confirm"
                     onClick={() => _config.onConfirm()}
                     disabled={_config.disableConfirm}
                   >

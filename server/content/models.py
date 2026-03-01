@@ -384,10 +384,41 @@ class Partnership(models.Model):
         }
 
 
+class Room(models.Model):
+    name: str = models.CharField(max_length=255)
+    order: int = models.IntegerField(default=0)
+    created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
+    updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return f"<Room pk={self.pk} name={self.name}>"
+
+    def export(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "order": self.order,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
 class Equipment(models.Model):
     name: str = models.CharField(max_length=255)
     custom_id: str = models.CharField(max_length=100, unique=True)
-    location: str = models.CharField(max_length=255, blank=True, null=True)
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="equipment",
+    )
     assigned_to = models.ForeignKey(
         "accounts.User",
         on_delete=models.SET_NULL,
@@ -395,6 +426,12 @@ class Equipment(models.Model):
         blank=True,
         related_name="assigned_equipment",
     )
+    users = models.ManyToManyField(
+        "accounts.User",
+        blank=True,
+        related_name="used_equipment",
+    )
+    users_order = models.JSONField(default=list, blank=True)
     is_active: bool = models.BooleanField(default=True)
     order: int = models.IntegerField(default=0)
     created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
@@ -410,17 +447,36 @@ class Equipment(models.Model):
         return f"<Equipment pk={self.pk} custom_id={self.custom_id}>"
 
     def export(self):
+        users_list = list(self.users.all())
+        users_map = {u.id: u for u in users_list}
+        ordered_users = []
+        for uid in self.users_order or []:
+            user = users_map.pop(uid, None)
+            if user:
+                ordered_users.append(user)
+        if users_map:
+            ordered_users.extend([u for u in users_list if u.id in users_map])
+
         return {
             "id": self.id,
             "name": self.name,
             "custom_id": self.custom_id,
-            "location": self.location,
+            "room": self.room.export() if self.room else None,
             "assigned_to": {
                 "id": self.assigned_to.id,
                 "name": self.assigned_to.name,
                 "email": self.assigned_to.email,
                 "profile_image": self.assigned_to.profile_image.url if self.assigned_to.profile_image else None,
             } if self.assigned_to else None,
+            "users": [
+                {
+                    "id": u.id,
+                    "name": u.name,
+                    "email": u.email,
+                    "profile_image": u.profile_image.url if u.profile_image else None,
+                }
+                for u in ordered_users
+            ],
             "is_active": self.is_active,
             "order": self.order,
             "created_at": self.created_at.isoformat(),

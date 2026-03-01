@@ -58,8 +58,6 @@ export default class AuthHandler {
     );
 
     if (response.success) {
-      await AuthHandler.sync();
-
       return {
         success: true,
         message: "You have successfully registered!",

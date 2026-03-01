@@ -108,8 +108,8 @@ const LabSettings = () => {
   return (
     <div className="profile-settings">
       <h1>Configurações do Laboratório</h1>
-      {message && <div className="success-message">{message}</div>}
-      {error && <div className="error-message">{error}</div>}
+      {message && <div className="msg-success">{message}</div>}
+      {error && <div className="msg-error">{error}</div>}
       <form onSubmit={handleSubmit} className="profile-settings__form">
         <label>
           Nome do Laboratório:
@@ -161,7 +161,7 @@ const LabSettings = () => {
           />
         </label>
 
-        <button type="submit" className="save-button">
+        <button type="submit" className="btn-confirm">
           Salvar Alterações
         </button>
       </form>

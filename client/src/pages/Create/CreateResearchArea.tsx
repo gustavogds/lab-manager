@@ -59,9 +59,9 @@ const CreateResearchArea = () => {
   };
 
   return (
-    <div className="create-research-area-page">
-      <div className="create-research-area-container">
-        <button className="back-button" onClick={() => navigate(-1)}>
+    <div className="page-layout">
+      <div className="page-container">
+        <button className="btn-back" onClick={() => navigate(-1)}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -70,8 +70,8 @@ const CreateResearchArea = () => {
           <p>Preencha os campos abaixo para criar uma nova área de pesquisa</p>
         </header>
 
-        {message && <div className="success-message">{message}</div>}
-        {error && <div className="error-message">{error}</div>}
+        {message && <div className="msg-success">{message}</div>}
+        {error && <div className="msg-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="research-area-form">
           <div className="form-field">
@@ -104,7 +104,7 @@ const CreateResearchArea = () => {
           <div className="form-actions">
             <button
               type="button"
-              className="cancel-button"
+              className="btn-cancel"
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
@@ -112,7 +112,7 @@ const CreateResearchArea = () => {
             </button>
             <button
               type="submit"
-              className="submit-button"
+              className="btn-confirm"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Criando..." : "Criar Área de Pesquisa"}

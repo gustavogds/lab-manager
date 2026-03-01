@@ -94,6 +94,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     position = models.CharField(max_length=100, null=True, blank=True)
     researcher_order = models.IntegerField(default=0)
     show_in_researchers = models.BooleanField(default=True)
+    is_former_member = models.BooleanField(default=False)
     birthdate = models.DateField(null=True, blank=True, default=timezone.now)
     phone = models.CharField(max_length=50, null=True, blank=True)
     contact_email = models.CharField(max_length=50, null=True, blank=True)
@@ -136,6 +137,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             "position": self.position,
             "researcher_order": self.researcher_order,
             "show_in_researchers": self.show_in_researchers,
+            "is_former_member": self.is_former_member,
             "email": self.email,
             "birthdate": self.birthdate.isoformat(),
             "is_staff": self.is_staff,

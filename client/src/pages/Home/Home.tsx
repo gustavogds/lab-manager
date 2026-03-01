@@ -715,7 +715,7 @@ const Home = () => {
       return;
     }
 
-    const configData = result as Array<{ id: number; order: number; show: boolean }>;
+    const configData = result as Array<{ id: number; order: number; show: boolean; is_former_member: boolean }>;
     const response = await updateResearchersConfig(configData);
 
     if (response.success) {
@@ -848,7 +848,7 @@ const Home = () => {
             {researchAreas.length > 0 ? (
               <div className="research-areas-list">
                 {researchAreas.map((area) => (
-                  <div key={area.id} className="research-area-card">
+                  <div key={area.id} className="content-card">
                     <div className="card-content">
                       <h3>{area.title}</h3>
                       <p>{area.description}</p>
@@ -856,21 +856,21 @@ const Home = () => {
                     {isProfessor && (
                       <div className="card-actions">
                         <button
-                          className="toggle-btn"
+                          className="btn-icon btn-icon--primary"
                           onClick={() => handleToggleResearchAreaVisibility(area)}
                           title={area.is_active ? "Esconder" : "Mostrar"}
                         >
                           {area.is_active ? <FaEye /> : <FaEyeSlash />}
                         </button>
                         <button
-                          className="edit-btn"
+                          className="btn-icon btn-icon--primary"
                           onClick={() => openResearchAreaEditor(area)}
                           title="Editar"
                         >
                           <FaEdit />
                         </button>
                         <button
-                          className="delete-btn"
+                          className="btn-icon btn-icon--danger"
                           onClick={() => handleDeleteResearchArea(area)}
                           title="Excluir"
                         >
@@ -890,7 +890,7 @@ const Home = () => {
             )}
             {isProfessor && (
               <button
-                className="add-research-area-btn"
+                className="btn-add"
                 onClick={() => navigate("/create/research-area")}
               >
                 <FaPlus /> Adicionar Área de Pesquisa
@@ -906,7 +906,7 @@ const Home = () => {
                 {projects.map((project) => (
                   <div 
                     key={project.id} 
-                    className="project-card clickable"
+                    className="content-card clickable"
                     onClick={() => openProjectDetails(project)}
                   >
                     <div className="card-content">
@@ -916,7 +916,7 @@ const Home = () => {
                     {isProfessor && (
                       <div className="card-actions">
                         <button
-                          className="toggle-btn"
+                          className="btn-icon btn-icon--primary"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleProjectVisibility(project);
@@ -926,7 +926,7 @@ const Home = () => {
                           {project.is_active ? <FaEye /> : <FaEyeSlash />}
                         </button>
                         <button
-                          className="edit-btn"
+                          className="btn-icon btn-icon--primary"
                           onClick={(e) => {
                             e.stopPropagation();
                             openProjectEditor(project);
@@ -936,7 +936,7 @@ const Home = () => {
                           <FaEdit />
                         </button>
                         <button
-                          className="delete-btn"
+                          className="btn-icon btn-icon--danger"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteProject(project);
@@ -959,7 +959,7 @@ const Home = () => {
             )}
             {isProfessor && (
               <button
-                className="add-project-btn"
+                className="btn-add"
                 onClick={() => navigate("/create/project")}
               >
                 <FaPlus /> Adicionar Projeto
@@ -968,11 +968,13 @@ const Home = () => {
           </div>
         );
       case "researchers":
+        const currentResearchers = researchers.filter((r) => !r.is_former_member);
+        const formerResearchers = researchers.filter((r) => r.is_former_member);
         return (
           <div className="researchers-section">
-            {researchers.length > 0 ? (
+            {currentResearchers.length > 0 ? (
               <div className="researchers-grid">
-                {researchers.map((researcher) => (
+                {currentResearchers.map((researcher) => (
                   <ResearcherCard
                     key={researcher.id}
                     researcher={researcher}
@@ -982,6 +984,20 @@ const Home = () => {
               </div>
             ) : (
               <p>Nenhum pesquisador disponível no momento.</p>
+            )}
+            {formerResearchers.length > 0 && (
+              <div className="former-members-section">
+                <h3 className="former-members-title">Ex-membros</h3>
+                <div className="researchers-grid former-grid">
+                  {formerResearchers.map((researcher) => (
+                    <ResearcherCard
+                      key={researcher.id}
+                      researcher={researcher}
+                      onClick={() => openResearcherDetails(researcher)}
+                    />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         );
@@ -1006,7 +1022,7 @@ const Home = () => {
             )}
             {isProfessor && (
               <button
-                className="add-partnership-btn"
+                className="btn-add"
                 onClick={() => navigate("/create/partnership")}
               >
                 <FaPlus /> Adicionar Parceria
@@ -1024,7 +1040,7 @@ const Home = () => {
               <h3><FaEnvelope /> Contato</h3>
               {isProfessor && (
                 <button
-                  className="column-edit-btn"
+                  className="btn-icon btn-icon--primary column-edit-btn"
                   type="button"
                   onClick={() => openSectionEditor("contact")}
                   title="Editar contato"
@@ -1048,7 +1064,7 @@ const Home = () => {
               <h3><FaMapMarkerAlt /> Localização</h3>
               {isProfessor && (
                 <button
-                  className="column-edit-btn"
+                  className="btn-icon btn-icon--primary column-edit-btn"
                   type="button"
                   onClick={() => openSectionEditor("location")}
                   title="Editar localização"

@@ -83,7 +83,7 @@ const ManageProjects = () => {
   return (
     <div className="manage-content-page">
       <div className="manage-content-container">
-        <button className="back-button" onClick={() => navigate("/manage")}>
+        <button className="btn-back" onClick={() => navigate("/manage")}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -94,7 +94,7 @@ const ManageProjects = () => {
           </div>
           {!isLoading && hasProjects && (
             <button
-              className="add-button"
+              className="btn-add btn-sm"
               onClick={() => navigate("/create/project")}
             >
               <FaPlus /> Novo Projeto

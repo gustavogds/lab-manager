@@ -1,31 +1,28 @@
 import React, { useState } from "react";
-import { updateResearchArea, deleteResearchArea } from "helpers/api/content";
-import type { ResearchArea } from "helpers/api/content";
+import { updateRoom, deleteRoom } from "helpers/api/content";
+import type { Room } from "helpers/api/content";
 
 import { ModalsHandler } from "components/my-own-modal-handler";
 import "pages/Manage/ManageContent.scss";
 
-interface ResearchAreaEditorProps {
-  researchArea: ResearchArea;
+interface RoomEditorProps {
+  room: Room;
   onConfirm: () => void;
   onCancel?: () => void;
 }
 
-const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
-  researchArea,
+const RoomEditor: React.FC<RoomEditorProps> = ({
+  room,
   onConfirm,
   onCancel,
 }) => {
   const [formData, setFormData] = useState({
-    title: researchArea.title,
-    description: researchArea.description || "",
+    name: room.name,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -33,26 +30,21 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
-      setError("O título é obrigatório.");
+    if (!formData.name.trim()) {
+      setError("O nome é obrigatório.");
       return;
     }
 
     setIsSaving(true);
     setError("");
 
-    const payload: Record<string, any> = {
-      title: formData.title,
-      description: formData.description.trim() || "",
-    };
-
-    const response = await updateResearchArea(researchArea.id, payload);
+    const response = await updateRoom(room.id, { name: formData.name.trim() });
     setIsSaving(false);
 
     if (response.success) {
       ModalsHandler.createNotification({
         title: "Sucesso",
-        message: "Área de pesquisa atualizada!",
+        message: "Sala atualizada com sucesso!",
         type: "success",
       });
       onConfirm();
@@ -60,48 +52,30 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
     } else {
       ModalsHandler.createNotification({
         title: "Erro",
-        message: response.error || "Falha ao atualizar área de pesquisa.",
+        message: response.error || "Falha ao atualizar sala.",
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar área de pesquisa.");
-    }
-  };
-
-  const handleToggleActive = async () => {
-    setIsSaving(true);
-    setError("");
-    const response = await updateResearchArea(researchArea.id, {
-      is_active: !researchArea.is_active,
-    });
-    setIsSaving(false);
-
-    if (response.success) {
-      ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: researchArea.is_active
-          ? "Área de pesquisa desativada!"
-          : "Área de pesquisa ativada!",
-        type: "success",
-      });
-      onConfirm();
-      onCancel?.();
-    } else {
-      setError(response.error || "Falha ao atualizar área de pesquisa.");
+      setError(response.error || "Falha ao atualizar sala.");
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Tem certeza que deseja excluir "${researchArea.title}"?`)) return;
+    if (
+      !confirm(
+        `Tem certeza que deseja excluir a sala "${room.name}"? Os equipamentos desta sala ficarão sem sala definida.`
+      )
+    )
+      return;
 
     setIsSaving(true);
     setError("");
-    const response = await deleteResearchArea(researchArea.id);
+    const response = await deleteRoom(room.id);
     setIsSaving(false);
 
     if (response.success) {
       ModalsHandler.createNotification({
         title: "Sucesso",
-        message: "Área de pesquisa excluída com sucesso!",
+        message: "Sala excluída com sucesso!",
         type: "success",
       });
       onConfirm();
@@ -109,10 +83,10 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
     } else {
       ModalsHandler.createNotification({
         title: "Erro",
-        message: response.error || "Falha ao excluir área de pesquisa.",
+        message: response.error || "Falha ao excluir sala.",
         type: "error",
       });
-      setError(response.error || "Falha ao excluir área de pesquisa.");
+      setError(response.error || "Falha ao excluir sala.");
     }
   };
 
@@ -134,7 +108,7 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Área de Pesquisa</h2>
+          <h2>Editar Sala</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -144,28 +118,17 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="ra-title">Título *</label>
+            <label htmlFor="room-name">Nome *</label>
             <input
-              id="ra-title"
+              id="room-name"
               type="text"
-              name="title"
-              value={formData.title}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
-              placeholder="Título da área de pesquisa"
+              placeholder="Nome da sala"
               maxLength={255}
               required
-            />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="ra-description">Descrição</label>
-            <textarea
-              id="ra-description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Descrição da área de pesquisa"
-              rows={4}
+              autoFocus
             />
           </div>
 
@@ -178,14 +141,6 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
                 disabled={isSaving}
               >
                 Excluir
-              </button>
-              <button
-                type="button"
-                className="btn-toggle"
-                onClick={handleToggleActive}
-                disabled={isSaving}
-              >
-                {researchArea.is_active ? "Desativar" : "Ativar"}
               </button>
             </div>
             <div className="right-actions">
@@ -203,4 +158,4 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
   );
 };
 
-export default ResearchAreaEditor;
+export default RoomEditor;

@@ -26,5 +26,9 @@ urlpatterns = [
     path("equipment/config/", views.update_equipment_config, name="update_equipment_config"),
     path("equipment/<int:equipment_id>/update/", views.update_equipment, name="update_equipment"),
     path("equipment/<int:equipment_id>/delete/", views.delete_equipment, name="delete_equipment"),
+    path("rooms/", views.list_rooms, name="list_rooms"),
+    path("rooms/create/", views.create_room, name="create_room"),
+    path("rooms/<int:room_id>/update/", views.update_room, name="update_room"),
+    path("rooms/<int:room_id>/delete/", views.delete_room, name="delete_room"),
     path("reports/generate/", reports.generate_report, name="generate_report"),
 ]

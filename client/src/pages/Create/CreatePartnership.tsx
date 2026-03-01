@@ -88,9 +88,9 @@ const CreatePartnership = () => {
   };
 
   return (
-    <div className="create-partnership-page">
-      <div className="create-partnership-container">
-        <button className="back-button" onClick={() => navigate(-1)}>
+    <div className="page-layout">
+      <div className="page-container">
+        <button className="btn-back" onClick={() => navigate(-1)}>
           <FaArrowLeft /> Voltar
         </button>
 
@@ -99,8 +99,8 @@ const CreatePartnership = () => {
           <p>Preencha os campos abaixo para adicionar uma nova instituição parceira</p>
         </header>
 
-        {message && <div className="success-message">{message}</div>}
-        {error && <div className="error-message">{error}</div>}
+        {message && <div className="msg-success">{message}</div>}
+        {error && <div className="msg-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="partnership-form">
           <div className="form-field">
@@ -165,7 +165,7 @@ const CreatePartnership = () => {
           <div className="form-actions">
             <button
               type="button"
-              className="cancel-button"
+              className="btn-cancel"
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
@@ -173,7 +173,7 @@ const CreatePartnership = () => {
             </button>
             <button
               type="submit"
-              className="submit-button"
+              className="btn-confirm"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Criando..." : "Criar Parceria"}

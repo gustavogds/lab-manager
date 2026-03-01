@@ -11,15 +11,14 @@ const ProjectDetails = ({ project, onConfirm }: ProjectDetailsProps) => {
   return (
     <div className="project-details-modal" onClick={onConfirm}>
       <div className="project-details-content" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onConfirm}>
-          ×
-        </button>
+        <header className="modal-header-shared project-header">
+          <h2>{project.title}</h2>
+          <button className="btn-close-modal" onClick={onConfirm}>
+            ×
+          </button>
+        </header>
 
         <div className="project-details-body">
-          <header className="project-header">
-            <h2>{project.title}</h2>
-          </header>
-
           <section className="project-description">
             <h3>Descrição</h3>
             <p>{project.description}</p>

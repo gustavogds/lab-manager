@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { listApprovedUsers, updateProject, deleteProject } from "helpers/api/content";
 import type { Project, User } from "helpers/api/content";
-import { FaTimes } from "react-icons/fa";
+
 import { ModalsHandler } from "components/my-own-modal-handler";
 import MultiSelect from "components/MultiSelect/MultiSelect";
 import "pages/Manage/ManageContent.scss";
@@ -142,7 +142,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
 
   return (
     <div
-      className="content-editor-overlay"
+      className="modal-overlay-shared"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           handleCancel();
@@ -150,17 +150,17 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
       }}
     >
       <div
-        className="content-editor-modal"
+        className="modal-panel"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="editor-header">
+        <div className="modal-header-shared">
           <h2>Editar Projeto</h2>
-          <button className="close-btn" onClick={handleCancel}>
-            <FaTimes />
+          <button className="btn-close-modal" onClick={handleCancel}>
+            ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="editor-form">
+        <form onSubmit={handleSubmit} className="modal-body-shared">
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
@@ -203,11 +203,11 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
             )}
           </div>
 
-          <div className="editor-actions">
+          <div className="modal-actions">
             <div className="left-actions">
               <button
                 type="button"
-                className="danger-btn"
+                className="btn-danger"
                 onClick={handleDelete}
                 disabled={isSaving}
               >
@@ -215,7 +215,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
               </button>
               <button
                 type="button"
-                className="toggle-btn"
+                className="btn-toggle"
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
@@ -223,10 +223,10 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
               </button>
             </div>
             <div className="right-actions">
-              <button type="button" className="cancel-btn" onClick={handleCancel}>
+              <button type="button" className="btn-cancel" onClick={handleCancel}>
                 Cancelar
               </button>
-              <button type="submit" className="confirm-btn" disabled={isSaving}>
+              <button type="submit" className="btn-confirm" disabled={isSaving}>
                 {isSaving ? "Salvando..." : "Salvar"}
               </button>
             </div>

@@ -62,18 +62,18 @@ const Create = () => {
   ];
 
   return (
-    <div className="create-page">
-      <div className="create-container">
-        <header className="create-header">
+    <div className="page-layout">
+      <div className="page-container">
+        <header className="page-header">
           <h1>Criar Novo Conteúdo</h1>
           <p>Selecione o tipo de conteúdo que deseja criar</p>
         </header>
 
-        <div className="create-options">
+        <div className="option-cards-grid">
           {createOptions.map((option) => (
             <div
               key={option.id}
-              className="create-option-card"
+              className="option-card"
               onClick={option.action}
             >
               <div className="option-icon">{option.icon}</div>

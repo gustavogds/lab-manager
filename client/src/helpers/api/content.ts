@@ -196,6 +196,7 @@ export type User = {
   position?: string;
   researcher_order?: number;
   show_in_researchers?: boolean;
+  is_former_member?: boolean;
   phone?: string;
   contact_email?: string;
   social_media?: string;
@@ -245,7 +246,7 @@ export const listAllResearchers = async () => {
 };
 
 export const updateResearchersConfig = async (
-  researchers: Array<{ id: number; order: number; show: boolean }>
+  researchers: Array<{ id: number; order: number; show: boolean; is_former_member: boolean }>
 ) => {
   const response = await api
     .patch("/accounts/researchers/config/", { researchers })
@@ -357,17 +358,31 @@ export const deletePartnership = async (partnershipId: number) => {
   };
 };
 
+export type Room = {
+  id: number;
+  name: string;
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Equipment = {
   id: number;
   name: string;
   custom_id: string;
-  location: string | null;
+  room: Room | null;
   assigned_to: {
     id: number;
     name: string;
     email: string;
     profile_image: string | null;
   } | null;
+  users: Array<{
+    id: number;
+    name: string;
+    email: string;
+    profile_image: string | null;
+  }>;
   is_active: boolean;
   order: number;
   created_at: string;
@@ -377,7 +392,7 @@ export type Equipment = {
 export const createEquipment = async (data: {
   name: string;
   custom_id: string;
-  location?: string;
+  room_id?: number | null;
 }) => {
   const response = await api
     .post("/content/equipment/create/", data)
@@ -431,6 +446,42 @@ export const updateEquipmentConfig = async (
 export const deleteEquipment = async (equipmentId: number) => {
   const response = await api
     .delete(`/content/equipment/${equipmentId}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const createRoom = async (data: { name: string }) => {
+  const response = await api
+    .post("/content/rooms/create/", data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const listRooms = async () => {
+  const response = await api
+    .get("/content/rooms/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, data: response.data.data || [] };
+};
+
+export const updateRoom = async (roomId: number, data: Partial<Room>) => {
+  const response = await api
+    .patch(`/content/rooms/${roomId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const deleteRoom = async (roomId: number) => {
+  const response = await api
+    .delete(`/content/rooms/${roomId}/delete/`)
     .catch((error) => {
       return error.response ? error.response : error;
     });

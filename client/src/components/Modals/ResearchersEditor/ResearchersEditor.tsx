@@ -10,6 +10,7 @@ interface ResearcherConfig {
   position: string | null;
   order: number;
   show: boolean;
+  is_former_member: boolean;
 }
 
 interface ResearchersEditorProps {
@@ -28,6 +29,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
         position: r.position ?? null,
         order: r.researcher_order ?? 0,
         show: r.show_in_researchers ?? true,
+        is_former_member: r.is_former_member ?? false,
       }))
       .sort((a, b) => a.order - b.order)
   );
@@ -36,6 +38,14 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
     setConfig((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, show: !item.show } : item
+      )
+    );
+  };
+
+  const toggleFormerMember = (id: number) => {
+    setConfig((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, is_former_member: !item.is_former_member } : item
       )
     );
   };
@@ -65,9 +75,9 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
   return (
     <div className="researchers-editor-modal" onClick={onCancel}>
       <div className="researchers-editor-content" onClick={(e) => e.stopPropagation()}>
-        <header className="editor-header">
+        <header className="modal-header-shared">
           <h2>Editar Seção de Pesquisadores</h2>
-          <button className="close-button" onClick={onCancel}>
+          <button className="btn-close-modal" onClick={onCancel}>
             ×
           </button>
         </header>
@@ -117,6 +127,15 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
                   )}
                 </div>
 
+                <button
+                  type="button"
+                  className={`former-member-btn ${researcher.is_former_member ? "active" : ""}`}
+                  onClick={() => toggleFormerMember(researcher.id)}
+                  title={researcher.is_former_member ? "Marcar como membro ativo" : "Marcar como ex-membro"}
+                >
+                  Ex-membro
+                </button>
+
                 <label className="visibility-toggle">
                   <input
                     type="checkbox"
@@ -134,7 +153,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
           <button className="btn-cancel" onClick={onCancel}>
             Cancelar
           </button>
-          <button className="btn-save" onClick={handleSave}>
+          <button className="btn-confirm" onClick={handleSave}>
             Salvar
           </button>
         </footer>

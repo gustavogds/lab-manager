@@ -73,9 +73,9 @@ const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsE
   return (
     <div className="partnerships-editor-modal" onClick={onCancel}>
       <div className="partnerships-editor-content" onClick={(e) => e.stopPropagation()}>
-        <header className="editor-header">
+        <header className="modal-header-shared">
           <h2>Editar Parcerias</h2>
-          <button className="close-button" onClick={onCancel}>
+          <button className="btn-close-modal" onClick={onCancel}>
             ×
           </button>
         </header>
@@ -152,7 +152,7 @@ const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsE
           <button className="btn-cancel" onClick={onCancel}>
             Cancelar
           </button>
-          <button className="btn-save" onClick={handleSave}>
+          <button className="btn-confirm" onClick={handleSave}>
             Salvar
           </button>
         </footer>
