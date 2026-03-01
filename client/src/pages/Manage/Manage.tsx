@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { FaTools, FaFlask, FaProjectDiagram, FaHandshake, FaArrowRight } from "react-icons/fa";
-import "./Manage.scss";
+import "./ManageContent.scss";
 
 type ManageOption = {
   id: string;

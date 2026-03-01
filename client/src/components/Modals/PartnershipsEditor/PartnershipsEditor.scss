@@ -1,4 +1,5 @@
-@import "../../../styles/variables";
+@use "sass:color";
+@use "../../../styles/variables" as *;
 
 .partnerships-editor-modal {
   position: fixed;
@@ -212,7 +213,7 @@
   background-color: rgba($btn-warning-color, 0.1);
   border: 1px solid rgba($btn-warning-color, 0.3);
   border-radius: 8px;
-  color: darken($btn-warning-color, 15%);
+  color: color.adjust($btn-warning-color, $lightness: -15%);
   font-size: 0.9rem;
 }
 

@@ -3,8 +3,6 @@ import { listApprovedUsers } from "helpers/api/content";
 import type { Project, User } from "helpers/api/content";
 import MultiSelect from "components/MultiSelect/MultiSelect";
 
-import "./ProjectEditor.scss";
-
 interface ProjectEditorProps {
   project: Project;
   onConfirm: (data: {

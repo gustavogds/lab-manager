@@ -1,4 +1,5 @@
-@import "variables";
+@use "sass:color";
+@use "variables" as *;
 
 .btn-confirm {
   padding: 0.75rem 1.5rem;
@@ -79,7 +80,7 @@
   transition: all $transition-fast;
   border: none;
   background: rgba($btn-success-color, 0.1);
-  color: darken($btn-success-color, 10%);
+  color: color.adjust($btn-success-color, $lightness: -10%);
 
   &:hover:not(:disabled) {
     background: rgba($btn-success-color, 0.18);
