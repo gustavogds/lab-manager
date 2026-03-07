@@ -4,6 +4,7 @@ import { ptBR } from "date-fns/locale/pt-BR";
 import "react-datepicker/dist/react-datepicker.css";
 import { useGlobalData } from "helpers/context/globalContext";
 import { saveProfile, uploadProfileImage } from "helpers/api/settings";
+import { listPositions, type Position } from "helpers/api/content";
 import "./Settings.scss";
 
 registerLocale("pt-BR", ptBR);
@@ -14,7 +15,7 @@ const ProfileSettings = () => {
 
   const [formData, setFormData] = useState({
     name: "",
-    position: "",
+    position_id: null as number | null,
     phone: "",
     contact_email: "",
     social_media: "",
@@ -28,6 +29,7 @@ const ProfileSettings = () => {
   const [error, setError] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [positions, setPositions] = useState<Position[]>([]);
 
   const MAX_PROFILE_IMAGE_SIZE_MB = 2;
   const MAX_PROFILE_IMAGE_SIZE_BYTES =
@@ -36,7 +38,7 @@ const ProfileSettings = () => {
   useEffect(() => {
     setFormData({
       name: initialData.name || "",
-      position: initialData.position || "",
+      position_id: initialData.position?.id ?? null,
       phone: initialData.phone || "",
       contact_email: initialData.contact_email || "",
       social_media: initialData.social_media || "",
@@ -60,8 +62,18 @@ const ProfileSettings = () => {
     setProfileImageUrl(initialData.profile_image || "");
   }, [initialData]);
 
+  useEffect(() => {
+    const fetchPositions = async () => {
+      const response = await listPositions();
+      if (response.success) {
+        setPositions(response.data);
+      }
+    };
+    fetchPositions();
+  }, []);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const target = e.target;
 
@@ -175,12 +187,24 @@ const ProfileSettings = () => {
         </label>
         <label>
           Posição/Cargo:
-          <input
-            name="position"
-            value={formData.position}
-            onChange={handleChange}
-            placeholder="Ex: Coordenador, Doutorando, Mestrando..."
-          />
+          <select
+            name="position_id"
+            value={formData.position_id || ""}
+            onChange={(e) => {
+              const value = e.target.value;
+              setFormData((prev) => ({
+                ...prev,
+                position_id: value ? Number(value) : null,
+              }));
+            }}
+          >
+            <option value="">Nenhum</option>
+            {positions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           Telefone:

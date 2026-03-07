@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
-from .models import User
+from .models import User, Position
 
 
 @login_required
@@ -21,7 +21,6 @@ def update_user_settings(request):
 
     allowed_fields = [
         "name",
-        "position",
         "phone",
         "contact_email",
         "social_media",
@@ -41,6 +40,21 @@ def update_user_settings(request):
             current_value = getattr(user, field)
             if current_value != new_value:
                 setattr(user, field, new_value)
+                updated = True
+
+    if "position_id" in data:
+        position_id = data.get("position_id")
+        if position_id:
+            try:
+                position = Position.objects.get(id=position_id)
+                if user.position != position:
+                    user.position = position
+                    updated = True
+            except Position.DoesNotExist:
+                pass
+        else:
+            if user.position is not None:
+                user.position = None
                 updated = True
 
     if updated:
@@ -191,3 +205,168 @@ def update_researchers_config(request):
             continue
 
     return JsonResponse({"success": True, "message": "Researchers updated."})
+
+
+@require_http_methods(["GET"])
+def list_positions(request):
+    positions = Position.objects.all()
+    return JsonResponse({
+        "success": True,
+        "data": [p.export() for p in positions]
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def create_position(request):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+    
+    name = data.get("name", "").strip()
+    if not name:
+        return JsonResponse({"error": "Name is required."}, status=400)
+    
+    position = Position.objects.create(name=name)
+    return JsonResponse({
+        "success": True,
+        "message": "Position created.",
+        "data": position.export()
+    })
+
+
+@login_required
+@require_http_methods(["PATCH"])
+def update_position(request, position_id):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    try:
+        position = Position.objects.get(id=position_id)
+    except Position.DoesNotExist:
+        return JsonResponse({"error": "Position not found."}, status=404)
+    
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+    
+    if "name" in data:
+        position.name = data["name"].strip()
+    if "order" in data:
+        position.order = data["order"]
+    
+    position.save()
+    return JsonResponse({
+        "success": True,
+        "message": "Position updated.",
+        "data": position.export()
+    })
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_position(request, position_id):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    try:
+        position = Position.objects.get(id=position_id)
+    except Position.DoesNotExist:
+        return JsonResponse({"error": "Position not found."}, status=404)
+    
+    position.delete()
+    return JsonResponse({"success": True, "message": "Position deleted."})
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_all_users(request):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    users = User.objects.select_related("position", "room").all().order_by("name")
+    return JsonResponse({
+        "success": True,
+        "data": [u.export() for u in users]
+    })
+
+
+@login_required
+@require_http_methods(["PATCH"])
+def update_user(request, user_id):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found."}, status=404)
+    
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+    
+    if "roles" in data:
+        roles = data["roles"]
+        valid_roles = ["professor", "student", "collaborator", "inventory_manager"]
+        if not isinstance(roles, list) or not all(r in valid_roles for r in roles):
+            return JsonResponse({"error": "Invalid roles."}, status=400)
+        user.roles = roles
+    
+    if "position_id" in data:
+        position_id = data["position_id"]
+        if position_id:
+            try:
+                user.position = Position.objects.get(id=position_id)
+            except Position.DoesNotExist:
+                return JsonResponse({"error": "Position not found."}, status=404)
+        else:
+            user.position = None
+    
+    if "room_id" in data:
+        room_id = data["room_id"]
+        if room_id:
+            from content.models import Room
+            try:
+                user.room = Room.objects.get(id=room_id)
+            except Room.DoesNotExist:
+                return JsonResponse({"error": "Room not found."}, status=404)
+        else:
+            user.room = None
+    
+    if "is_active" in data:
+        user.is_active = data["is_active"]
+    
+    if "is_approved" in data:
+        user.is_approved = data["is_approved"]
+    
+    user.save()
+    return JsonResponse({
+        "success": True,
+        "message": "User updated.",
+        "data": user.export()
+    })
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_user(request, user_id):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found."}, status=404)
+    
+    if user.id == request.user.id:
+        return JsonResponse({"error": "Cannot delete yourself."}, status=400)
+    
+    user.delete()
+    return JsonResponse({"success": True, "message": "User deleted."})

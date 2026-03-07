@@ -19,7 +19,7 @@ const ResearcherCard = ({ researcher, onClick }: ResearcherCardProps) => {
       </div>
       <h3 className="researcher-name">{researcher.name}</h3>
       {researcher.position && (
-        <p className="researcher-position">{researcher.position}</p>
+        <p className="researcher-position">{researcher.position.name}</p>
       )}
     </div>
   );

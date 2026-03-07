@@ -16,4 +16,11 @@ urlpatterns = [
     path("researchers/", views.list_researchers, name="list_researchers"),
     path("researchers/all/", views.list_all_researchers, name="list_all_researchers"),
     path("researchers/config/", views.update_researchers_config, name="update_researchers_config"),
+    path("positions/", views.list_positions, name="list_positions"),
+    path("positions/create/", views.create_position, name="create_position"),
+    path("positions/<int:position_id>/update/", views.update_position, name="update_position"),
+    path("positions/<int:position_id>/delete/", views.delete_position, name="delete_position"),
+    path("users/", views.list_all_users, name="list_all_users"),
+    path("users/<int:user_id>/update/", views.update_user, name="update_user"),
+    path("users/<int:user_id>/delete/", views.delete_user, name="delete_user"),
 ]

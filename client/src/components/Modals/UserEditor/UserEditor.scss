@@ -1,0 +1,77 @@
+@use "../../../styles/variables" as *;
+
+.user-editor-modal {
+  .user-info-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    padding: $spacing-lg;
+    background: $neutral-surface;
+    border-radius: $radius-md;
+
+    .user-avatar-large {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-xs;
+
+      .user-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $neutral-ink;
+      }
+
+      .user-email {
+        font-size: 0.875rem;
+        color: $neutral-muted;
+      }
+
+      .user-username {
+        font-size: 0.8125rem;
+        color: $neutral-muted;
+      }
+    }
+  }
+
+  .roles-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    padding: $spacing-sm 0;
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      cursor: pointer;
+      padding: $spacing-sm $spacing-md;
+      background: $neutral-surface;
+      border-radius: $radius-sm;
+      border: 1px solid $neutral-border;
+      transition: all $transition-fast;
+
+      &:hover {
+        border-color: $primary-color;
+        background: rgba($primary-color, 0.05);
+      }
+
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: $primary-color;
+      }
+
+      span {
+        font-size: 0.875rem;
+        color: $neutral-ink;
+      }
+    }
+  }
+}

@@ -26,7 +26,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
         id: r.id,
         name: r.name,
         profile_image: r.profile_image,
-        position: r.position ?? null,
+        position: r.position?.name ?? null,
         order: r.researcher_order ?? 0,
         show: r.show_in_researchers ?? true,
         is_former_member: r.is_former_member ?? false,

@@ -8,6 +8,26 @@ from django.db import models
 from django.utils import timezone
 
 
+class Position(models.Model):
+    name = models.CharField(max_length=100)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
+
+    def export(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "order": self.order,
+        }
+
+
 class UserManager(BaseUserManager):
     VALID_ROLES = ["professor", "student", "collaborator", "inventory_manager"]
     
@@ -78,7 +98,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50, unique=True, null=True, blank=True)
 
     name = models.CharField(max_length=50, null=True, blank=True)
-    position = models.CharField(max_length=100, null=True, blank=True)
+    position = models.ForeignKey(
+        Position,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users"
+    )
+    room = models.ForeignKey(
+        "content.Room",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="users"
+    )
     researcher_order = models.IntegerField(default=0)
     show_in_researchers = models.BooleanField(default=True)
     is_former_member = models.BooleanField(default=False)
@@ -111,19 +144,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"<User pk={self.pk} username={self.username} email={self.email}>"
     
     def has_role(self, role):
-        """Check if user has a specific role"""
         return role in (self.roles or [])
     
     def has_any_role(self, roles_list):
-        """Check if user has any of the specified roles"""
         return any(role in (self.roles or []) for role in roles_list)
     
     def can_manage_equipment(self):
-        """Check if user can manage equipment"""
         return self.has_any_role(["professor", "inventory_manager"])
     
     def can_manage_all(self):
-        """Check if user can manage everything (professor only)"""
         return self.has_role("professor")
 
     def export(self, include=None):
@@ -131,12 +160,13 @@ class User(AbstractBaseUser, PermissionsMixin):
             "id": self.id,
             "username": self.username,
             "name": self.name,
-            "position": self.position,
+            "position": self.position.export() if self.position else None,
+            "room": self.room.export() if self.room else None,
             "researcher_order": self.researcher_order,
             "show_in_researchers": self.show_in_researchers,
             "is_former_member": self.is_former_member,
             "email": self.email,
-            "birthdate": self.birthdate.isoformat(),
+            "birthdate": self.birthdate.isoformat() if self.birthdate else None,
             "is_staff": self.is_staff,
             "is_active": self.is_active,
             "date_joined": self.date_joined.isoformat(),

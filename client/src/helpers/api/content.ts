@@ -192,8 +192,10 @@ export type User = {
   id: number;
   name: string;
   email: string;
+  username?: string;
   profile_image: string | null;
-  position?: string;
+  position?: Position | null;
+  room?: Room | null;
   researcher_order?: number;
   show_in_researchers?: boolean;
   is_former_member?: boolean;
@@ -203,6 +205,10 @@ export type User = {
   lattes?: string;
   bio?: string;
   roles?: string[];
+  is_active?: boolean;
+  is_approved?: boolean;
+  email_validated?: boolean;
+  date_joined?: string;
 };
 
 export type Researcher = User;
@@ -365,6 +371,12 @@ export type Room = {
   order: number;
   created_at: string;
   updated_at: string;
+};
+
+export type Position = {
+  id: number;
+  name: string;
+  order: number;
 };
 
 export type IdentificationCategory = {
@@ -635,4 +647,104 @@ export const generateReport = async (data: {
     }
     return { success: false, error: "Erro ao gerar relatório." };
   }
+};
+
+export const listPositions = async () => {
+  const response = await api
+    .get("/accounts/positions/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data?.data || [],
+  };
+};
+
+export const createPosition = async (data: { name: string }) => {
+  const response = await api
+    .post("/accounts/positions/create/", data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const updatePosition = async (id: number, data: { name?: string; order?: number }) => {
+  const response = await api
+    .patch(`/accounts/positions/${id}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const deletePosition = async (id: number) => {
+  const response = await api
+    .delete(`/accounts/positions/${id}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const listAllUsers = async () => {
+  const response = await api
+    .get("/accounts/users/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data?.data || [],
+  };
+};
+
+export const updateUser = async (
+  id: number,
+  data: {
+    roles?: string[];
+    position_id?: number | null;
+    room_id?: number | null;
+    is_active?: boolean;
+    is_approved?: boolean;
+  }
+) => {
+  const response = await api
+    .patch(`/accounts/users/${id}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const deleteUser = async (id: number) => {
+  const response = await api
+    .delete(`/accounts/users/${id}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
 };

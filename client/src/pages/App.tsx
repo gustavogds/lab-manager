@@ -21,6 +21,7 @@ import ManageEquipment from "./Manage/ManageEquipment";
 import ManageResearchAreas from "./Manage/ManageResearchAreas";
 import ManageProjects from "./Manage/ManageProjects";
 import ManagePartnerships from "./Manage/ManagePartnerships";
+import ManageUsers from "./Manage/ManageUsers";
 
 import { useEffect, useState } from "react";
 import AuthHandler from "../helpers/services/AuthHandler";
@@ -39,6 +40,8 @@ import PartnershipManageEditor from "../components/Modals/PartnershipManageEdito
 import RoomEditor from "../components/Modals/RoomEditor/RoomEditor";
 import IdentificationCategoryEditor from "../components/Modals/IdentificationCategoryEditor/IdentificationCategoryEditor";
 import EquipmentStateEditor from "../components/Modals/EquipmentStateEditor/EquipmentStateEditor";
+import UserEditor from "../components/Modals/UserEditor/UserEditor";
+import PositionEditor from "../components/Modals/PositionEditor/PositionEditor";
 
 const PrivateRoute = ({
   user,
@@ -98,6 +101,8 @@ const App = () => {
     ModalsHandler.registerModal("RoomEditor", RoomEditor);
     ModalsHandler.registerModal("IdentificationCategoryEditor", IdentificationCategoryEditor);
     ModalsHandler.registerModal("EquipmentStateEditor", EquipmentStateEditor);
+    ModalsHandler.registerModal("UserEditor", UserEditor);
+    ModalsHandler.registerModal("PositionEditor", PositionEditor);
   }, []);
 
   if (!readyToRender) {
@@ -288,6 +293,18 @@ const App = () => {
               canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <ManagePartnerships />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/manage/users"
+            element={
+              canManageAll(user.state) ? (
+                <PrivateRoute user={user.state}>
+                  <ManageUsers />
                 </PrivateRoute>
               ) : (
                 <Navigate to="/" />

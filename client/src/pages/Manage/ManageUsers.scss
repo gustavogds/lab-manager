@@ -1,0 +1,161 @@
+@use "../../styles/variables" as *;
+
+.manage-users-page {
+
+  .users-layout {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+
+  .positions-section {
+    .category-item {
+      background: $accent-purple-light;
+      
+      .category-name {
+        color: $accent-purple;
+      }
+
+      .btn-icon {
+        color: $accent-purple;
+      }
+    }
+  }
+
+  .rooms-section {
+    .category-item {
+      background: $accent-teal-light;
+      
+      .category-name {
+        color: $accent-teal;
+      }
+
+      .btn-icon {
+        color: $accent-teal;
+      }
+    }
+  }
+
+  .users-section {
+    background: $neutral-white;
+    border-radius: $radius-lg;
+    border: 2px solid $border-light;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.25rem;
+  }
+
+  .users-header {
+    margin-bottom: 1rem;
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: $accent-teal;
+      margin: 0;
+    }
+  }
+
+  .user-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid $border-light;
+  }
+
+  .cell-email {
+    color: $neutral-text-secondary;
+    font-size: 0.9rem;
+  }
+
+  .cell-position,
+  .cell-room {
+    color: $neutral-text-secondary;
+    font-size: 0.9rem;
+  }
+
+  .roles-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .role-tag {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    &.role-professor {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    &.role-student {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    &.role-collaborator {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    &.role-inventory_manager {
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    &.active {
+      background: #e6f7f0;
+      color: #1a7a54;
+    }
+
+    &.former {
+      background: #f5f5f5;
+      color: #757575;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .manage-users-page {
+    .header-actions {
+      width: 100%;
+    }
+
+    .create-dropdown {
+      width: 100%;
+
+      .btn-add {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .new-room-input-bar {
+      flex-direction: column;
+      align-items: stretch;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+}

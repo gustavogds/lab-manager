@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { FaTools, FaFlask, FaProjectDiagram, FaHandshake, FaArrowRight } from "react-icons/fa";
+import { FaTools, FaFlask, FaProjectDiagram, FaHandshake, FaUsers, FaArrowRight } from "react-icons/fa";
 import "./ManageContent.scss";
 import { useGlobalData } from "helpers/context/globalContext";
 import { canManageAll } from "helpers/utils";
@@ -58,6 +58,16 @@ const Manage = () => {
         navigate("/manage/equipment");
       },
       requiresFullAccess: false,
+    },
+    {
+      id: "users",
+      title: "Usuários",
+      description: "Gerenciar usuários, cargos e permissões",
+      icon: <FaUsers />,
+      action: () => {
+        navigate("/manage/users");
+      },
+      requiresFullAccess: true,
     },
   ];
 

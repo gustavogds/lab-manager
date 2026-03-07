@@ -24,7 +24,7 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
             <div className="researcher-info">
               <h2>{researcher.name}</h2>
               {researcher.position && (
-                <p className="position">{researcher.position}</p>
+                <p className="position">{researcher.position.name}</p>
               )}
             </div>
           </div>
