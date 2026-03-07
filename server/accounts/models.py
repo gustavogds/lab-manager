@@ -4,9 +4,8 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import models
 from django.utils import timezone
-from content.models import Content, ContentKind, Mount
 
 
 class UserManager(BaseUserManager):
@@ -37,19 +36,11 @@ class UserManager(BaseUserManager):
         if User.objects.filter(username=username).exists():
             raise ValidationError("User with this username already exists")
 
-        root_folder = Content.objects.create(
-            path=[],
-            kind=ContentKind.FOLDER,
-            name=email,
-            meta={"root": True},
-        )
-
         user = self.model(
             username=username,
             email=email,
             name=name,
             role=role,
-            storage_root=root_folder,
             is_approved=False,
         )
 
@@ -59,11 +50,8 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save()
 
-        Mount.objects.create(user=user, content=root_folder, perm=Mount.Perm.ALL)
-
         return user
 
-    @transaction.atomic
     def create_superuser(self, email, password=None, **extra_fields):
         user = self.create_user("admin", email, password, "admin", **extra_fields)
         user.email_validated = True
@@ -78,14 +66,6 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
-
-    storage_root = models.ForeignKey(
-        "content.Content",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="storage_root",
-    )
 
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50, unique=True, null=True, blank=True)
