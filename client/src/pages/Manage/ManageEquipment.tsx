@@ -10,7 +10,7 @@ import {
 } from "helpers/api/content";
 import type { Equipment, Room, IdentificationCategory } from "helpers/api/content";
 import { ModalsHandler } from "components/my-own-modal-handler";
-import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag, FaSearch, FaTimes } from "react-icons/fa";
 import "./ManageContent.scss";
 import "./ManageEquipment.scss";
 
@@ -28,8 +28,9 @@ const ManageEquipment = () => {
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedEquipment, setSelectedEquipment] = useState<Set<number>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const dragItem = useRef<{ equipmentId: number } | null>(null);
+  const dragItems = useRef<number[]>([]);
   const [dragOverRoom, setDragOverRoom] = useState<number | null>(null);
 
   const fetchData = async () => {
@@ -129,7 +130,43 @@ const ManageEquipment = () => {
   };
 
   const handleDragStart = (equipmentId: number) => {
-    dragItem.current = { equipmentId };
+    // If dragging a selected item, drag all selected items
+    if (selectedEquipment.has(equipmentId)) {
+      dragItems.current = Array.from(selectedEquipment);
+    } else {
+      // If dragging an unselected item, only drag that one
+      dragItems.current = [equipmentId];
+    }
+  };
+
+  const toggleEquipmentSelection = (equipmentId: number) => {
+    setSelectedEquipment((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(equipmentId)) {
+        newSet.delete(equipmentId);
+      } else {
+        newSet.add(equipmentId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = (items: Equipment[]) => {
+    const itemIds = items.map((eq) => eq.id);
+    const allSelected = itemIds.every((id) => selectedEquipment.has(id));
+    setSelectedEquipment((prev) => {
+      const newSet = new Set(prev);
+      if (allSelected) {
+        itemIds.forEach((id) => newSet.delete(id));
+      } else {
+        itemIds.forEach((id) => newSet.add(id));
+      }
+      return newSet;
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedEquipment(new Set());
   };
 
   const handleDragOver = (e: React.DragEvent, roomId: number | null) => {
@@ -144,20 +181,23 @@ const ManageEquipment = () => {
   const handleDrop = async (e: React.DragEvent, targetRoomId: number | null) => {
     e.preventDefault();
     setDragOverRoom(null);
-    if (!dragItem.current) return;
+    if (dragItems.current.length === 0) return;
 
-    const { equipmentId } = dragItem.current;
-    dragItem.current = null;
+    const itemsToMove = dragItems.current.filter((id) => {
+      const item = equipment.find((eq) => eq.id === id);
+      if (!item) return false;
+      const currentRoomId = item.room?.id || null;
+      return currentRoomId !== targetRoomId;
+    });
 
-    const item = equipment.find((eq) => eq.id === equipmentId);
-    if (!item) return;
+    dragItems.current = [];
 
-    const currentRoomId = item.room?.id || null;
-    if (currentRoomId === targetRoomId) return;
+    if (itemsToMove.length === 0) return;
 
+    // Optimistic update
     setEquipment((prev) =>
       prev.map((eq) =>
-        eq.id === equipmentId
+        itemsToMove.includes(eq.id)
           ? {
               ...eq,
               room: targetRoomId
@@ -168,17 +208,30 @@ const ManageEquipment = () => {
       )
     );
 
-    const response = await updateEquipment(equipmentId, {
-      room_id: targetRoomId,
-    } as any);
+    // Clear selection after move
+    setSelectedEquipment(new Set());
 
-    if (!response.success) {
+    // Send API requests for all items
+    const results = await Promise.all(
+      itemsToMove.map((id) =>
+        updateEquipment(id, { room_id: targetRoomId } as any)
+      )
+    );
+
+    const failures = results.filter((r) => !r.success).length;
+    if (failures > 0) {
       ModalsHandler.createNotification({
         title: "Erro",
-        message: "Falha ao mover equipamento.",
+        message: `Falha ao mover ${failures} equipamento(s).`,
         type: "error",
       });
       fetchData();
+    } else if (itemsToMove.length > 1) {
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: `${itemsToMove.length} equipamentos movidos com sucesso!`,
+        type: "success",
+      });
     }
   };
 
@@ -223,39 +276,63 @@ const ManageEquipment = () => {
     items: Equipment[],
     roomId: number | null,
     emptyMessage: string
-  ) => (
-    <div
-      className={`room-table-drop-zone ${dragOverRoom === roomId ? "drag-over" : ""}`}
-      onDragOver={(e) => handleDragOver(e, roomId)}
-      onDragLeave={handleDragLeave}
-      onDrop={(e) => handleDrop(e, roomId)}
-    >
-      {items.length === 0 ? (
-        <div className="room-empty">{emptyMessage}</div>
-      ) : (
-        <table className="content-table">
-          <thead>
-            <tr>
-              <th style={{ width: 40 }} />
-              <th>Categoria</th>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Responsável</th>
-              <th>Usuários</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr
-                key={item.id}
-                className={!item.is_active ? "inactive" : ""}
-                draggable
-                onDragStart={() => handleDragStart(item.id)}
-              >
-                <td className="cell-drag">
-                  <FaGripVertical className="drag-handle" />
-                </td>
+  ) => {
+    const allSelected = items.length > 0 && items.every((eq) => selectedEquipment.has(eq.id));
+    const someSelected = items.some((eq) => selectedEquipment.has(eq.id));
+
+    return (
+      <div
+        className={`room-table-drop-zone ${dragOverRoom === roomId ? "drag-over" : ""}`}
+        onDragOver={(e) => handleDragOver(e, roomId)}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, roomId)}
+      >
+        {items.length === 0 ? (
+          <div className="room-empty">{emptyMessage}</div>
+        ) : (
+          <table className="content-table">
+            <thead>
+              <tr>
+                <th className="cell-checkbox" style={{ width: 36 }}>
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected && !allSelected;
+                    }}
+                    onChange={() => toggleSelectAll(items)}
+                    title="Selecionar todos"
+                  />
+                </th>
+                <th style={{ width: 40 }} />
+                <th>Categoria</th>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Responsável</th>
+                <th>Usuários</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => {
+                const isSelected = selectedEquipment.has(item.id);
+                return (
+                  <tr
+                    key={item.id}
+                    className={`${!item.is_active ? "inactive" : ""} ${isSelected ? "selected" : ""}`}
+                    draggable
+                    onDragStart={() => handleDragStart(item.id)}
+                  >
+                    <td className="cell-checkbox" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleEquipmentSelection(item.id)}
+                      />
+                    </td>
+                    <td className="cell-drag">
+                      <FaGripVertical className="drag-handle" />
+                    </td>
                 <td className="cell-category" onClick={() => handleEdit(item)}>
                   {item.identification_category ? (
                     <span className="category-tag">{item.identification_category.name}</span>
@@ -311,12 +388,14 @@ const ManageEquipment = () => {
                   </span>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-  );
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    );
+  };
 
   const hasContent = equipment.length > 0 || rooms.length > 0;
 
@@ -390,6 +469,19 @@ const ManageEquipment = () => {
             </button>
           )}
         </div>
+
+        {selectedEquipment.size > 0 && (
+          <div className="selection-bar">
+            <div className="selection-info">
+              <span className="selection-count">{selectedEquipment.size}</span>
+              <span>equipamento{selectedEquipment.size !== 1 ? "s" : ""} selecionado{selectedEquipment.size !== 1 ? "s" : ""}</span>
+            </div>
+            <span className="selection-hint">Arraste para mover para outra sala</span>
+            <button className="btn-clear-selection" onClick={clearSelection} title="Limpar seleção">
+              <FaTimes />
+            </button>
+          </div>
+        )}
 
         {showNewRoomInput && (
           <div className="new-room-input-bar">

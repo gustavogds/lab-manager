@@ -194,6 +194,98 @@
       cursor: grabbing;
       opacity: 0.7;
     }
+
+    &.selected {
+      background: #e0f2f0;
+
+      &:hover {
+        background: #d4edea;
+      }
+    }
+  }
+
+  // Checkbox styles
+  .cell-checkbox {
+    width: 36px;
+    text-align: center;
+    padding: 0.5rem !important;
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #2d7a73;
+    }
+  }
+
+  // Selection bar
+  .selection-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: #2d7a73;
+    border-radius: 10px;
+    color: white;
+    animation: slideIn 0.2s ease;
+
+    .selection-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+
+      .selection-count {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+        padding: 0 0.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+    }
+
+    .selection-hint {
+      flex: 1;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.75);
+      font-style: italic;
+    }
+
+    .btn-clear-selection {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      color: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   // Create dropdown
