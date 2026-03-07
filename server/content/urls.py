@@ -43,5 +43,6 @@ urlpatterns = [
     path("equipment-states/create/", views.create_equipment_state, name="create_equipment_state"),
     path("equipment-states/<int:state_id>/update/", views.update_equipment_state, name="update_equipment_state"),
     path("equipment-states/<int:state_id>/delete/", views.delete_equipment_state, name="delete_equipment_state"),
+    path("reports/config/", reports.get_report_config, name="get_report_config"),
     path("reports/generate/", reports.generate_report, name="generate_report"),
 ]

@@ -51,108 +51,281 @@
   }
 }
 
-.sections-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-
-  label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: $neutral-ink;
-  }
-
-  .select-all-btn {
-    background: none;
-    border: none;
-    color: $primary-color;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 0;
-    transition: color $transition-fast;
-
-    &:hover {
-      color: $primary-color-strong;
-      text-decoration: underline;
-    }
-  }
-}
-
-.section-options {
+.sections-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
-.section-option {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
+.section-item {
   border: 1px solid $neutral-border;
   border-radius: $radius-md;
-  cursor: pointer;
+  overflow: hidden;
   transition: all $transition-fast;
-  user-select: none;
-
-  input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .checkmark {
-    width: 20px;
-    height: 20px;
-    border: 2px solid $neutral-border;
-    border-radius: 4px;
-    flex-shrink: 0;
-    position: relative;
-    transition: all $transition-fast;
-
-    &::after {
-      content: "";
-      position: absolute;
-      display: none;
-      left: 5px;
-      top: 1px;
-      width: 6px;
-      height: 10px;
-      border: solid white;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
-    }
-  }
-
-  .section-label {
-    font-size: 0.95rem;
-    color: $neutral-ink;
-    font-weight: 500;
-  }
-
-  &:hover {
-    border-color: rgba($primary-color, 0.4);
-    background: rgba($primary-color, 0.02);
-  }
 
   &.selected {
     border-color: $primary-color;
-    background: rgba($primary-color, 0.05);
+    background: rgba($primary-color, 0.02);
+  }
 
-    .checkmark {
-      background: $primary-color;
-      border-color: $primary-color;
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    cursor: pointer;
+    user-select: none;
 
-      &::after {
-        display: block;
+    .section-checkbox {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+
+      input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .checkmark {
+        width: 20px;
+        height: 20px;
+        border: 2px solid $neutral-border;
+        border-radius: 4px;
+        flex-shrink: 0;
+        position: relative;
+        transition: all $transition-fast;
+
+        &::after {
+          content: "";
+          position: absolute;
+          display: none;
+          left: 5px;
+          top: 1px;
+          width: 6px;
+          height: 10px;
+          border: solid white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+      }
+
+      input:checked + .checkmark {
+        background: $primary-color;
+        border-color: $primary-color;
+
+        &::after {
+          display: block;
+        }
       }
     }
 
+    .section-title-row {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
     .section-label {
-      color: $primary-color;
+      font-size: 0.95rem;
+      color: $neutral-ink;
+      font-weight: 500;
+    }
+
+    .columns-count {
+      font-size: 0.8rem;
+      color: $neutral-muted;
+    }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      color: $neutral-muted;
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color $transition-fast;
+
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+
+  &.selected .section-header .section-label {
+    color: $primary-color;
+  }
+
+  .section-content {
+    padding: 0 1rem 1rem 1rem;
+    border-top: 1px solid rgba($neutral-border, 0.5);
+    margin-top: 0;
+    padding-top: 1rem;
+
+    .columns-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+
+      span {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: $neutral-ink;
+      }
+
+      .select-all-btn {
+        background: none;
+        border: none;
+        color: $primary-color;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0;
+        transition: color $transition-fast;
+
+        &:hover {
+          color: $primary-color-strong;
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .columns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .column-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid $neutral-border;
+      border-radius: $radius-sm;
+      cursor: pointer;
+      transition: all $transition-fast;
+      user-select: none;
+
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: $accent-teal;
+      }
+
+      .column-label {
+        font-size: 0.85rem;
+        color: $neutral-ink;
+      }
+
+      &:hover {
+        border-color: rgba($primary-color, 0.4);
+        background: rgba($primary-color, 0.02);
+      }
+
+      &.selected {
+        border-color: $primary-color;
+        background: rgba($primary-color, 0.05);
+
+        .checkmark {
+          background: $primary-color;
+          border-color: $primary-color;
+
+          &::after {
+            display: block;
+          }
+        }
+
+        .column-label {
+          color: $primary-color;
+        }
+      }
+    }
+
+    .grouping-options {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed rgba($neutral-border, 0.7);
+
+      .grouping-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: $neutral-ink;
+      }
+
+      .grouping-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid $neutral-border;
+        border-radius: $radius-sm;
+        cursor: pointer;
+        transition: all $transition-fast;
+        user-select: none;
+        font-size: 0.85rem;
+        color: $neutral-ink;
+
+        input[type="checkbox"] {
+          position: absolute;
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .checkmark {
+          width: 14px;
+          height: 14px;
+          border: 2px solid $neutral-border;
+          border-radius: 3px;
+          flex-shrink: 0;
+          position: relative;
+          transition: all $transition-fast;
+
+          &::after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 3px;
+            top: 0px;
+            width: 4px;
+            height: 7px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+          }
+        }
+
+        &:hover {
+          border-color: rgba($primary-color, 0.4);
+          background: rgba($primary-color, 0.02);
+        }
+
+        &.selected {
+          border-color: $primary-color;
+          background: rgba($primary-color, 0.05);
+          color: $primary-color;
+
+          .checkmark {
+            background: $primary-color;
+            border-color: $primary-color;
+
+            &::after {
+              display: block;
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -160,5 +333,15 @@
 @media (max-width: 640px) {
   .format-options {
     grid-template-columns: 1fr;
+  }
+
+  .section-item .section-content .columns-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-item .section-content .grouping-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 }

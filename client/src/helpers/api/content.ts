@@ -667,10 +667,49 @@ export const deleteEquipmentState = async (stateId: number) => {
   return { success: response.status === 200, ...response.data };
 };
 
+export type ReportColumnConfig = {
+  key: string;
+  label: string;
+};
+
+export type ReportSectionConfig = {
+  label: string;
+  columns: ReportColumnConfig[];
+  supports_room_grouping: boolean;
+  supports_section_grouping: boolean;
+};
+
+export type ReportConfig = {
+  [sectionKey: string]: ReportSectionConfig;
+};
+
+export type ReportSectionOptions = {
+  columns: string[];
+  group_by_room?: boolean;
+  group_by_section?: boolean;
+};
+
+export type ReportSections = {
+  [sectionKey: string]: ReportSectionOptions;
+};
+
+export const getReportConfig = async () => {
+  const response = await api
+    .get("/content/reports/config/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    data: response.data.data as ReportConfig,
+  };
+};
+
 export const generateReport = async (data: {
   name: string;
   format: "pdf" | "xlsx";
-  sections: string[];
+  sections: ReportSections;
 }) => {
   try {
     const response = await api.post("/content/reports/generate/", data, {
