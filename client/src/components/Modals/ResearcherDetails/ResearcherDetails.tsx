@@ -34,8 +34,17 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
         </header>
 
         <div className="researcher-details-body">
+          {researcher.bio && (
+            <section className="bio-section">
+              <h3>Sobre</h3>
+              <p className="bio-text">{researcher.bio}</p>
+            </section>
+          )}
+
           <section className="contact-section">
-            <h3>Contato</h3>
+            {researcher.contact_email || researcher.phone ? (
+              <h3>Contato</h3>
+            ) : null}
             <div className="contact-list">
               {researcher.contact_email && researcher.contact_email !== researcher.email && (
                 <div className="contact-item">

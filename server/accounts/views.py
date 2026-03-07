@@ -26,6 +26,7 @@ def update_user_settings(request):
         "contact_email",
         "social_media",
         "lattes",
+        "bio",
         "birthdate",
         "is_public",
     ]

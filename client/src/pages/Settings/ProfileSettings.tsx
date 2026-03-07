@@ -19,6 +19,7 @@ const ProfileSettings = () => {
     contact_email: "",
     social_media: "",
     lattes: "",
+    bio: "",
     birthdate: "",
     is_public: true,
   });
@@ -40,6 +41,7 @@ const ProfileSettings = () => {
       contact_email: initialData.contact_email || "",
       social_media: initialData.social_media || "",
       lattes: initialData.lattes || "",
+      bio: initialData.bio || "",
       birthdate: initialData.birthdate || "",
       is_public: initialData.is_public ?? true,
     });
@@ -206,6 +208,16 @@ const ProfileSettings = () => {
             name="lattes"
             value={formData.lattes}
             onChange={handleChange}
+          />
+        </label>
+        <label>
+          Bio:
+          <textarea
+            name="bio"
+            value={formData.bio}
+            onChange={handleChange}
+            placeholder="Escreva uma breve descrição sobre você..."
+            rows={4}
           />
         </label>
         <label>

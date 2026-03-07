@@ -201,6 +201,7 @@ export type User = {
   contact_email?: string;
   social_media?: string;
   lattes?: string;
+  bio?: string;
   role?: string;
 };
 

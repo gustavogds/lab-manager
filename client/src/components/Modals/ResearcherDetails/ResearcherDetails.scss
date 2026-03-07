@@ -91,6 +91,7 @@
   @include custom-scrollbar;
 }
 
+.bio-section,
 .contact-section,
 .links-section,
 .projects-section {
@@ -104,6 +105,13 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
+}
+
+.bio-text {
+  color: #444;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-line;
 }
 
 .contact-list {

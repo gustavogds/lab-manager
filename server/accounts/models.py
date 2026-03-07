@@ -100,6 +100,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     contact_email = models.CharField(max_length=50, null=True, blank=True)
     social_media = models.CharField(max_length=50, null=True, blank=True)
     lattes = models.CharField(max_length=50, null=True, blank=True)
+    bio = models.TextField(null=True, blank=True)
     is_public = models.BooleanField(default=True)
     is_approved = models.BooleanField(default=False)
     profile_image = models.ImageField(
@@ -149,6 +150,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             "contact_email": self.contact_email,
             "social_media": self.social_media,
             "lattes": self.lattes,
+            "bio": self.bio,
             "email_validated": self.email_validated,
             "profile_image": self.profile_image.url if self.profile_image else None,
         }
