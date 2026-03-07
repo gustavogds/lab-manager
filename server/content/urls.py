@@ -34,5 +34,9 @@ urlpatterns = [
     path("identification-categories/create/", views.create_identification_category, name="create_identification_category"),
     path("identification-categories/<int:category_id>/update/", views.update_identification_category, name="update_identification_category"),
     path("identification-categories/<int:category_id>/delete/", views.delete_identification_category, name="delete_identification_category"),
+    path("equipment-states/", views.list_equipment_states, name="list_equipment_states"),
+    path("equipment-states/create/", views.create_equipment_state, name="create_equipment_state"),
+    path("equipment-states/<int:state_id>/update/", views.update_equipment_state, name="update_equipment_state"),
+    path("equipment-states/<int:state_id>/delete/", views.delete_equipment_state, name="delete_equipment_state"),
     path("reports/generate/", reports.generate_report, name="generate_report"),
 ]

@@ -7,10 +7,12 @@ import {
   updateEquipment,
   listIdentificationCategories,
   createIdentificationCategory,
+  listEquipmentStates,
+  createEquipmentState,
 } from "helpers/api/content";
-import type { Equipment, Room, IdentificationCategory } from "helpers/api/content";
+import type { Equipment, Room, IdentificationCategory, EquipmentState } from "helpers/api/content";
 import { ModalsHandler } from "components/my-own-modal-handler";
-import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag, FaSearch, FaTimes } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag, FaSearch, FaTimes, FaClipboard } from "react-icons/fa";
 import "./ManageContent.scss";
 import "./ManageEquipment.scss";
 
@@ -19,6 +21,7 @@ const ManageEquipment = () => {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [categories, setCategories] = useState<IdentificationCategory[]>([]);
+  const [states, setStates] = useState<EquipmentState[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newRoomName, setNewRoomName] = useState("");
   const [showNewRoomInput, setShowNewRoomInput] = useState(false);
@@ -26,6 +29,9 @@ const ManageEquipment = () => {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newStateName, setNewStateName] = useState("");
+  const [showNewStateInput, setShowNewStateInput] = useState(false);
+  const [isCreatingState, setIsCreatingState] = useState(false);
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<Set<number>>(new Set());
@@ -35,14 +41,16 @@ const ManageEquipment = () => {
 
   const fetchData = async () => {
     setIsLoading(true);
-    const [eqResponse, roomResponse, catResponse] = await Promise.all([
+    const [eqResponse, roomResponse, catResponse, stateResponse] = await Promise.all([
       listAllEquipment(),
       listRooms(),
       listIdentificationCategories(),
+      listEquipmentStates(),
     ]);
     if (eqResponse.success) setEquipment(eqResponse.data);
     if (roomResponse.success) setRooms(roomResponse.data);
     if (catResponse.success) setCategories(catResponse.data);
+    if (stateResponse.success) setStates(stateResponse.data);
     setIsLoading(false);
   };
 
@@ -65,6 +73,7 @@ const ManageEquipment = () => {
       equipment: item,
       rooms,
       categories,
+      states,
       onConfirm: () => fetchData(),
     });
   };
@@ -125,6 +134,36 @@ const ManageEquipment = () => {
   const handleEditCategory = (category: IdentificationCategory) => {
     ModalsHandler.createModal("IdentificationCategoryEditor", {
       category,
+      onConfirm: () => fetchData(),
+    });
+  };
+
+  const handleCreateState = async () => {
+    if (!newStateName.trim()) return;
+    setIsCreatingState(true);
+    const response = await createEquipmentState({ name: newStateName.trim() });
+    setIsCreatingState(false);
+    if (response.success) {
+      setNewStateName("");
+      setShowNewStateInput(false);
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: "Estado criado com sucesso!",
+        type: "success",
+      });
+      fetchData();
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.error || "Falha ao criar estado.",
+        type: "error",
+      });
+    }
+  };
+
+  const handleEditState = (state: EquipmentState) => {
+    ModalsHandler.createModal("EquipmentStateEditor", {
+      state,
       onConfirm: () => fetchData(),
     });
   };
@@ -305,11 +344,13 @@ const ManageEquipment = () => {
                   />
                 </th>
                 <th style={{ width: 40 }} />
-                <th>Categoria</th>
                 <th>ID</th>
+                <th>Categoria</th>
                 <th>Nome</th>
+                <th>Obs.</th>
                 <th>Responsável</th>
                 <th>Usuários</th>
+                <th>Estado</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -333,61 +374,79 @@ const ManageEquipment = () => {
                     <td className="cell-drag">
                       <FaGripVertical className="drag-handle" />
                     </td>
-                <td className="cell-category" onClick={() => handleEdit(item)}>
-                  {item.identification_category ? (
-                    <span className="category-tag">{item.identification_category.name}</span>
-                  ) : (
-                    <span className="empty-value">—</span>
-                  )}
-                </td>
-                <td className="cell-id" onClick={() => handleEdit(item)}>
-                  {item.custom_id}
-                </td>
-                <td className="cell-name" onClick={() => handleEdit(item)}>
-                  {item.name}
-                </td>
-                <td className="cell-assigned" onClick={() => handleEdit(item)}>
-                  {item.assigned_to ? (
-                    <div className="assigned-user">
-                      {item.assigned_to.profile_image && (
-                        <img
-                          src={item.assigned_to.profile_image}
-                          alt={item.assigned_to.name}
-                          className="user-avatar"
-                        />
+                    <td className="cell-id" onClick={() => handleEdit(item)}>
+                      {item.custom_id}
+                    </td>
+                    <td className="cell-category" onClick={() => handleEdit(item)}>
+                      {item.identification_category ? (
+                        <span className="category-tag">{item.identification_category.name}</span>
+                      ) : (
+                        <span className="empty-value">—</span>
                       )}
-                      <span>{item.assigned_to.name}</span>
-                    </div>
-                  ) : (
-                    <span className="empty-value">—</span>
-                  )}
-                </td>
-                <td className="cell-users" onClick={() => handleEdit(item)}>
-                  {item.users && item.users.length > 0 ? (
-                    <div className="users-list">
-                      {item.users.slice(0, 3).map((u) => (
-                        <span key={u.id} className="user-tag">
-                          {u.name.split(" ")[0]}
+                    </td>
+                    <td className="cell-name" onClick={() => handleEdit(item)}>
+                      {item.name}
+                    </td>
+                    <td className="cell-observation" onClick={() => handleEdit(item)}>
+                      {item.observation ? (
+                        <span className="observation-text" title={item.observation}>
+                          {item.observation.length > 30
+                            ? `${item.observation.substring(0, 30)}...`
+                            : item.observation}
                         </span>
-                      ))}
-                      {item.users.length > 3 && (
-                        <span className="user-tag more">
-                          +{item.users.length - 3}
-                        </span>
+                      ) : (
+                        <span className="empty-value">—</span>
                       )}
-                    </div>
-                  ) : (
-                    <span className="empty-value">—</span>
-                  )}
-                </td>
-                <td className="cell-status" onClick={() => handleEdit(item)}>
-                  <span
-                    className={`status-badge ${item.is_active ? "active" : "inactive"}`}
-                  >
-                    {item.is_active ? "Ativo" : "Inativo"}
-                  </span>
-                </td>
-              </tr>
+                    </td>
+                    <td className="cell-assigned" onClick={() => handleEdit(item)}>
+                      {item.assigned_to ? (
+                        <div className="assigned-user">
+                          {item.assigned_to.profile_image && (
+                            <img
+                              src={item.assigned_to.profile_image}
+                              alt={item.assigned_to.name}
+                              className="user-avatar"
+                            />
+                          )}
+                          <span>{item.assigned_to.name}</span>
+                        </div>
+                      ) : (
+                        <span className="empty-value">—</span>
+                      )}
+                    </td>
+                    <td className="cell-users" onClick={() => handleEdit(item)}>
+                      {item.users && item.users.length > 0 ? (
+                        <div className="users-list">
+                          {item.users.slice(0, 3).map((u) => (
+                            <span key={u.id} className="user-tag">
+                              {u.name.split(" ")[0]}
+                            </span>
+                          ))}
+                          {item.users.length > 3 && (
+                            <span className="user-tag more">
+                              +{item.users.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="empty-value">—</span>
+                      )}
+                    </td>
+                    <td className="cell-state" onClick={() => handleEdit(item)}>
+                      {item.equipment_state ? (
+                        <span className="state-tag">{item.equipment_state.name}</span>
+                      ) : (
+                        <span className="empty-value">—</span>
+                      )}
+                    </td>
+                    <td className="cell-status" onClick={() => handleEdit(item)}>
+                      <span
+                        className={`status-badge ${item.is_active ? "active" : "inactive"}`}
+                      >
+                        {item.is_active ? "Ativo" : "Inativo"}
+                      </span>
+                    </td>
+                  </tr>
                 );
               })}
             </tbody>
@@ -444,6 +503,14 @@ const ManageEquipment = () => {
                     }}
                   >
                     <FaTag /> Categoria de Identificação
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowNewStateInput(true);
+                      setShowCreateDropdown(false);
+                    }}
+                  >
+                    <FaClipboard /> Estado do Equipamento
                   </button>
                 </div>
               )}
@@ -555,6 +622,42 @@ const ManageEquipment = () => {
           </div>
         )}
 
+        {showNewStateInput && (
+          <div className="new-room-input-bar">
+            <input
+              type="text"
+              placeholder="Nome do novo estado..."
+              value={newStateName}
+              onChange={(e) => setNewStateName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreateState();
+                if (e.key === "Escape") {
+                  setShowNewStateInput(false);
+                  setNewStateName("");
+                }
+              }}
+              autoFocus
+              maxLength={255}
+            />
+            <button
+              className="btn-confirm"
+              onClick={handleCreateState}
+              disabled={isCreatingState || !newStateName.trim()}
+            >
+              {isCreatingState ? "Criando..." : "Criar"}
+            </button>
+            <button
+              className="btn-cancel"
+              onClick={() => {
+                setShowNewStateInput(false);
+                setNewStateName("");
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="loading-state">Carregando equipamentos...</div>
         ) : !hasContent ? (
@@ -579,6 +682,28 @@ const ManageEquipment = () => {
                         className="btn-icon btn-icon--primary"
                         onClick={() => handleEditCategory(category)}
                         title="Editar categoria"
+                      >
+                        <FaPen />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {states.length > 0 && (
+              <div className="categories-section states-section">
+                <div className="categories-header">
+                  <h2><FaClipboard className="category-icon" /> Estados do Equipamento</h2>
+                </div>
+                <div className="categories-list">
+                  {states.map((state) => (
+                    <div key={state.id} className="category-item state-item">
+                      <span className="category-name">{state.name}</span>
+                      <button
+                        className="btn-icon btn-icon--primary"
+                        onClick={() => handleEditState(state)}
+                        title="Editar estado"
                       >
                         <FaPen />
                       </button>

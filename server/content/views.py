@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Max
 
-from .models import ResearchArea, Project, Partnership, Equipment, Room, IdentificationCategory
+from .models import ResearchArea, Project, Partnership, Equipment, Room, IdentificationCategory, EquipmentState
 from accounts.models import User
 
 
@@ -439,8 +439,10 @@ def create_equipment(request):
 
     name = data.get("name", "").strip()
     custom_id = data.get("custom_id", "").strip()
+    observation = data.get("observation", "").strip()
     room_id = data.get("room_id")
     identification_category_id = data.get("identification_category_id")
+    equipment_state_id = data.get("equipment_state_id")
 
     if not name:
         return JsonResponse({"error": "Nome é obrigatório."}, status=400)
@@ -465,12 +467,21 @@ def create_equipment(request):
         except IdentificationCategory.DoesNotExist:
             return JsonResponse({"error": "Categoria de identificação não encontrada."}, status=404)
 
+    equipment_state = None
+    if equipment_state_id:
+        try:
+            equipment_state = EquipmentState.objects.get(id=equipment_state_id)
+        except EquipmentState.DoesNotExist:
+            return JsonResponse({"error": "Estado do equipamento não encontrado."}, status=404)
+
     max_order = Equipment.objects.aggregate(Max("order"))["order__max"] or 0
 
     equipment = Equipment.objects.create(
         name=name,
         custom_id=custom_id,
+        observation=observation,
         identification_category=identification_category,
+        equipment_state=equipment_state,
         room=room,
         order=max_order + 1,
     )
@@ -524,7 +535,7 @@ def update_equipment(request, equipment_id):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON."}, status=400)
 
-    allowed_fields = ["name", "custom_id", "is_active", "order"]
+    allowed_fields = ["name", "custom_id", "observation", "is_active", "order"]
     updated = False
 
     for field in allowed_fields:
@@ -567,6 +578,21 @@ def update_equipment(request, equipment_id):
                     updated = True
             except IdentificationCategory.DoesNotExist:
                 return JsonResponse({"error": "Categoria de identificação não encontrada."}, status=404)
+
+    if "equipment_state_id" in data:
+        state_id = data["equipment_state_id"]
+        if state_id is None:
+            if equipment.equipment_state is not None:
+                equipment.equipment_state = None
+                updated = True
+        else:
+            try:
+                state = EquipmentState.objects.get(id=state_id)
+                if equipment.equipment_state_id != state.id:
+                    equipment.equipment_state = state
+                    updated = True
+            except EquipmentState.DoesNotExist:
+                return JsonResponse({"error": "Estado do equipamento não encontrado."}, status=404)
 
     if "assigned_to" in data:
         assigned_to_id = data["assigned_to"]
@@ -861,3 +887,101 @@ def delete_identification_category(request, category_id):
         )
     except IdentificationCategory.DoesNotExist:
         return JsonResponse({"error": "Categoria não encontrada."}, status=404)
+
+
+# Equipment State Views
+
+@login_required
+@require_http_methods(["POST"])
+def create_equipment_state(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    name = data.get("name", "").strip()
+
+    if not name:
+        return JsonResponse({"error": "Nome é obrigatório."}, status=400)
+
+    max_order = EquipmentState.objects.aggregate(Max("order"))["order__max"] or 0
+
+    state = EquipmentState.objects.create(
+        name=name,
+        order=max_order + 1,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Estado do equipamento criado com sucesso.",
+            "data": state.export(),
+        }
+    )
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_equipment_states(request):
+    states = EquipmentState.objects.all()
+    return JsonResponse(
+        {
+            "success": True,
+            "data": [state.export() for state in states],
+        }
+    )
+
+
+@login_required
+@require_http_methods(["PATCH"])
+def update_equipment_state(request, state_id):
+    try:
+        state = EquipmentState.objects.get(id=state_id)
+    except EquipmentState.DoesNotExist:
+        return JsonResponse({"error": "Estado não encontrado."}, status=404)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    allowed_fields = ["name", "order"]
+    updated = False
+
+    for field in allowed_fields:
+        if field in data:
+            new_value = data[field]
+            current_value = getattr(state, field)
+            if current_value != new_value:
+                setattr(state, field, new_value)
+                updated = True
+
+    if updated:
+        state.save()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Estado atualizado com sucesso.",
+                "data": state.export(),
+            }
+        )
+
+    return JsonResponse(
+        {"success": False, "message": "Nenhuma alteração foi feita."}
+    )
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_equipment_state(request, state_id):
+    try:
+        state = EquipmentState.objects.get(id=state_id)
+        state.delete()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Estado deletado com sucesso.",
+            }
+        )
+    except EquipmentState.DoesNotExist:
+        return JsonResponse({"error": "Estado não encontrado."}, status=404)

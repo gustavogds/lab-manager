@@ -375,11 +375,21 @@ export type IdentificationCategory = {
   updated_at: string;
 };
 
+export type EquipmentState = {
+  id: number;
+  name: string;
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Equipment = {
   id: number;
   name: string;
   custom_id: string;
+  observation: string;
   identification_category: IdentificationCategory | null;
+  equipment_state: EquipmentState | null;
   room: Room | null;
   assigned_to: {
     id: number;
@@ -402,8 +412,10 @@ export type Equipment = {
 export const createEquipment = async (data: {
   name: string;
   custom_id: string;
+  observation?: string;
   room_id?: number | null;
   identification_category_id?: number | null;
+  equipment_state_id?: number | null;
 }) => {
   const response = await api
     .post("/content/equipment/create/", data)
@@ -534,6 +546,47 @@ export const updateIdentificationCategory = async (
 export const deleteIdentificationCategory = async (categoryId: number) => {
   const response = await api
     .delete(`/content/identification-categories/${categoryId}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+// Equipment State APIs
+
+export const createEquipmentState = async (data: { name: string }) => {
+  const response = await api
+    .post("/content/equipment-states/create/", data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const listEquipmentStates = async () => {
+  const response = await api
+    .get("/content/equipment-states/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, data: response.data.data || [] };
+};
+
+export const updateEquipmentState = async (
+  stateId: number,
+  data: Partial<EquipmentState>
+) => {
+  const response = await api
+    .patch(`/content/equipment-states/${stateId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const deleteEquipmentState = async (stateId: number) => {
+  const response = await api
+    .delete(`/content/equipment-states/${stateId}/delete/`)
     .catch((error) => {
       return error.response ? error.response : error;
     });

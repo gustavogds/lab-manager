@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { createEquipment, listRooms, listIdentificationCategories } from "helpers/api/content";
-import type { Room, IdentificationCategory } from "helpers/api/content";
+import { createEquipment, listRooms, listIdentificationCategories, listEquipmentStates } from "helpers/api/content";
+import type { Room, IdentificationCategory, EquipmentState } from "helpers/api/content";
 import { FaArrowLeft } from "react-icons/fa";
 import "./CreateEquipment.scss";
 
@@ -10,20 +10,24 @@ const CreateEquipment = () => {
   const [formData, setFormData] = useState({
     name: "",
     custom_id: "",
+    observation: "",
     identification_category_id: "" as string,
+    equipment_state_id: "" as string,
     room_id: "" as string,
   });
   const [rooms, setRooms] = useState<Room[]>([]);
   const [categories, setCategories] = useState<IdentificationCategory[]>([]);
+  const [states, setStates] = useState<EquipmentState[]>([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [roomsResponse, categoriesResponse] = await Promise.all([
+      const [roomsResponse, categoriesResponse, statesResponse] = await Promise.all([
         listRooms(),
         listIdentificationCategories(),
+        listEquipmentStates(),
       ]);
       if (roomsResponse.success) {
         setRooms(roomsResponse.data);
@@ -31,12 +35,15 @@ const CreateEquipment = () => {
       if (categoriesResponse.success) {
         setCategories(categoriesResponse.data);
       }
+      if (statesResponse.success) {
+        setStates(statesResponse.data);
+      }
     };
     fetchData();
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -58,12 +65,18 @@ const CreateEquipment = () => {
     setError("");
     setMessage("");
 
-    const payload: { name: string; custom_id: string; identification_category_id?: number | null; room_id?: number | null } = {
+    const payload: { name: string; custom_id: string; observation?: string; identification_category_id?: number | null; equipment_state_id?: number | null; room_id?: number | null } = {
       name: formData.name,
       custom_id: formData.custom_id,
     };
+    if (formData.observation.trim()) {
+      payload.observation = formData.observation.trim();
+    }
     if (formData.identification_category_id) {
       payload.identification_category_id = Number(formData.identification_category_id);
+    }
+    if (formData.equipment_state_id) {
+      payload.equipment_state_id = Number(formData.equipment_state_id);
     }
     if (formData.room_id) {
       payload.room_id = Number(formData.room_id);
@@ -75,7 +88,7 @@ const CreateEquipment = () => {
     if (response.success) {
       setMessage(response.message || "Equipamento criado com sucesso!");
       setError("");
-      setFormData({ name: "", custom_id: "", identification_category_id: "", room_id: "" });
+      setFormData({ name: "", custom_id: "", observation: "", identification_category_id: "", equipment_state_id: "", room_id: "" });
       setTimeout(() => {
         navigate(-1);
       }, 1500);
@@ -156,6 +169,33 @@ const CreateEquipment = () => {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="form-field">
+            <label htmlFor="equipment_state_id">Estado do Equipamento (opcional)</label>
+            <select
+              id="equipment_state_id"
+              name="equipment_state_id"
+              value={formData.equipment_state_id}
+              onChange={handleChange}
+            >
+              <option value="">Nenhum</option>
+              {states.map((state) => (
+                <option key={state.id} value={state.id}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-field">
+            <label htmlFor="observation">Observação (opcional)</label>
+            <textarea
+              id="observation"
+              name="observation"
+              value={formData.observation}
+              onChange={handleChange}
+              placeholder="Observações sobre o equipamento..."
+              rows={3}
+            />
           </div>
           <div className="form-actions">
             <button

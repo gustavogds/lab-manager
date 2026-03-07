@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { listApprovedUsers, updateEquipment, deleteEquipment } from "helpers/api/content";
-import type { Equipment, User, Room, IdentificationCategory } from "helpers/api/content";
+import type { Equipment, User, Room, IdentificationCategory, EquipmentState } from "helpers/api/content";
+import { FaPen } from "react-icons/fa";
 
 import { ModalsHandler } from "components/my-own-modal-handler";
 import MultiSelect from "components/MultiSelect/MultiSelect";
@@ -10,6 +11,7 @@ interface EquipmentEditorProps {
   equipment: Equipment;
   rooms: Room[];
   categories: IdentificationCategory[];
+  states: EquipmentState[];
   onConfirm: () => void;
   onCancel?: () => void;
 }
@@ -18,16 +20,20 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
   equipment,
   rooms,
   categories,
+  states,
   onConfirm,
   onCancel,
 }) => {
   const [formData, setFormData] = useState({
     name: equipment.name,
     custom_id: equipment.custom_id,
+    observation: equipment.observation || "",
     identification_category_id: equipment.identification_category?.id ?? (null as number | null),
+    equipment_state_id: equipment.equipment_state?.id ?? (null as number | null),
     room_id: equipment.room?.id ?? (null as number | null),
     assigned_to: equipment.assigned_to?.id || (null as number | null),
   });
+  const [isEditingObservation, setIsEditingObservation] = useState(!equipment.observation);
   const [selectedUsers, setSelectedUsers] = useState<
     Array<{ id: number; name: string; email?: string; profile_image?: string | null }>
   >(equipment.users || []);
@@ -70,6 +76,14 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     }));
   };
 
+  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      equipment_state_id: value ? Number(value) : null,
+    }));
+  };
+
   const handleAssignedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setFormData((prev) => ({
@@ -96,7 +110,9 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     const payload: Record<string, any> = {
       name: formData.name,
       custom_id: formData.custom_id,
+      observation: formData.observation,
       identification_category_id: formData.identification_category_id,
+      equipment_state_id: formData.equipment_state_id,
       room_id: formData.room_id,
       assigned_to: formData.assigned_to,
       users: selectedUsers.map((u) => u.id),
@@ -199,6 +215,38 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
         <form onSubmit={handleSubmit} className="modal-body-shared">
           {error && <div className="editor-error">{error}</div>}
 
+          <div className="form-field observation-field">
+            <label htmlFor="eq-observation">Observação</label>
+            {isEditingObservation ? (
+              <textarea
+                id="eq-observation"
+                name="observation"
+                value={formData.observation}
+                onChange={(e) => setFormData((prev) => ({ ...prev, observation: e.target.value }))}
+                placeholder="Adicione uma observação sobre o equipamento..."
+                rows={3}
+                onBlur={() => {
+                  if (formData.observation.trim()) {
+                    setIsEditingObservation(false);
+                  }
+                }}
+                autoFocus={!equipment.observation}
+              />
+            ) : (
+              <div className="observation-display">
+                <span className="observation-text">{formData.observation}</span>
+                <button
+                  type="button"
+                  className="btn-icon btn-icon--primary"
+                  onClick={() => setIsEditingObservation(true)}
+                  title="Editar observação"
+                >
+                  <FaPen />
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="form-field">
             <label htmlFor="eq-name">Nome *</label>
             <input
@@ -259,6 +307,23 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
               {rooms.map((room) => (
                 <option key={room.id} value={room.id}>
                   {room.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="eq-state">Estado do Equipamento</label>
+            <select
+              id="eq-state"
+              name="equipment_state_id"
+              value={formData.equipment_state_id ?? ""}
+              onChange={handleStateChange}
+            >
+              <option value="">Nenhum</option>
+              {states.map((state) => (
+                <option key={state.id} value={state.id}>
+                  {state.name}
                 </option>
               ))}
             </select>

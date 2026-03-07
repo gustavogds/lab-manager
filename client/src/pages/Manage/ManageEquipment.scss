@@ -411,6 +411,100 @@
       font-weight: 500;
     }
   }
+
+  // State tag in table
+  .cell-state {
+    .state-tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      background: #f0e8f4;
+      color: #6b4c7a;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+  }
+
+  // Observation text in table
+  .cell-observation {
+    max-width: 150px;
+
+    .observation-text {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.85rem;
+      color: #666;
+    }
+  }
+
+  // States section
+  .states-section {
+    .state-item {
+      background: #f4f0f7;
+
+      .category-name {
+        color: #6b4c7a;
+      }
+    }
+  }
+
+  // Horizontal overflow for tables
+  .content-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .content-table {
+    min-width: 900px;
+  }
+}
+
+// Observation field in modal
+.observation-field {
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1.5px solid #d0e8e6;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #333;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      border-color: #2d7a73;
+    }
+
+    &::placeholder {
+      color: #aaa;
+    }
+  }
+
+  .observation-display {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8faf9;
+    border-radius: 6px;
+    border: 1.5px solid #d0e8e6;
+
+    .observation-text {
+      flex: 1;
+      font-size: 0.95rem;
+      color: #333;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .btn-icon {
+      flex-shrink: 0;
+    }
+  }
 }
 
 @media (max-width: 768px) {
