@@ -46,7 +46,8 @@ export default class AuthHandler {
     name: string,
     password: string,
     confirmPassword: string,
-    role: string
+    role: string,
+    invitationToken?: string
   ) => {
     const response = await register(
       email,
@@ -54,13 +55,15 @@ export default class AuthHandler {
       name,
       password,
       confirmPassword,
-      role
+      role,
+      invitationToken
     );
 
     if (response.success) {
       return {
         success: true,
         message: "You have successfully registered!",
+        autoApproved: response.auto_approved || false,
       };
     } else {
       return {

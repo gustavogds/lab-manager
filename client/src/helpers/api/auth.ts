@@ -42,7 +42,8 @@ export const register = async (
   name: string,
   password: string,
   confirmPassword: string,
-  role: string
+  role: string,
+  invitationToken?: string
 ) => {
   const response = await api
     .post("/auth/sign-up/", {
@@ -52,6 +53,7 @@ export const register = async (
       password,
       confirmPassword,
       role,
+      invitation_token: invitationToken,
     })
     .catch((error) => {
       return error.response ? error.response : error;

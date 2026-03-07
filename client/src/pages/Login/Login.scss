@@ -296,3 +296,39 @@
     font-size: 1.3rem;
   }
 }
+
+.invitation-banner {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  border-radius: $radius-md;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: $neutral-ink;
+
+  strong {
+    color: #4f46e5;
+  }
+}
+
+.loading-invitation {
+  text-align: center;
+  padding: 2rem;
+  color: $neutral-muted;
+  font-size: 1rem;
+}
+
+.login-page .form-field .field-hint {
+  font-size: 0.75rem;
+  color: $neutral-muted;
+  margin-top: 0.25rem;
+}
+
+.login-page .form-field.disabled {
+  .input-wrapper input {
+    background-color: $neutral-surface;
+    cursor: not-allowed;
+    color: $neutral-muted;
+  }
+}

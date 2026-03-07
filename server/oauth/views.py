@@ -74,11 +74,29 @@ def sign_up(request):
     email = data.get("email")
     password = data.get("password")
     username = data.get("username")
+    invitation_token = data.get("invitation_token")
+    
+    # Check if this is an invitation-based signup
+    invitation = None
+    if invitation_token:
+        from accounts.models import Invitation
+        try:
+            invitation = Invitation.objects.get(token=invitation_token)
+            if not invitation.is_valid:
+                raise ValidationError("This invitation is no longer valid.")
+            # Use email from invitation
+            email = invitation.email
+        except Invitation.DoesNotExist:
+            raise ValidationError("Invalid invitation.")
     
     roles = data.get("roles")
     if not roles:
         role = data.get("role")
         roles = [role] if role else None
+    
+    # If invitation exists, use roles from invitation
+    if invitation:
+        roles = invitation.roles
 
     if password != data.get("confirmPassword"):
         raise ValidationError("Passwords do not match")
@@ -101,6 +119,38 @@ def sign_up(request):
     user = User.objects.create_user(
         name=name, email=email, password=password, username=username, roles=roles
     )
+    
+    # If invitation exists, mark user as approved and email validated
+    if invitation:
+        user.email_validated = True
+        user.is_approved = True
+        
+        # Apply pre-filled fields from invitation
+        if invitation.phone:
+            user.phone = invitation.phone
+        if invitation.lattes:
+            user.lattes = invitation.lattes
+        if invitation.bio:
+            user.bio = invitation.bio
+        
+        # Apply positions from invitation
+        if invitation.positions.exists():
+            positions = list(invitation.positions.all())
+            user.positions.set(positions)
+            user.position = positions[0] if positions else None
+        
+        user.save()
+        
+        # Mark invitation as used
+        invitation.mark_as_used(user)
+        
+        return JsonResponse(
+            content={
+                "success": True,
+                "message": "Account created successfully. You can now sign in.",
+                "auto_approved": True,
+            }
+        )
 
     send_verification_email(user)
 

@@ -6,20 +6,32 @@ import "./Login.scss";
 import Medias from "components/Medias/Medias";
 import AuthHandler from "helpers/services/AuthHandler";
 import { getLabSettings } from "helpers/api/settings";
+import { validateInvitation } from "helpers/api/invitations";
 import { ModalsHandler } from "components/my-own-modal-handler";
+
+type InvitationData = {
+  email: string;
+  roles: string[];
+  name: string;
+  phone: string;
+  lattes: string;
+  bio: string;
+} | null;
 
 const SignUp = ({
   onSubmit,
   isLoading,
+  invitationData,
 }: {
   onSubmit: (data: any) => void;
   isLoading: boolean;
+  invitationData?: InvitationData;
 }) => {
   const [formData, setFormData] = useState({
-    email: "",
+    email: invitationData?.email || "",
     username: "",
-    name: "",
-    role: "",
+    name: invitationData?.name || "",
+    role: invitationData?.roles?.[0] || "",
     password: "",
     confirmPassword: "",
   });
@@ -47,7 +59,8 @@ const SignUp = ({
     if (!formData.username.trim())
       newErrors.username = "Nome de usuário é obrigatório.";
     if (!formData.name.trim()) newErrors.name = "Nome completo é obrigatório.";
-    if (!formData.role) newErrors.role = "Selecione uma função.";
+    // Skip role validation if invitation provides roles
+    if (!invitationData && !formData.role) newErrors.role = "Selecione uma função.";
     if (!formData.password) newErrors.password = "Senha é obrigatória.";
     else if (formData.password.length < 6)
       newErrors.password = "A senha deve ter pelo menos 6 caracteres.";
@@ -66,10 +79,31 @@ const SignUp = ({
     onSubmit(formData);
   };
 
+  const getRoleDisplayName = (role: string) => {
+    const roleNames: Record<string, string> = {
+      professor: "Professor",
+      student: "Estudante",
+      collaborator: "Colaborador",
+      inventory_manager: "Gestor de Inventário",
+    };
+    return roleNames[role] || role;
+  };
+
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <h2>Criar Conta</h2>
-      <p className="form-subtitle">Preencha os dados para se cadastrar</p>
+      <h2>{invitationData ? "Completar Cadastro" : "Criar Conta"}</h2>
+      <p className="form-subtitle">
+        {invitationData
+          ? "Complete seu cadastro usando o convite recebido"
+          : "Preencha os dados para se cadastrar"}
+      </p>
+
+      {invitationData && (
+        <div className="invitation-banner">
+          <span>✉️ Você foi convidado com a função: </span>
+          <strong>{invitationData.roles.map(getRoleDisplayName).join(", ")}</strong>
+        </div>
+      )}
 
       <div className={`form-field ${errors.name ? "has-error" : ""}`}>
         <label htmlFor="name">Nome Completo</label>
@@ -87,7 +121,7 @@ const SignUp = ({
         {errors.name && <span className="field-error">{errors.name}</span>}
       </div>
 
-      <div className={`form-field ${errors.email ? "has-error" : ""}`}>
+      <div className={`form-field ${errors.email ? "has-error" : ""} ${invitationData ? "disabled" : ""}`}>
         <label htmlFor="email">E-mail</label>
         <div className="input-wrapper">
           <FaEnvelope className="input-icon" />
@@ -98,9 +132,14 @@ const SignUp = ({
             value={formData.email}
             onChange={handleChange}
             placeholder="seu@email.com"
+            disabled={!!invitationData}
+            readOnly={!!invitationData}
           />
         </div>
         {errors.email && <span className="field-error">{errors.email}</span>}
+        {invitationData && (
+          <span className="field-hint">E-mail definido pelo convite</span>
+        )}
       </div>
 
       <div className={`form-field ${errors.username ? "has-error" : ""}`}>
@@ -121,23 +160,25 @@ const SignUp = ({
         )}
       </div>
 
-      <div className={`form-field ${errors.role ? "has-error" : ""}`}>
-        <label htmlFor="role">Função</label>
-        <select
-          id="role"
-          name="role"
-          value={formData.role}
-          onChange={handleChange}
-        >
-          <option value="" disabled>
-            Selecione uma função
-          </option>
-          <option value="professor">Professor</option>
-          <option value="student">Estudante</option>
-          <option value="collaborator">Colaborador</option>
-        </select>
-        {errors.role && <span className="field-error">{errors.role}</span>}
-      </div>
+      {!invitationData && (
+        <div className={`form-field ${errors.role ? "has-error" : ""}`}>
+          <label htmlFor="role">Função</label>
+          <select
+            id="role"
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+          >
+            <option value="" disabled>
+              Selecione uma função
+            </option>
+            <option value="professor">Professor</option>
+            <option value="student">Estudante</option>
+            <option value="collaborator">Colaborador</option>
+          </select>
+          {errors.role && <span className="field-error">{errors.role}</span>}
+        </div>
+      )}
 
       <div className={`form-field ${errors.password ? "has-error" : ""}`}>
         <label htmlFor="password">Senha</label>
@@ -390,9 +431,13 @@ const Login = ({
   isPasswordReset?: boolean;
 }) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [labLogo, setLabLogo] = useState("");
   const [labName, setLabName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [invitationData, setInvitationData] = useState<InvitationData>(null);
+  const [invitationToken, setInvitationToken] = useState<string | null>(null);
+  const [isValidatingInvitation, setIsValidatingInvitation] = useState(false);
 
   useEffect(() => {
     const fetchLab = async () => {
@@ -405,6 +450,28 @@ const Login = ({
     fetchLab();
   }, []);
 
+  useEffect(() => {
+    const inviteToken = searchParams.get("invite");
+    if (inviteToken && isSignUp) {
+      setIsValidatingInvitation(true);
+      validateInvitation(inviteToken).then((response) => {
+        setIsValidatingInvitation(false);
+        if (response.valid && response.data) {
+          setInvitationData(response.data);
+          setInvitationToken(inviteToken);
+          setSearchParams({}, { replace: true });
+        } else {
+          ModalsHandler.createNotification({
+            title: "Convite Inválido",
+            message: response.error || "O convite não é válido ou expirou.",
+            type: "error",
+          });
+          navigate("/signup");
+        }
+      });
+    }
+  }, [searchParams, isSignUp]);
+
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     if (isSignUp) {
@@ -414,19 +481,31 @@ const Login = ({
         data.name,
         data.password,
         data.confirmPassword,
-        data.role
+        data.role,
+        invitationToken || undefined
       );
       setIsLoading(false);
       if (result.success) {
-        ModalsHandler.createNotification({
-          title: "Conta Criada",
-          message:
-            "Sua conta foi criada com sucesso! Verifique seu e-mail para ativar o cadastro.",
-          type: "success",
-        });
-        setTimeout(() => {
-          navigate("/signin");
-        }, 3000);
+        if (result.autoApproved) {
+          ModalsHandler.createNotification({
+            title: "Conta Criada",
+            message: "Sua conta foi criada com sucesso! Você já pode fazer login.",
+            type: "success",
+          });
+          setTimeout(() => {
+            navigate("/signin");
+          }, 2000);
+        } else {
+          ModalsHandler.createNotification({
+            title: "Conta Criada",
+            message:
+              "Sua conta foi criada com sucesso! Verifique seu e-mail para ativar o cadastro.",
+            type: "success",
+          });
+          setTimeout(() => {
+            navigate("/signin");
+          }, 3000);
+        }
       } else {
         ModalsHandler.createNotification({
           title: "Erro no Cadastro",
@@ -469,6 +548,28 @@ const Login = ({
     switchPath = "/signup";
   }
 
+  if (isValidatingInvitation) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <div className="login-brand">
+            <img
+              src={labLogo || Medias.Logo}
+              alt={labName || "Lab Manager"}
+              onClick={() => navigate("/")}
+            />
+            {labName && <h1>{labName}</h1>}
+          </div>
+          <div className="login-form-area">
+            <div className="loading-invitation">
+              <p>Validando convite...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="login-page">
       <div className="login-card">
@@ -485,7 +586,7 @@ const Login = ({
           {isPasswordReset ? (
             <ForgotPassword />
           ) : isSignUpPage ? (
-            <SignUp onSubmit={onSubmit} isLoading={isLoading} />
+            <SignUp onSubmit={onSubmit} isLoading={isLoading} invitationData={invitationData} />
           ) : (
             <SignIn onSubmit={onSubmit} isLoading={isLoading} />
           )}

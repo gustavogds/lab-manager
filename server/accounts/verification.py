@@ -5,6 +5,8 @@ from django.core import signing
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
+from core.models import LabSettings
+
 
 logger = logging.getLogger(__name__)
 
@@ -56,3 +58,58 @@ def send_verification_email(user) -> None:
         html_message=html_message,
         fail_silently=False,
     )
+
+
+def send_invitation_email(invitation) -> None:
+    try:
+        lab_settings = LabSettings.objects.first()
+        lab_name = lab_settings.name if lab_settings else "Laboratório"
+    except Exception:
+        lab_name = "Laboratório"
+    
+    invitation_url = f"{settings.SITE_URL}/signup?invite={invitation.token}"
+    
+    logger.info("=" * 60)
+    logger.info("INVITATION LINK for %s:", invitation.email)
+    logger.info(invitation_url)
+    logger.info("=" * 60)
+    
+    invited_by_name = invitation.invited_by.name if invitation.invited_by else "Um administrador"
+    
+    role_names = {
+        "professor": "Professor",
+        "student": "Estudante",
+        "collaborator": "Colaborador",
+        "inventory_manager": "Gestor de Inventário",
+    }
+    roles_display = ", ".join(role_names.get(r, r) for r in invitation.roles)
+    
+    html_message = render_to_string(
+        "accounts/invitation_email.html",
+        {
+            "lab_name": lab_name,
+            "invited_by_name": invited_by_name,
+            "invitation_url": invitation_url,
+            "roles_display": roles_display,
+            "prefilled_name": invitation.name,
+        },
+    )
+    
+    plain_message = (
+        f"Olá!\n\n"
+        f"Você foi convidado(a) por {invited_by_name} para fazer parte do {lab_name}.\n\n"
+        f"Função(ões): {roles_display}\n\n"
+        f"Para completar seu cadastro, acesse o link abaixo:\n\n"
+        f"{invitation_url}\n\n"
+        f"Este convite expira em 7 dias.\n"
+    )
+    
+    send_mail(
+        subject=f"Convite para participar do {lab_name}",
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[invitation.email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+

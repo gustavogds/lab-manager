@@ -16,6 +16,7 @@ import CreateProject from "./Create/CreateProject";
 import CreatePartnership from "./Create/CreatePartnership";
 import CreateEquipment from "./Create/CreateEquipment";
 import CreateReport from "./Create/CreateReport";
+import CreateInvitation from "./Create/CreateInvitation";
 import Manage from "./Manage/Manage";
 import ManageEquipment from "./Manage/ManageEquipment";
 import ManageResearchAreas from "./Manage/ManageResearchAreas";
@@ -175,6 +176,18 @@ const App = () => {
               canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <Create />
+                </PrivateRoute>
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/create/invitation"
+            element={
+              canManageAll(user.state) ? (
+                <PrivateRoute user={user.state}>
+                  <CreateInvitation />
                 </PrivateRoute>
               ) : (
                 <Navigate to="/" />

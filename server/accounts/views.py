@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
+from .verification import send_invitation_email
+from .models import Invitation
 from .models import User, Position
 
 
@@ -414,3 +416,152 @@ def delete_user(request, user_id):
     
     user.delete()
     return JsonResponse({"success": True, "message": "User deleted."})
+
+
+@login_required
+@require_http_methods(["POST"])
+def create_invitation(request):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+    
+    email = data.get("email", "").lower().strip()
+    roles = data.get("roles", [])
+    
+    if not email:
+        return JsonResponse({"error": "Email is required."}, status=400)
+    
+    if not roles or not isinstance(roles, list):
+        return JsonResponse({"error": "At least one role is required."}, status=400)
+    
+    valid_roles = ["professor", "student", "collaborator", "inventory_manager"]
+    for role in roles:
+        if role not in valid_roles:
+            return JsonResponse({"error": f"Invalid role: {role}"}, status=400)
+    
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({"error": "A user with this email already exists."}, status=400)
+    
+    existing = Invitation.objects.filter(email=email, is_used=False).first()
+    if existing and existing.is_valid:
+        return JsonResponse({
+            "error": "A valid invitation already exists for this email."
+        }, status=400)
+    
+    invitation = Invitation.objects.create(
+        email=email,
+        roles=roles,
+        name=data.get("name", ""),
+        phone=data.get("phone", ""),
+        lattes=data.get("lattes", ""),
+        bio=data.get("bio", ""),
+        invited_by=request.user,
+    )
+    
+    position_ids = data.get("position_ids", [])
+    if position_ids:
+        positions = Position.objects.filter(id__in=position_ids)
+        invitation.positions.set(positions)
+    
+    try:
+        send_invitation_email(invitation)
+    except Exception as e:
+        invitation.delete()
+        return JsonResponse({"error": f"Failed to send invitation email: {str(e)}"}, status=500)
+    
+    return JsonResponse({
+        "success": True,
+        "message": "Invitation sent successfully.",
+        "data": invitation.export()
+    })
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_invitations(request):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    invitations = Invitation.objects.all()
+    return JsonResponse({
+        "success": True,
+        "data": [inv.export() for inv in invitations]
+    })
+
+
+@require_http_methods(["GET"])
+def validate_invitation(request, token):
+    try:
+        invitation = Invitation.objects.get(token=token)
+    except Invitation.DoesNotExist:
+        return JsonResponse({"error": "Invalid invitation.", "valid": False}, status=404)
+    
+    if invitation.is_used:
+        return JsonResponse({"error": "This invitation has already been used.", "valid": False}, status=400)
+    
+    if invitation.is_expired:
+        return JsonResponse({"error": "This invitation has expired.", "valid": False}, status=400)
+    
+    return JsonResponse({
+        "success": True,
+        "valid": True,
+        "data": {
+            "email": invitation.email,
+            "roles": invitation.roles,
+            "name": invitation.name,
+            "phone": invitation.phone,
+            "lattes": invitation.lattes,
+            "bio": invitation.bio,
+            "positions": [p.export() for p in invitation.positions.all()],
+        }
+    })
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_invitation(request, invitation_id):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    try:
+        invitation = Invitation.objects.get(id=invitation_id)
+    except Invitation.DoesNotExist:
+        return JsonResponse({"error": "Invitation not found."}, status=404)
+    
+    invitation.delete()
+    return JsonResponse({"success": True, "message": "Invitation deleted."})
+
+
+@login_required
+@require_http_methods(["POST"])
+def resend_invitation(request, invitation_id):
+    if not request.user.has_role("professor"):
+        return JsonResponse({"error": "Permission denied."}, status=403)
+    
+    try:
+        invitation = Invitation.objects.get(id=invitation_id)
+    except Invitation.DoesNotExist:
+        return JsonResponse({"error": "Invitation not found."}, status=404)
+    
+    if invitation.is_used:
+        return JsonResponse({"error": "This invitation has already been used."}, status=400)
+    
+    from django.utils import timezone
+    if invitation.is_expired:
+        invitation.expires_at = timezone.now() + timezone.timedelta(days=7)
+        invitation.save()
+    
+    try:
+        send_invitation_email(invitation)
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to send email: {str(e)}"}, status=500)
+    
+    return JsonResponse({
+        "success": True,
+        "message": "Invitation email resent.",
+        "data": invitation.export()
+    })

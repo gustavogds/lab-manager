@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from accounts.models import User
+from accounts.models import User, Invitation
 
 
 class UserChangeForm(forms.ModelForm):
@@ -49,3 +49,12 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
+
+
+@admin.register(Invitation)
+class InvitationAdmin(admin.ModelAdmin):
+    list_display = ("email", "invited_by", "is_used", "is_expired", "created_at")
+    list_filter = ("is_used", "created_at")
+    search_fields = ("email", "invited_by__email", "invited_by__name")
+    readonly_fields = ("token", "created_at", "used_at", "used_by")
+    ordering = ("-created_at",)

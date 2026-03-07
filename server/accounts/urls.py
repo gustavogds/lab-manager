@@ -23,4 +23,10 @@ urlpatterns = [
     path("users/", views.list_all_users, name="list_all_users"),
     path("users/<int:user_id>/update/", views.update_user, name="update_user"),
     path("users/<int:user_id>/delete/", views.delete_user, name="delete_user"),
+    # Invitation endpoints
+    path("invitations/", views.list_invitations, name="list_invitations"),
+    path("invitations/create/", views.create_invitation, name="create_invitation"),
+    path("invitations/<str:token>/validate/", views.validate_invitation, name="validate_invitation"),
+    path("invitations/<int:invitation_id>/delete/", views.delete_invitation, name="delete_invitation"),
+    path("invitations/<int:invitation_id>/resend/", views.resend_invitation, name="resend_invitation"),
 ]

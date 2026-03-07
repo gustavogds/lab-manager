@@ -1,3 +1,5 @@
+import secrets
+
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
@@ -203,3 +205,90 @@ class User(AbstractBaseUser, PermissionsMixin):
             data[key] = getattr(self, key).export()
 
         return data
+
+
+class Invitation(models.Model):
+    """
+    Model for user invitations.
+    When a professor invites someone, an invitation is created with a unique token.
+    The invited user can use this token to complete registration without email
+    verification or admin approval.
+    """
+    email = models.EmailField()
+    token = models.CharField(max_length=64, unique=True, editable=False)
+    roles = models.JSONField(default=list)
+    
+    # Optional pre-filled fields
+    name = models.CharField(max_length=100, blank=True, default="")
+    phone = models.CharField(max_length=50, blank=True, default="")
+    lattes = models.CharField(max_length=200, blank=True, default="")
+    bio = models.TextField(blank=True, default="")
+    
+    # Position can be pre-assigned
+    positions = models.ManyToManyField(Position, blank=True, related_name="invitations")
+    
+    # Tracking
+    invited_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="sent_invitations"
+    )
+    is_used = models.BooleanField(default=False)
+    used_at = models.DateTimeField(null=True, blank=True)
+    used_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="invitation_used"
+    )
+    
+    created_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField()
+    
+    class Meta:
+        ordering = ["-created_at"]
+    
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(32)
+        if not self.expires_at:
+            # Default expiration: 7 days
+            self.expires_at = timezone.now() + timezone.timedelta(days=7)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Invitation for {self.email}"
+    
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+    @property
+    def is_valid(self):
+        return not self.is_used and not self.is_expired
+    
+    def mark_as_used(self, user):
+        self.is_used = True
+        self.used_at = timezone.now()
+        self.used_by = user
+        self.save()
+    
+    def export(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "roles": self.roles,
+            "name": self.name,
+            "phone": self.phone,
+            "lattes": self.lattes,
+            "bio": self.bio,
+            "positions": [p.export() for p in self.positions.all()],
+            "invited_by": self.invited_by.name if self.invited_by else None,
+            "is_used": self.is_used,
+            "is_expired": self.is_expired,
+            "is_valid": self.is_valid,
+            "created_at": self.created_at.isoformat(),
+            "expires_at": self.expires_at.isoformat(),
+        }

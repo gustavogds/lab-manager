@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { FaFlask, FaPlus, FaProjectDiagram, FaHandshake, FaTools, FaFileAlt } from "react-icons/fa";
+import { FaFlask, FaPlus, FaProjectDiagram, FaHandshake, FaTools, FaFileAlt, FaUserPlus } from "react-icons/fa";
 import "./Create.scss";
 
 type CreateOption = {
@@ -14,6 +14,15 @@ const Create = () => {
   const navigate = useNavigate();
 
   const createOptions: CreateOption[] = [
+    {
+      id: "invitation",
+      title: "Convidar Membro",
+      description: "Convidar um novo membro por e-mail para o laboratório",
+      icon: <FaUserPlus />,
+      action: () => {
+        navigate("/create/invitation");
+      },
+    },
     {
       id: "research-area",
       title: "Área de Pesquisa",
