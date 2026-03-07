@@ -37,12 +37,6 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
           <section className="contact-section">
             <h3>Contato</h3>
             <div className="contact-list">
-              {researcher.email && (
-                <div className="contact-item">
-                  <span className="label">Email:</span>
-                  <a href={`mailto:${researcher.email}`}>{researcher.email}</a>
-                </div>
-              )}
               {researcher.contact_email && researcher.contact_email !== researcher.email && (
                 <div className="contact-item">
                   <span className="label">Email de contato:</span>
