@@ -90,7 +90,7 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
                     rel="noopener noreferrer"
                     className="link-item"
                   >
-                    Rede Social
+                    Página
                   </a>
                 )}
               </div>

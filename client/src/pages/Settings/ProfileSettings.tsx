@@ -220,11 +220,12 @@ const ProfileSettings = () => {
           />
         </label>
         <label>
-          Rede Social:
+          Página:
           <input
             name="social_media"
             value={formData.social_media}
             onChange={handleChange}
+            placeholder="LinkedIn, página pessoal, etc."
           />
         </label>
         <label>
