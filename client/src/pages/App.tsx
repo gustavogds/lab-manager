@@ -38,6 +38,7 @@ import ResearchAreaEditor from "../components/Modals/ResearchAreaEditor/Research
 import ProjectManageEditor from "../components/Modals/ProjectManageEditor/ProjectManageEditor";
 import PartnershipManageEditor from "../components/Modals/PartnershipManageEditor/PartnershipManageEditor";
 import RoomEditor from "../components/Modals/RoomEditor/RoomEditor";
+import RoomSectionEditor from "../components/Modals/RoomSectionEditor/RoomSectionEditor";
 import IdentificationCategoryEditor from "../components/Modals/IdentificationCategoryEditor/IdentificationCategoryEditor";
 import EquipmentStateEditor from "../components/Modals/EquipmentStateEditor/EquipmentStateEditor";
 import UserEditor from "../components/Modals/UserEditor/UserEditor";
@@ -99,6 +100,7 @@ const App = () => {
     ModalsHandler.registerModal("ProjectManageEditor", ProjectManageEditor);
     ModalsHandler.registerModal("PartnershipManageEditor", PartnershipManageEditor);
     ModalsHandler.registerModal("RoomEditor", RoomEditor);
+    ModalsHandler.registerModal("RoomSectionEditor", RoomSectionEditor);
     ModalsHandler.registerModal("IdentificationCategoryEditor", IdentificationCategoryEditor);
     ModalsHandler.registerModal("EquipmentStateEditor", EquipmentStateEditor);
     ModalsHandler.registerModal("UserEditor", UserEditor);

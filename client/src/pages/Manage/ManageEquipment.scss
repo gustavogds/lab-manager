@@ -112,7 +112,6 @@
     }
   }
 
-  // Checkbox styles
   .cell-checkbox {
     width: 36px;
     text-align: center;
@@ -126,7 +125,6 @@
     }
   }
 
-  // Selection bar
   .selection-bar {
     display: flex;
     align-items: center;
@@ -197,7 +195,6 @@
   }
 
 
-  // Category tag in table
   .cell-category {
     .category-tag {
       display: inline-block;
@@ -210,7 +207,6 @@
     }
   }
 
-  // State tag in table
   .cell-state {
     .state-tag {
       display: inline-block;
@@ -223,7 +219,6 @@
     }
   }
 
-  // Observation text in table
   .cell-observation {
     max-width: 150px;
 
@@ -237,7 +232,6 @@
     }
   }
 
-  // States section
   .states-section {
     .state-item {
       background: $accent-purple-bg;
@@ -248,9 +242,9 @@
     }
   }
 
-  // Horizontal overflow for tables
   .content-table-wrapper {
     overflow-x: auto;
+    @include custom-scrollbar;
   }
 
   .content-table {
@@ -258,7 +252,6 @@
   }
 }
 
-// Observation field in modal
 .observation-field {
   textarea {
     width: 100%;
@@ -317,12 +310,164 @@
       }
     }
 
-    .new-room-input-bar {
+    .new-input-bar {
       flex-wrap: wrap;
 
       input {
         width: 100%;
       }
     }
+  }
+}
+
+.room-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.room-sections-container {
+  background: $neutral-white;
+  border: 1.5px solid $border-light;
+  border-radius: $radius-lg;
+  overflow: clip;
+}
+
+.section-area {
+  overflow: hidden;
+
+  &:not(:first-child) {
+    .section-area-header {
+      border-left: 3px solid $neutral-gray;
+      border-right: 3px solid $neutral-gray;
+    }
+  }
+  .section-area-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+
+    .section-icon {
+      font-size: 0.75rem;
+      color: $accent-purple;
+    }
+
+    .section-area-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: $accent-purple;
+      flex: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-icon {
+      opacity: 0.6;
+      transition: $transition-normal;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .content-table-wrapper {
+    margin: 0;
+    overflow-x: auto;
+    @include custom-scrollbar;
+  }
+
+  .room-table-drop-zone {
+    border-radius: 0;
+    min-height: 40px;
+
+    &.drag-over {
+      outline: none;
+      background: rgba($accent-purple, 0.06);
+    }
+  }
+
+  .room-empty {
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    text-align: left;
+    transition: $transition-normal;
+  }
+
+  .content-table {
+    border-radius: 0;
+    border: none;
+
+    thead th {
+      background: $bg-surface-alt;
+      border-top: none;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+.section-area:first-of-type {
+  .section-area-header {
+    .section-area-title {
+      color: $neutral-text-secondary;
+      font-style: italic;
+    }
+  }
+}
+
+.section-area:last-of-type {
+  .content-table-wrapper {
+    border-bottom-left-radius: $radius-lg;
+    border-bottom-right-radius: $radius-lg;
+  }
+
+  .content-table {
+    border-bottom-left-radius: $radius-lg;
+    border-bottom-right-radius: $radius-lg;
+
+    tbody tr:last-child {
+      td:first-child {
+        border-bottom-left-radius: $radius-lg;
+      }
+      td:last-child {
+        border-bottom-right-radius: $radius-lg;
+      }
+    }
+  }
+}
+
+.room-sections-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: $bg-surface-alt;
+  border-radius: $radius-sm;
+
+  .sections-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $neutral-text-secondary;
+  }
+
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    background: $accent-purple-light;
+    color: $accent-purple;
+    border-radius: $radius-pill;
+    font-size: 0.8rem;
+    font-weight: 500;
   }
 }

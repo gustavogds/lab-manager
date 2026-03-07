@@ -9,10 +9,12 @@ import {
   createIdentificationCategory,
   listEquipmentStates,
   createEquipmentState,
+  listAllSections,
+  createRoomSection,
 } from "helpers/api/content";
-import type { Equipment, Room, IdentificationCategory, EquipmentState } from "helpers/api/content";
+import type { Equipment, Room, IdentificationCategory, EquipmentState, RoomSection } from "helpers/api/content";
 import { ModalsHandler } from "components/my-own-modal-handler";
-import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag, FaSearch, FaTimes, FaClipboard } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag, FaSearch, FaTimes, FaClipboard, FaLayerGroup } from "react-icons/fa";
 import "./ManageContent.scss";
 import "./ManageEquipment.scss";
 
@@ -20,6 +22,7 @@ const ManageEquipment = () => {
   const navigate = useNavigate();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [sections, setSections] = useState<RoomSection[]>([]);
   const [categories, setCategories] = useState<IdentificationCategory[]>([]);
   const [states, setStates] = useState<EquipmentState[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,25 +35,30 @@ const ManageEquipment = () => {
   const [newStateName, setNewStateName] = useState("");
   const [showNewStateInput, setShowNewStateInput] = useState(false);
   const [isCreatingState, setIsCreatingState] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+  const [showNewSectionInput, setShowNewSectionInput] = useState<number | null>(null);
+  const [isCreatingSection, setIsCreatingSection] = useState(false);
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<Set<number>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dragItems = useRef<number[]>([]);
-  const [dragOverRoom, setDragOverRoom] = useState<number | null>(null);
+  const [dragOverTarget, setDragOverTarget] = useState<{ roomId: number | null; sectionId: number | null } | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
-    const [eqResponse, roomResponse, catResponse, stateResponse] = await Promise.all([
+    const [eqResponse, roomResponse, catResponse, stateResponse, sectionsResponse] = await Promise.all([
       listAllEquipment(),
       listRooms(),
       listIdentificationCategories(),
       listEquipmentStates(),
+      listAllSections(),
     ]);
     if (eqResponse.success) setEquipment(eqResponse.data);
     if (roomResponse.success) setRooms(roomResponse.data);
     if (catResponse.success) setCategories(catResponse.data);
     if (stateResponse.success) setStates(stateResponse.data);
+    if (sectionsResponse.success) setSections(sectionsResponse.data);
     setIsLoading(false);
   };
 
@@ -69,11 +77,13 @@ const ManageEquipment = () => {
   }, []);
 
   const handleEdit = (item: Equipment) => {
+    const roomSections = sections.filter((s) => s.room_id === item.room?.id);
     ModalsHandler.createModal("EquipmentEditor", {
       equipment: item,
       rooms,
       categories,
       states,
+      sections: roomSections,
       onConfirm: () => fetchData(),
     });
   };
@@ -168,12 +178,45 @@ const ManageEquipment = () => {
     });
   };
 
+  const handleCreateSection = async (roomId: number) => {
+    if (!newSectionName.trim()) return;
+    setIsCreatingSection(true);
+    const response = await createRoomSection(roomId, { name: newSectionName.trim() });
+    setIsCreatingSection(false);
+    if (response.success) {
+      setNewSectionName("");
+      setShowNewSectionInput(null);
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: "Seção criada com sucesso!",
+        type: "success",
+      });
+      fetchData();
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.error || "Falha ao criar seção.",
+        type: "error",
+      });
+    }
+  };
+
+  const handleEditSection = (section: RoomSection, roomName: string) => {
+    ModalsHandler.createModal("RoomSectionEditor", {
+      section,
+      roomName,
+      onConfirm: () => fetchData(),
+    });
+  };
+
+  const getSectionsForRoom = (roomId: number) => {
+    return sections.filter((s) => s.room_id === roomId);
+  };
+
   const handleDragStart = (equipmentId: number) => {
-    // If dragging a selected item, drag all selected items
     if (selectedEquipment.has(equipmentId)) {
       dragItems.current = Array.from(selectedEquipment);
     } else {
-      // If dragging an unselected item, only drag that one
       dragItems.current = [equipmentId];
     }
   };
@@ -208,32 +251,38 @@ const ManageEquipment = () => {
     setSelectedEquipment(new Set());
   };
 
-  const handleDragOver = (e: React.DragEvent, roomId: number | null) => {
+  const handleDragOver = (e: React.DragEvent, roomId: number | null, sectionId: number | null = null) => {
     e.preventDefault();
-    setDragOverRoom(roomId);
+    e.stopPropagation();
+    setDragOverTarget({ roomId, sectionId });
   };
 
-  const handleDragLeave = () => {
-    setDragOverRoom(null);
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+      setDragOverTarget(null);
+    }
   };
 
-  const handleDrop = async (e: React.DragEvent, targetRoomId: number | null) => {
+  const handleDrop = async (e: React.DragEvent, targetRoomId: number | null, targetSectionId: number | null = null) => {
     e.preventDefault();
-    setDragOverRoom(null);
+    e.stopPropagation();
+    setDragOverTarget(null);
     if (dragItems.current.length === 0) return;
 
     const itemsToMove = dragItems.current.filter((id) => {
       const item = equipment.find((eq) => eq.id === id);
       if (!item) return false;
       const currentRoomId = item.room?.id || null;
-      return currentRoomId !== targetRoomId;
+      const currentSectionId = item.section?.id || null;
+      return currentRoomId !== targetRoomId || currentSectionId !== targetSectionId;
     });
 
     dragItems.current = [];
 
     if (itemsToMove.length === 0) return;
 
-    // Optimistic update
     setEquipment((prev) =>
       prev.map((eq) =>
         itemsToMove.includes(eq.id)
@@ -242,18 +291,19 @@ const ManageEquipment = () => {
               room: targetRoomId
                 ? rooms.find((r) => r.id === targetRoomId) || null
                 : null,
+              section: targetSectionId
+                ? sections.find((s) => s.id === targetSectionId) || null
+                : null,
             }
           : eq
       )
     );
 
-    // Clear selection after move
     setSelectedEquipment(new Set());
 
-    // Send API requests for all items
     const results = await Promise.all(
       itemsToMove.map((id) =>
-        updateEquipment(id, { room_id: targetRoomId } as any)
+        updateEquipment(id, { room_id: targetRoomId, section_id: targetSectionId } as any)
       )
     );
 
@@ -306,6 +356,13 @@ const ManageEquipment = () => {
   const getEquipmentForRoom = (roomId: number) =>
     sortActiveFirst(filteredEquipment.filter((eq) => eq.room?.id === roomId));
 
+  const getEquipmentForSection = (roomId: number, sectionId: number | null) =>
+    sortActiveFirst(
+      filteredEquipment.filter(
+        (eq) => eq.room?.id === roomId && (eq.section?.id || null) === sectionId
+      )
+    );
+
   const sortedRooms = useMemo(
     () => [...rooms].sort((a, b) => a.order - b.order),
     [rooms]
@@ -314,17 +371,19 @@ const ManageEquipment = () => {
   const renderEquipmentTable = (
     items: Equipment[],
     roomId: number | null,
+    sectionId: number | null,
     emptyMessage: string
   ) => {
     const allSelected = items.length > 0 && items.every((eq) => selectedEquipment.has(eq.id));
     const someSelected = items.some((eq) => selectedEquipment.has(eq.id));
+    const isDragOver = dragOverTarget?.roomId === roomId && dragOverTarget?.sectionId === sectionId;
 
     return (
       <div
-        className={`room-table-drop-zone ${dragOverRoom === roomId ? "drag-over" : ""}`}
-        onDragOver={(e) => handleDragOver(e, roomId)}
+        className={`room-table-drop-zone ${isDragOver ? "drag-over" : ""}`}
+        onDragOver={(e) => handleDragOver(e, roomId, sectionId)}
         onDragLeave={handleDragLeave}
-        onDrop={(e) => handleDrop(e, roomId)}
+        onDrop={(e) => handleDrop(e, roomId, sectionId)}
       >
         {items.length === 0 ? (
           <div className="room-empty">{emptyMessage}</div>
@@ -551,7 +610,7 @@ const ManageEquipment = () => {
         )}
 
         {showNewRoomInput && (
-          <div className="new-room-input-bar">
+          <div className="new-input-bar">
             <input
               type="text"
               placeholder="Nome da nova sala..."
@@ -587,7 +646,7 @@ const ManageEquipment = () => {
         )}
 
         {showNewCategoryInput && (
-          <div className="new-room-input-bar">
+          <div className="new-input-bar">
             <input
               type="text"
               placeholder="Nome da nova categoria..."
@@ -623,7 +682,7 @@ const ManageEquipment = () => {
         )}
 
         {showNewStateInput && (
-          <div className="new-room-input-bar">
+          <div className="new-input-bar">
             <input
               type="text"
               placeholder="Nome do novo estado..."
@@ -679,7 +738,7 @@ const ManageEquipment = () => {
                     <div key={category.id} className="category-item">
                       <span className="category-name">{category.name}</span>
                       <button
-                        className="btn-icon btn-icon--primary"
+                        className="btn-icon btn-icon--primary btn-icon--sm"
                         onClick={() => handleEditCategory(category)}
                         title="Editar categoria"
                       >
@@ -701,7 +760,7 @@ const ManageEquipment = () => {
                     <div key={state.id} className="category-item state-item">
                       <span className="category-name">{state.name}</span>
                       <button
-                        className="btn-icon btn-icon--primary"
+                        className="btn-icon btn-icon--primary btn-icon--sm"
                         onClick={() => handleEditState(state)}
                         title="Editar estado"
                       >
@@ -722,6 +781,7 @@ const ManageEquipment = () => {
                   {renderEquipmentTable(
                     unassignedEquipment,
                     null,
+                    null,
                     "Nenhum equipamento sem sala."
                   )}
                 </div>
@@ -730,6 +790,7 @@ const ManageEquipment = () => {
 
             {sortedRooms.map((room) => {
               const roomEquipment = getEquipmentForRoom(room.id);
+              const roomSections = getSectionsForRoom(room.id);
               return (
                 <div key={room.id} className="room-section">
                   <div className="room-header">
@@ -737,21 +798,111 @@ const ManageEquipment = () => {
                       <FaDoorOpen className="room-icon" />
                       {room.name}
                     </h2>
-                    <button
-                      className="btn-icon btn-icon--primary"
-                      onClick={() => handleEditRoom(room)}
-                      title="Editar sala"
-                    >
-                      <FaPen />
-                    </button>
+                    <div className="room-header-actions">
+                      <button
+                        className="btn-icon btn-icon--primary btn-icons-sm"
+                        onClick={() => setShowNewSectionInput(showNewSectionInput === room.id ? null : room.id)}
+                        title="Adicionar seção"
+                      >
+                        <FaLayerGroup />
+                        <FaPlus className="icon-small" />
+                      </button>
+                      <button
+                        className="btn-icon btn-icon--primary"
+                        onClick={() => handleEditRoom(room)}
+                        title="Editar sala"
+                      >
+                        <FaPen />
+                      </button>
+                    </div>
                   </div>
-                  <div className="content-table-wrapper">
-                    {renderEquipmentTable(
-                      roomEquipment,
-                      room.id,
-                      "Arraste equipamentos para esta sala"
-                    )}
-                  </div>
+
+                  {showNewSectionInput === room.id && (
+                    <div className="new-input-bar">
+                      <input
+                        type="text"
+                        placeholder="Nome da nova seção..."
+                        value={newSectionName}
+                        onChange={(e) => setNewSectionName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleCreateSection(room.id);
+                          if (e.key === "Escape") {
+                            setShowNewSectionInput(null);
+                            setNewSectionName("");
+                          }
+                        }}
+                        autoFocus
+                        maxLength={255}
+                      />
+                      <button
+                        className="btn-confirm"
+                        onClick={() => handleCreateSection(room.id)}
+                        disabled={isCreatingSection || !newSectionName.trim()}
+                      >
+                        {isCreatingSection ? "Criando..." : "Criar"}
+                      </button>
+                      <button
+                        className="btn-cancel"
+                        onClick={() => {
+                          setShowNewSectionInput(null);
+                          setNewSectionName("");
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  )}
+
+                  {roomSections.length > 0 ? (
+                    <div className="room-sections-container">
+                      <div className="section-area">
+                        <div className="section-area-header">
+                          <span className="section-area-title">Sem seção</span>
+                        </div>
+                        <div className="content-table-wrapper">
+                          {renderEquipmentTable(
+                            getEquipmentForSection(room.id, null),
+                            room.id,
+                            null,
+                            "Arraste equipamentos para esta área"
+                          )}
+                        </div>
+                      </div>
+
+                      {roomSections.map((section) => (
+                        <div key={section.id} className="section-area">
+                          <div className="section-area-header">
+                            <FaLayerGroup className="section-icon" />
+                            <span className="section-area-title">{section.name}</span>
+                            <button
+                              className="btn-icon btn-icon--primary btn-icon--sm"
+                              onClick={() => handleEditSection(section, room.name)}
+                              title="Editar seção"
+                            >
+                              <FaPen />
+                            </button>
+                          </div>
+                          <div className="content-table-wrapper">
+                            {renderEquipmentTable(
+                              getEquipmentForSection(room.id, section.id),
+                              room.id,
+                              section.id,
+                              `Arraste equipamentos para ${section.name}`
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="content-table-wrapper">
+                      {renderEquipmentTable(
+                        roomEquipment,
+                        room.id,
+                        null,
+                        "Arraste equipamentos para esta sala"
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

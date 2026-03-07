@@ -216,7 +216,7 @@ const ManageUsers = () => {
         </div>
 
         {showNewPositionInput && (
-          <div className="new-room-input-bar">
+          <div className="new-input-bar">
             <input
               type="text"
               placeholder="Nome do novo cargo..."
@@ -252,7 +252,7 @@ const ManageUsers = () => {
         )}
 
         {showNewRoomInput && (
-          <div className="new-room-input-bar">
+          <div className="new-input-bar">
             <input
               type="text"
               placeholder="Nome da nova sala..."
@@ -303,7 +303,7 @@ const ManageUsers = () => {
                         {position.name} {!position.is_visible && "(oculto)"}
                       </span>
                       <button
-                        className="btn-icon"
+                        className="btn-icon btn-icon--primary btn-icon--sm"
                         onClick={() => handleEditPosition(position)}
                         title="Editar cargo"
                       >
@@ -325,7 +325,7 @@ const ManageUsers = () => {
                     <div key={room.id} className="category-item room-item">
                       <span className="category-name">{room.name}</span>
                       <button
-                        className="btn-icon"
+                        className="btn-icon btn-icon--primary btn-icon--sm"
                         onClick={() => handleEditRoom(room)}
                         title="Editar sala"
                       >

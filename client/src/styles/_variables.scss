@@ -97,6 +97,7 @@ $transition-slow: 0.5s ease;
 @mixin custom-scrollbar {
   &::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   &::-webkit-scrollbar-track {
@@ -110,5 +111,9 @@ $transition-slow: 0.5s ease;
     &:hover {
       background-color: rgba(0, 0, 0, 0.25);
     }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }

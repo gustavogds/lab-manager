@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Max
 
-from .models import ResearchArea, Project, Partnership, Equipment, Room, IdentificationCategory, EquipmentState
+from .models import ResearchArea, Project, Partnership, Equipment, Room, RoomSection, IdentificationCategory, EquipmentState
 from accounts.models import User
 
 
@@ -554,15 +554,35 @@ def update_equipment(request, equipment_id):
         if room_id is None:
             if equipment.room is not None:
                 equipment.room = None
+                equipment.section = None  # Clear section when room is cleared
                 updated = True
         else:
             try:
                 room = Room.objects.get(id=room_id)
                 if equipment.room_id != room.id:
                     equipment.room = room
+                    equipment.section = None  # Clear section when room changes
                     updated = True
             except Room.DoesNotExist:
                 return JsonResponse({"error": "Sala não encontrada."}, status=404)
+
+    if "section_id" in data:
+        section_id = data["section_id"]
+        if section_id is None:
+            if equipment.section is not None:
+                equipment.section = None
+                updated = True
+        else:
+            try:
+                section = RoomSection.objects.get(id=section_id)
+                # Validate that section belongs to equipment's room
+                if equipment.room_id != section.room_id:
+                    return JsonResponse({"error": "Seção não pertence à sala do equipamento."}, status=400)
+                if equipment.section_id != section.id:
+                    equipment.section = section
+                    updated = True
+            except RoomSection.DoesNotExist:
+                return JsonResponse({"error": "Seção não encontrada."}, status=404)
 
     if "identification_category_id" in data:
         category_id = data["identification_category_id"]
@@ -985,3 +1005,124 @@ def delete_equipment_state(request, state_id):
         )
     except EquipmentState.DoesNotExist:
         return JsonResponse({"error": "Estado não encontrado."}, status=404)
+
+
+# Room Section Views
+
+@login_required
+@require_http_methods(["POST"])
+def create_room_section(request, room_id):
+    try:
+        room = Room.objects.get(id=room_id)
+    except Room.DoesNotExist:
+        return JsonResponse({"error": "Sala não encontrada."}, status=404)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    name = data.get("name", "").strip()
+
+    if not name:
+        return JsonResponse({"error": "Nome é obrigatório."}, status=400)
+
+    max_order = RoomSection.objects.filter(room=room).aggregate(Max("order"))["order__max"] or 0
+
+    section = RoomSection.objects.create(
+        name=name,
+        room=room,
+        order=max_order + 1,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Seção criada com sucesso.",
+            "data": section.export(),
+        }
+    )
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_room_sections(request, room_id):
+    try:
+        room = Room.objects.get(id=room_id)
+    except Room.DoesNotExist:
+        return JsonResponse({"error": "Sala não encontrada."}, status=404)
+
+    sections = RoomSection.objects.filter(room=room)
+    return JsonResponse(
+        {
+            "success": True,
+            "data": [section.export() for section in sections],
+        }
+    )
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_all_sections(request):
+    sections = RoomSection.objects.select_related("room").all()
+    return JsonResponse(
+        {
+            "success": True,
+            "data": [section.export() for section in sections],
+        }
+    )
+
+
+@login_required
+@require_http_methods(["PATCH"])
+def update_room_section(request, section_id):
+    try:
+        section = RoomSection.objects.get(id=section_id)
+    except RoomSection.DoesNotExist:
+        return JsonResponse({"error": "Seção não encontrada."}, status=404)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    allowed_fields = ["name", "order"]
+    updated = False
+
+    for field in allowed_fields:
+        if field in data:
+            new_value = data[field]
+            current_value = getattr(section, field)
+            if current_value != new_value:
+                setattr(section, field, new_value)
+                updated = True
+
+    if updated:
+        section.save()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Seção atualizada com sucesso.",
+                "data": section.export(),
+            }
+        )
+
+    return JsonResponse(
+        {"success": False, "message": "Nenhuma alteração foi feita."}
+    )
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_room_section(request, section_id):
+    try:
+        section = RoomSection.objects.get(id=section_id)
+        section.delete()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Seção deletada com sucesso.",
+            }
+        )
+    except RoomSection.DoesNotExist:
+        return JsonResponse({"error": "Seção não encontrada."}, status=404)

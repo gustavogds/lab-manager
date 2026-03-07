@@ -139,6 +139,37 @@ class Room(models.Model):
         }
 
 
+class RoomSection(models.Model):
+    name: str = models.CharField(max_length=255)
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.CASCADE,
+        related_name="sections",
+    )
+    order: int = models.IntegerField(default=0)
+    created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
+    updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.room.name})"
+
+    def __repr__(self):
+        return f"<RoomSection pk={self.pk} name={self.name} room={self.room_id}>"
+
+    def export(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "room_id": self.room_id,
+            "order": self.order,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
 class IdentificationCategory(models.Model):
     name: str = models.CharField(max_length=255)
     order: int = models.IntegerField(default=0)
@@ -216,6 +247,13 @@ class Equipment(models.Model):
         blank=True,
         related_name="room_equipment",
     )
+    section = models.ForeignKey(
+        RoomSection,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="equipment",
+    )
     assigned_to = models.ForeignKey(
         "accounts.User",
         on_delete=models.SET_NULL,
@@ -262,6 +300,7 @@ class Equipment(models.Model):
             "identification_category": self.identification_category.export() if self.identification_category else None,
             "equipment_state": self.equipment_state.export() if self.equipment_state else None,
             "room": self.room.export() if self.room else None,
+            "section": self.section.export() if self.section else None,
             "assigned_to": {
                 "id": self.assigned_to.id,
                 "name": self.assigned_to.name,

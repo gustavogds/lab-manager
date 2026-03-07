@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { listApprovedUsers, updateEquipment, deleteEquipment } from "helpers/api/content";
-import type { Equipment, User, Room, IdentificationCategory, EquipmentState } from "helpers/api/content";
+import { listApprovedUsers, updateEquipment, deleteEquipment, listAllSections } from "helpers/api/content";
+import type { Equipment, User, Room, IdentificationCategory, EquipmentState, RoomSection } from "helpers/api/content";
 import { FaPen } from "react-icons/fa";
 
 import { ModalsHandler } from "components/my-own-modal-handler";
@@ -12,6 +12,7 @@ interface EquipmentEditorProps {
   rooms: Room[];
   categories: IdentificationCategory[];
   states: EquipmentState[];
+  sections?: RoomSection[];
   onConfirm: () => void;
   onCancel?: () => void;
 }
@@ -21,6 +22,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
   rooms,
   categories,
   states,
+  sections: initialSections,
   onConfirm,
   onCancel,
 }) => {
@@ -31,6 +33,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     identification_category_id: equipment.identification_category?.id ?? (null as number | null),
     equipment_state_id: equipment.equipment_state?.id ?? (null as number | null),
     room_id: equipment.room?.id ?? (null as number | null),
+    section_id: equipment.section?.id ?? (null as number | null),
     assigned_to: equipment.assigned_to?.id || (null as number | null),
   });
   const [isEditingObservation, setIsEditingObservation] = useState(!equipment.observation);
@@ -38,15 +41,22 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     Array<{ id: number; name: string; email?: string; profile_image?: string | null }>
   >(equipment.users || []);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [allSections, setAllSections] = useState<RoomSection[]>(initialSections || []);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await listApprovedUsers();
-      if (response.success) {
-        setAvailableUsers(response.data);
+      const [usersResponse, sectionsResponse] = await Promise.all([
+        listApprovedUsers(),
+        !initialSections ? listAllSections() : Promise.resolve({ success: true, data: [] }),
+      ]);
+      if (usersResponse.success) {
+        setAvailableUsers(usersResponse.data);
+      }
+      if (!initialSections && sectionsResponse.success) {
+        setAllSections(sectionsResponse.data);
       }
       setIsLoading(false);
     };
@@ -65,8 +75,19 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     setFormData((prev) => ({
       ...prev,
       room_id: value ? Number(value) : null,
+      section_id: null, // Clear section when room changes
     }));
   };
+
+  const handleSectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      section_id: value ? Number(value) : null,
+    }));
+  };
+
+  const availableSections = allSections.filter((s) => s.room_id === formData.room_id);
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -114,6 +135,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
       identification_category_id: formData.identification_category_id,
       equipment_state_id: formData.equipment_state_id,
       room_id: formData.room_id,
+      section_id: formData.section_id,
       assigned_to: formData.assigned_to,
       users: selectedUsers.map((u) => u.id),
     };
@@ -311,6 +333,25 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
               ))}
             </select>
           </div>
+
+          {formData.room_id && availableSections.length > 0 && (
+            <div className="form-field">
+              <label htmlFor="eq-section">Seção</label>
+              <select
+                id="eq-section"
+                name="section_id"
+                value={formData.section_id ?? ""}
+                onChange={handleSectionChange}
+              >
+                <option value="">Nenhuma</option>
+                {availableSections.map((section) => (
+                  <option key={section.id} value={section.id}>
+                    {section.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="form-field">
             <label htmlFor="eq-state">Estado do Equipamento</label>

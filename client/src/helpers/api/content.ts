@@ -374,6 +374,15 @@ export type Room = {
   updated_at: string;
 };
 
+export type RoomSection = {
+  id: number;
+  name: string;
+  room_id: number;
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Position = {
   id: number;
   name: string;
@@ -405,6 +414,7 @@ export type Equipment = {
   identification_category: IdentificationCategory | null;
   equipment_state: EquipmentState | null;
   room: Room | null;
+  section: RoomSection | null;
   assigned_to: {
     id: number;
     name: string;
@@ -519,6 +529,56 @@ export const updateRoom = async (roomId: number, data: Partial<Room>) => {
 export const deleteRoom = async (roomId: number) => {
   const response = await api
     .delete(`/content/rooms/${roomId}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+// Room Section APIs
+
+export const createRoomSection = async (roomId: number, data: { name: string }) => {
+  const response = await api
+    .post(`/content/rooms/${roomId}/sections/create/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const listRoomSections = async (roomId: number) => {
+  const response = await api
+    .get(`/content/rooms/${roomId}/sections/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, data: response.data.data || [] };
+};
+
+export const listAllSections = async () => {
+  const response = await api
+    .get("/content/sections/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, data: response.data.data || [] };
+};
+
+export const updateRoomSection = async (
+  sectionId: number,
+  data: Partial<RoomSection>
+) => {
+  const response = await api
+    .patch(`/content/sections/${sectionId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const deleteRoomSection = async (sectionId: number) => {
+  const response = await api
+    .delete(`/content/sections/${sectionId}/delete/`)
     .catch((error) => {
       return error.response ? error.response : error;
     });

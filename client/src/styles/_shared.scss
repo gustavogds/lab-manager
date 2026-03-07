@@ -134,6 +134,22 @@
     height: 40px;
     font-size: 1rem;
   }
+
+  &--sm {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+
+  &--xs {
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
+  }
+
+  &.btn-icons-sm {
+    font-size: 0.75rem;
+  }
 }
 
 .btn-add {
@@ -821,7 +837,7 @@
   }
 }
 
-.new-room-input-bar {
+.new-input-bar {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -971,24 +987,6 @@
 
     .category-name {
       color: $accent-teal;
-    }
-
-    .btn-icon {
-      padding: 0.2rem;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: inherit;
-      opacity: 0.7;
-      transition: $transition-normal;
-
-      svg {
-        font-size: 0.7rem;
-      }
-
-      &:hover {
-        opacity: 1;
-      }
     }
   }
 
