@@ -18,6 +18,10 @@ let minify = undefined;
 let rollupOutput = undefined;
 
 export default defineConfig({
+  server: {
+    port: 5175,
+    strictPort: true,
+  },
   build: {
     outDir: resolve(storageRoot),
     manifest: true,

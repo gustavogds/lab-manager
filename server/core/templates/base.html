@@ -13,10 +13,10 @@
     />
     <title>Lab Manager</title>
     {% if debug %}
-    <script type="module" src="http://localhost:5173/@vite/client"></script>
+    <script type="module" src="http://localhost:5175/@vite/client"></script>
     <script type="module">
       console.log("Development mode: Vite HMR enabled");
-      import RefreshRuntime from "http://localhost:5173/@react-refresh";
+      import RefreshRuntime from "http://localhost:5175/@react-refresh";
       if (RefreshRuntime) {
         RefreshRuntime.injectIntoGlobalHook(window);
         window.$RefreshReg$ = () => {};
@@ -34,7 +34,7 @@
   <body>
     <div id="root"></div>
     {% if debug %}
-    <script type="module" src="http://localhost:5173/src/main.tsx"></script>
+    <script type="module" src="http://localhost:5175/src/main.tsx"></script>
     {% else %} {% render_vite_bundle %} {% endif %}
   </body>
 </html>

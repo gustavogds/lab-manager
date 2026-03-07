@@ -85,7 +85,7 @@ Crie banco e usuário (troque os valores):
 ```sql
 CREATE DATABASE lab_manager;
 CREATE USER lab_manager_user WITH PASSWORD 'sua_senha_forte';
-GRANT ALL PRIVILEGES ON DATABASE lab_manager TO lab_manager_user;
+ALTER DATABASE lab_manager OWNER TO lab_manager_user;
 \q
 ```
 
