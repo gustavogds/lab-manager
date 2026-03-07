@@ -9,7 +9,12 @@ from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, name, email, password, username, role="student", **kwargs):
+    VALID_ROLES = ["professor", "student", "collaborator", "inventory_manager"]
+    
+    def create_user(self, name, email, password, username, roles=None, **kwargs):
+        if roles is None:
+            roles = ["student"]
+        
         if not email:
             raise ValidationError("Users must have an email address")
         email = email.lower()
@@ -23,12 +28,14 @@ class UserManager(BaseUserManager):
         if not password:
             raise ValidationError("Users must have a password")
 
-        if not role:
-            raise ValidationError("Users must have a role")
-        if role not in ["professor", "student", "collaborator"]:
-            raise ValidationError(
-                "Invalid role. Must be one of: professor, student, collaborator"
-            )
+        if not roles:
+            raise ValidationError("Users must have at least one role")
+        
+        for role in roles:
+            if role not in self.VALID_ROLES:
+                raise ValidationError(
+                    f"Invalid role: {role}. Must be one of: {', '.join(self.VALID_ROLES)}"
+                )
 
         if User.objects.filter(email=email).exists():
             raise ValidationError("User with this email already exists")
@@ -40,7 +47,7 @@ class UserManager(BaseUserManager):
             username=username,
             email=email,
             name=name,
-            role=role,
+            roles=roles,
             is_approved=False,
         )
 
@@ -53,7 +60,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        user = self.create_user("admin", email, password, "admin", **extra_fields)
+        user = self.create_user("admin", email, password, "admin", roles=["professor"], **extra_fields)
         user.email_validated = True
         user.is_staff = True
         user.is_superuser = True
@@ -90,15 +97,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email_validated = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    role = models.CharField(
-        max_length=50,
-        choices=[
-            ("professor", "Professor"),
-            ("student", "Student"),
-            ("collaborator", "Collaborator"),
-        ],
-        default="collaborator",
-    )
+    
+    roles = models.JSONField(default=list, blank=True)
 
     date_joined = models.DateTimeField(default=timezone.now)
 
@@ -109,6 +109,22 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __repr__(self):
         return f"<User pk={self.pk} username={self.username} email={self.email}>"
+    
+    def has_role(self, role):
+        """Check if user has a specific role"""
+        return role in (self.roles or [])
+    
+    def has_any_role(self, roles_list):
+        """Check if user has any of the specified roles"""
+        return any(role in (self.roles or []) for role in roles_list)
+    
+    def can_manage_equipment(self):
+        """Check if user can manage equipment"""
+        return self.has_any_role(["professor", "inventory_manager"])
+    
+    def can_manage_all(self):
+        """Check if user can manage everything (professor only)"""
+        return self.has_role("professor")
 
     def export(self, include=None):
         data = {
@@ -124,7 +140,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             "is_staff": self.is_staff,
             "is_active": self.is_active,
             "date_joined": self.date_joined.isoformat(),
-            "role": self.role,
+            "roles": self.roles or [],
             "is_public": self.is_public,
             "phone": self.phone,
             "contact_email": self.contact_email,

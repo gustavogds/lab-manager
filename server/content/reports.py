@@ -36,14 +36,14 @@ SECTION_CONFIG = {
     },
     "users": {
         "label": "Usuários",
-        "headers": ["ID", "Nome", "E-mail", "Cargo", "Função"],
+        "headers": ["ID", "Nome", "E-mail", "Cargo", "Funções"],
         "get_data": lambda: User.objects.filter(is_approved=True).order_by("name"),
         "row": lambda item: [
             item.id,
             item.name or "",
             item.email,
             item.position or "",
-            dict(User._meta.get_field("role").choices).get(item.role, item.role),
+            ", ".join(item.roles) if item.roles else "",
         ],
     },
     "equipment": {
@@ -77,7 +77,7 @@ VALID_SECTIONS = set(SECTION_CONFIG.keys())
 @login_required
 @require_http_methods(["POST"])
 def generate_report(request):
-    if not hasattr(request.user, "role") or request.user.role != "professor":
+    if not hasattr(request.user, "has_role") or not request.user.has_role("professor"):
         return JsonResponse({"error": "Permissão negada."}, status=403)
 
     try:

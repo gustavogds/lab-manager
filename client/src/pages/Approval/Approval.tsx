@@ -10,7 +10,7 @@ type User = {
   id: number;
   name: string;
   email: string;
-  role: string;
+  roles: string[];
 };
 
 const Approval = () => {
@@ -64,7 +64,7 @@ const Approval = () => {
               <div className="approval-info">
                 <p className="approval-name">{user.name}</p>
                 <p className="approval-email">{user.email}</p>
-                <p className="approval-role">Role: {user.role}</p>
+                <p className="approval-role">Funções: {user.roles?.join(", ") || "Nenhuma"}</p>
               </div>
               <div className="approval-actions">
                 <button

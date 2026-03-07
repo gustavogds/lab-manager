@@ -42,7 +42,7 @@ import {
 import ResearcherCard from "components/ResearcherCard/ResearcherCard";
 import PartnershipBadge from "components/PartnershipBadge/PartnershipBadge";
 import { useGlobalData } from "helpers/context/globalContext";
-import { isEmptyObject } from "helpers/utils";
+import { isEmptyObject, canManageAll } from "helpers/utils";
 import { ModalsHandler } from "components/my-own-modal-handler";
 import type { SectionEditorField } from "components/Modals/SectionEditor/SectionEditor";
 
@@ -91,7 +91,7 @@ const Home = () => {
   const [allPartnerships, setAllPartnerships] = useState<Partnership[]>([]);
   const hashNavTimeout = useRef<number | null>(null);
   const { user }: any = useGlobalData();
-  const isProfessor = !isEmptyObject(user.state) && user.state.role === "professor";
+  const isProfessor = !isEmptyObject(user.state) && canManageAll(user.state);
   const sectionEditors: Record<
     string,
     {

@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useGlobalData } from "helpers/context/globalContext";
 import AuthHandler from "helpers/services/AuthHandler";
-import { isEmptyObject } from "helpers/utils";
+import { isEmptyObject, canManageAll, canManageEquipment } from "helpers/utils";
 import { getLabSettings } from "helpers/api/settings";
 
 const Navbar = () => {
@@ -84,7 +84,7 @@ const Navbar = () => {
                     <button onClick={() => navigate("/settings/profile")}>
                       Configurações
                     </button>
-                    {user.state.role === "professor" && (
+                    {canManageAll(user.state) && (
                       <button onClick={() => navigate("/approval")}>
                         Ativação de Contas
                       </button>
@@ -100,12 +100,12 @@ const Navbar = () => {
               </div>
             )}
           </div>
-          {!isEmptyObject(user.state) && user.state.role === "professor" && (
+          {!isEmptyObject(user.state) && canManageEquipment(user.state) && (
             <span className="header-icon" onClick={() => navigate("/manage")}>
               <Icons.FaSlidersH />
             </span>
           )}
-          {!isEmptyObject(user.state) && user.state.role === "professor" && (
+          {!isEmptyObject(user.state) && canManageAll(user.state) && (
             <span className="header-icon" onClick={() => navigate("/create")}>
               <Icons.FaPlus />
             </span>

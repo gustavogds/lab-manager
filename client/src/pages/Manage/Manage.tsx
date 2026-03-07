@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router";
 import { FaTools, FaFlask, FaProjectDiagram, FaHandshake, FaArrowRight } from "react-icons/fa";
 import "./ManageContent.scss";
+import { useGlobalData } from "helpers/context/globalContext";
+import { canManageAll } from "helpers/utils";
 
 type ManageOption = {
   id: string;
@@ -8,12 +10,15 @@ type ManageOption = {
   description: string;
   icon: React.ReactNode;
   action: () => void;
+  requiresFullAccess?: boolean;
 };
 
 const Manage = () => {
   const navigate = useNavigate();
+  const { user }: any = useGlobalData();
+  const hasFullAccess = canManageAll(user.state);
 
-  const manageOptions: ManageOption[] = [
+  const allOptions: ManageOption[] = [
     {
       id: "research-areas",
       title: "Áreas de Pesquisa",
@@ -22,6 +27,7 @@ const Manage = () => {
       action: () => {
         navigate("/manage/research-areas");
       },
+      requiresFullAccess: true,
     },
     {
       id: "projects",
@@ -31,6 +37,7 @@ const Manage = () => {
       action: () => {
         navigate("/manage/projects");
       },
+      requiresFullAccess: true,
     },
     {
       id: "partnerships",
@@ -40,6 +47,7 @@ const Manage = () => {
       action: () => {
         navigate("/manage/partnerships");
       },
+      requiresFullAccess: true,
     },
     {
       id: "equipment",
@@ -49,8 +57,13 @@ const Manage = () => {
       action: () => {
         navigate("/manage/equipment");
       },
+      requiresFullAccess: false,
     },
   ];
+
+  const manageOptions = allOptions.filter(
+    (option) => !option.requiresFullAccess || hasFullAccess
+  );
 
   return (
     <div className="page-layout">

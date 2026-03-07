@@ -202,7 +202,7 @@ export type User = {
   social_media?: string;
   lattes?: string;
   bio?: string;
-  role?: string;
+  roles?: string[];
 };
 
 export type Researcher = User;

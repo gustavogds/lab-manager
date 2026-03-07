@@ -66,3 +66,21 @@ export const bytesToSize = (bytes: number) => {
   if (i === 0) return `${bytes} ${sizes[i]}`;
   return `${(bytes / 1024 ** i).toFixed(1)} ${sizes[i]}`;
 };
+
+export type UserWithRoles = { roles?: string[] };
+
+export const hasRole = (user: UserWithRoles | null | undefined, role: string): boolean => {
+  return user?.roles?.includes(role) ?? false;
+};
+
+export const hasAnyRole = (user: UserWithRoles | null | undefined, roles: string[]): boolean => {
+  return roles.some(role => user?.roles?.includes(role) ?? false);
+};
+
+export const canManageEquipment = (user: UserWithRoles | null | undefined): boolean => {
+  return hasAnyRole(user, ["professor", "inventory_manager"]);
+};
+
+export const canManageAll = (user: UserWithRoles | null | undefined): boolean => {
+  return hasRole(user, "professor");
+};

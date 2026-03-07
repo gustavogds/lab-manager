@@ -135,12 +135,14 @@ def list_approved_users(request):
 
 @require_http_methods(["GET"])
 def list_researchers(request):
-    researchers = User.objects.filter(
+    all_users = User.objects.filter(
         is_approved=True,
         is_public=True,
-        role__in=["professor", "collaborator"],
         show_in_researchers=True,
     ).order_by("researcher_order", "name")
+    
+    researcher_roles = ["professor", "collaborator", "student"]
+    researchers = [user for user in all_users if user.has_any_role(researcher_roles)]
     
     users_data = [user.export() for user in researchers]
     return JsonResponse({"users": users_data}, safe=False)
@@ -149,10 +151,12 @@ def list_researchers(request):
 @login_required
 @require_http_methods(["GET"])
 def list_all_researchers(request):
-    researchers = User.objects.filter(
+    all_users = User.objects.filter(
         is_approved=True,
-        role__in=["professor", "collaborator"],
     ).order_by("researcher_order", "name")
+    
+    researcher_roles = ["professor", "collaborator", "student"]
+    researchers = [user for user in all_users if user.has_any_role(researcher_roles)]
     
     users_data = [user.export() for user in researchers]
     return JsonResponse({"users": users_data}, safe=False)

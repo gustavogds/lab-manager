@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import "./App.scss";
-import { isEmptyObject } from "../helpers/utils";
+import { isEmptyObject, canManageAll, canManageEquipment } from "../helpers/utils";
 import { ModalsHandler, Overlays } from "../components/my-own-modal-handler";
 import Navbar from "../components/Navbar/Navbar";
 import Home from "./Home/Home";
@@ -146,14 +146,14 @@ const App = () => {
             }
           >
             <Route path="profile" element={<ProfileSettings />} />
-            {user.state.role === "professor" && (
+            {canManageAll(user.state) && (
               <Route path="lab" element={<LabSettings />} />
             )}
           </Route>
           <Route
             path="/approval"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <Approval />
                 </PrivateRoute>
@@ -165,7 +165,7 @@ const App = () => {
           <Route
             path="/create"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <Create />
                 </PrivateRoute>
@@ -177,7 +177,7 @@ const App = () => {
           <Route
             path="/create/research-area"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <CreateResearchArea />
                 </PrivateRoute>
@@ -189,7 +189,7 @@ const App = () => {
           <Route
             path="/create/project"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <CreateProject />
                 </PrivateRoute>
@@ -201,7 +201,7 @@ const App = () => {
           <Route
             path="/create/partnership"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <CreatePartnership />
                 </PrivateRoute>
@@ -213,7 +213,7 @@ const App = () => {
           <Route
             path="/create/equipment"
             element={
-              user.state.role === "professor" ? (
+              canManageEquipment(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <CreateEquipment />
                 </PrivateRoute>
@@ -225,7 +225,7 @@ const App = () => {
           <Route
             path="/create/report"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <CreateReport />
                 </PrivateRoute>
@@ -237,7 +237,7 @@ const App = () => {
           <Route
             path="/manage"
             element={
-              user.state.role === "professor" ? (
+              canManageEquipment(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <Manage />
                 </PrivateRoute>
@@ -249,7 +249,7 @@ const App = () => {
           <Route
             path="/manage/equipment"
             element={
-              user.state.role === "professor" ? (
+              canManageEquipment(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <ManageEquipment />
                 </PrivateRoute>
@@ -261,7 +261,7 @@ const App = () => {
           <Route
             path="/manage/research-areas"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <ManageResearchAreas />
                 </PrivateRoute>
@@ -273,7 +273,7 @@ const App = () => {
           <Route
             path="/manage/projects"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <ManageProjects />
                 </PrivateRoute>
@@ -285,7 +285,7 @@ const App = () => {
           <Route
             path="/manage/partnerships"
             element={
-              user.state.role === "professor" ? (
+              canManageAll(user.state) ? (
                 <PrivateRoute user={user.state}>
                   <ManagePartnerships />
                 </PrivateRoute>

@@ -30,7 +30,7 @@ class CustomUserAdmin(UserAdmin):
             "Permissions",
             {
                 "fields": (
-                    "role",
+                    "roles",
                     "is_active",
                     "is_staff",
                     "is_superuser",

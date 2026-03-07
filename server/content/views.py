@@ -45,7 +45,7 @@ def create_research_area(request):
 
 @require_http_methods(["GET"])
 def list_research_areas(request):
-    if request.user.is_authenticated and hasattr(request.user, "role") and request.user.role == "professor":
+    if request.user.is_authenticated and hasattr(request.user, "has_role") and request.user.has_role("professor"):
         areas = ResearchArea.objects.all()
     else:
         areas = ResearchArea.objects.filter(is_active=True)
@@ -182,7 +182,7 @@ def create_project(request):
 
 @require_http_methods(["GET"])
 def list_projects(request):
-    if request.user.is_authenticated and hasattr(request.user, "role") and request.user.role == "professor":
+    if request.user.is_authenticated and hasattr(request.user, "has_role") and request.user.has_role("professor"):
         projects = Project.objects.all()
     else:
         projects = Project.objects.filter(is_active=True)
@@ -497,7 +497,7 @@ def create_equipment(request):
 
 @require_http_methods(["GET"])
 def list_equipment(request):
-    if request.user.is_authenticated and hasattr(request.user, "role") and request.user.role == "professor":
+    if request.user.is_authenticated and hasattr(request.user, "can_manage_equipment") and request.user.can_manage_equipment():
         items = Equipment.objects.select_related("room", "assigned_to").prefetch_related("users").all()
     else:
         items = Equipment.objects.select_related("room", "assigned_to").prefetch_related("users").filter(is_active=True)

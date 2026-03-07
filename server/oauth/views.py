@@ -74,7 +74,11 @@ def sign_up(request):
     email = data.get("email")
     password = data.get("password")
     username = data.get("username")
-    role = data.get("role")
+    
+    roles = data.get("roles")
+    if not roles:
+        role = data.get("role")
+        roles = [role] if role else None
 
     if password != data.get("confirmPassword"):
         raise ValidationError("Passwords do not match")
@@ -88,14 +92,14 @@ def sign_up(request):
     if not password:
         raise ValidationError("Users must have a password")
 
-    if not role:
+    if not roles:
         raise ValidationError("Role is required")
 
     if User.objects.filter(email=email).exists():
         raise ValidationError("User with this email already exists")
 
     user = User.objects.create_user(
-        name=name, email=email, password=password, username=username, role=role
+        name=name, email=email, password=password, username=username, roles=roles
     )
 
     send_verification_email(user)

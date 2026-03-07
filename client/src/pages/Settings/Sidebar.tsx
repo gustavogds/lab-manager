@@ -1,5 +1,6 @@
 import { NavLink } from "react-router";
 import { useGlobalData } from "helpers/context/globalContext";
+import { canManageAll } from "helpers/utils";
 import "./Settings.scss";
 
 const Sidebar = () => {
@@ -19,7 +20,7 @@ const Sidebar = () => {
           Profile Settings
         </NavLink>
 
-        {user?.state?.role === "professor" && (
+        {canManageAll(user?.state) && (
           <NavLink
             to="/settings/lab"
             className={({ isActive }) =>
