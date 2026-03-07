@@ -5,10 +5,12 @@ import {
   listRooms,
   createRoom,
   updateEquipment,
+  listIdentificationCategories,
+  createIdentificationCategory,
 } from "helpers/api/content";
-import type { Equipment, Room } from "helpers/api/content";
+import type { Equipment, Room, IdentificationCategory } from "helpers/api/content";
 import { ModalsHandler } from "components/my-own-modal-handler";
-import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag } from "react-icons/fa";
 import "./ManageContent.scss";
 import "./ManageEquipment.scss";
 
@@ -16,21 +18,29 @@ const ManageEquipment = () => {
   const navigate = useNavigate();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [categories, setCategories] = useState<IdentificationCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newRoomName, setNewRoomName] = useState("");
   const [showNewRoomInput, setShowNewRoomInput] = useState(false);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [showCreateDropdown, setShowCreateDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const dragItem = useRef<{ equipmentId: number } | null>(null);
   const [dragOverRoom, setDragOverRoom] = useState<number | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
-    const [eqResponse, roomResponse] = await Promise.all([
+    const [eqResponse, roomResponse, catResponse] = await Promise.all([
       listAllEquipment(),
       listRooms(),
+      listIdentificationCategories(),
     ]);
     if (eqResponse.success) setEquipment(eqResponse.data);
     if (roomResponse.success) setRooms(roomResponse.data);
+    if (catResponse.success) setCategories(catResponse.data);
     setIsLoading(false);
   };
 
@@ -38,10 +48,22 @@ const ManageEquipment = () => {
     fetchData();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowCreateDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleEdit = (item: Equipment) => {
     ModalsHandler.createModal("EquipmentEditor", {
       equipment: item,
       rooms,
+      categories,
       onConfirm: () => fetchData(),
     });
   };
@@ -74,6 +96,36 @@ const ManageEquipment = () => {
         type: "error",
       });
     }
+  };
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    setIsCreatingCategory(true);
+    const response = await createIdentificationCategory({ name: newCategoryName.trim() });
+    setIsCreatingCategory(false);
+    if (response.success) {
+      setNewCategoryName("");
+      setShowNewCategoryInput(false);
+      ModalsHandler.createNotification({
+        title: "Sucesso",
+        message: "Categoria criada com sucesso!",
+        type: "success",
+      });
+      fetchData();
+    } else {
+      ModalsHandler.createNotification({
+        title: "Erro",
+        message: response.error || "Falha ao criar categoria.",
+        type: "error",
+      });
+    }
+  };
+
+  const handleEditCategory = (category: IdentificationCategory) => {
+    ModalsHandler.createModal("IdentificationCategoryEditor", {
+      category,
+      onConfirm: () => fetchData(),
+    });
   };
 
   const handleDragStart = (equipmentId: number) => {
@@ -167,6 +219,7 @@ const ManageEquipment = () => {
           <thead>
             <tr>
               <th style={{ width: 40 }} />
+              <th>Categoria</th>
               <th>ID</th>
               <th>Nome</th>
               <th>Responsável</th>
@@ -184,6 +237,13 @@ const ManageEquipment = () => {
               >
                 <td className="cell-drag">
                   <FaGripVertical className="drag-handle" />
+                </td>
+                <td className="cell-category" onClick={() => handleEdit(item)}>
+                  {item.identification_category ? (
+                    <span className="category-tag">{item.identification_category.name}</span>
+                  ) : (
+                    <span className="empty-value">—</span>
+                  )}
                 </td>
                 <td className="cell-id" onClick={() => handleEdit(item)}>
                   {item.custom_id}
@@ -255,18 +315,42 @@ const ManageEquipment = () => {
             <p>Gerencie os materiais, equipamentos e salas do laboratório</p>
           </div>
           <div className="header-actions">
-            <button
-              className="btn-add btn-add--secondary btn-sm"
-              onClick={() => setShowNewRoomInput(true)}
-            >
-              <FaDoorOpen /> Nova Sala
-            </button>
-            <button
-              className="btn-add btn-sm"
-              onClick={() => navigate("/create/equipment")}
-            >
-              <FaPlus /> Novo Equipamento
-            </button>
+            <div className="create-dropdown" ref={dropdownRef}>
+              <button
+                className="btn-add btn-sm"
+                onClick={() => setShowCreateDropdown(!showCreateDropdown)}
+              >
+                <FaPlus /> Criar <FaChevronDown />
+              </button>
+              {showCreateDropdown && (
+                <div className="dropdown-menu">
+                  <button
+                    onClick={() => {
+                      navigate("/create/equipment");
+                      setShowCreateDropdown(false);
+                    }}
+                  >
+                    <FaPlus /> Equipamento
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowNewRoomInput(true);
+                      setShowCreateDropdown(false);
+                    }}
+                  >
+                    <FaDoorOpen /> Sala
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowNewCategoryInput(true);
+                      setShowCreateDropdown(false);
+                    }}
+                  >
+                    <FaTag /> Categoria de Identificação
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -306,6 +390,42 @@ const ManageEquipment = () => {
           </div>
         )}
 
+        {showNewCategoryInput && (
+          <div className="new-room-input-bar">
+            <input
+              type="text"
+              placeholder="Nome da nova categoria..."
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreateCategory();
+                if (e.key === "Escape") {
+                  setShowNewCategoryInput(false);
+                  setNewCategoryName("");
+                }
+              }}
+              autoFocus
+              maxLength={255}
+            />
+            <button
+              className="btn-confirm"
+              onClick={handleCreateCategory}
+              disabled={isCreatingCategory || !newCategoryName.trim()}
+            >
+              {isCreatingCategory ? "Criando..." : "Criar"}
+            </button>
+            <button
+              className="btn-cancel"
+              onClick={() => {
+                setShowNewCategoryInput(false);
+                setNewCategoryName("");
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="loading-state">Carregando equipamentos...</div>
         ) : !hasContent ? (
@@ -317,6 +437,28 @@ const ManageEquipment = () => {
           </div>
         ) : (
           <div className="rooms-layout">
+            {categories.length > 0 && (
+              <div className="categories-section">
+                <div className="categories-header">
+                  <h2><FaTag className="category-icon" /> Categorias de Identificação</h2>
+                </div>
+                <div className="categories-list">
+                  {categories.map((category) => (
+                    <div key={category.id} className="category-item">
+                      <span className="category-name">{category.name}</span>
+                      <button
+                        className="btn-icon btn-icon--primary"
+                        onClick={() => handleEditCategory(category)}
+                        title="Editar categoria"
+                      >
+                        <FaPen />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {unassignedEquipment.length > 0 && (
               <div className="room-section">
                 <div className="room-header">

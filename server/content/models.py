@@ -139,15 +139,48 @@ class Room(models.Model):
         }
 
 
+class IdentificationCategory(models.Model):
+    name: str = models.CharField(max_length=255)
+    order: int = models.IntegerField(default=0)
+    created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
+    updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+        verbose_name_plural = "Identification Categories"
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return f"<IdentificationCategory pk={self.pk} name={self.name}>"
+
+    def export(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "order": self.order,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+
+
 class Equipment(models.Model):
     name: str = models.CharField(max_length=255)
     custom_id: str = models.CharField(max_length=100, unique=True)
+    identification_category = models.ForeignKey(
+        IdentificationCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="equipment",
+    )
     room = models.ForeignKey(
         Room,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="equipment",
+        related_name="room_equipment",
     )
     assigned_to = models.ForeignKey(
         "accounts.User",
@@ -191,6 +224,7 @@ class Equipment(models.Model):
             "id": self.id,
             "name": self.name,
             "custom_id": self.custom_id,
+            "identification_category": self.identification_category.export() if self.identification_category else None,
             "room": self.room.export() if self.room else None,
             "assigned_to": {
                 "id": self.assigned_to.id,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { createEquipment, listRooms } from "helpers/api/content";
-import type { Room } from "helpers/api/content";
+import { createEquipment, listRooms, listIdentificationCategories } from "helpers/api/content";
+import type { Room, IdentificationCategory } from "helpers/api/content";
 import { FaArrowLeft } from "react-icons/fa";
 import "./CreateEquipment.scss";
 
@@ -10,21 +10,29 @@ const CreateEquipment = () => {
   const [formData, setFormData] = useState({
     name: "",
     custom_id: "",
+    identification_category_id: "" as string,
     room_id: "" as string,
   });
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [categories, setCategories] = useState<IdentificationCategory[]>([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchRooms = async () => {
-      const response = await listRooms();
-      if (response.success) {
-        setRooms(response.data);
+    const fetchData = async () => {
+      const [roomsResponse, categoriesResponse] = await Promise.all([
+        listRooms(),
+        listIdentificationCategories(),
+      ]);
+      if (roomsResponse.success) {
+        setRooms(roomsResponse.data);
+      }
+      if (categoriesResponse.success) {
+        setCategories(categoriesResponse.data);
       }
     };
-    fetchRooms();
+    fetchData();
   }, []);
 
   const handleChange = (
@@ -50,10 +58,13 @@ const CreateEquipment = () => {
     setError("");
     setMessage("");
 
-    const payload: { name: string; custom_id: string; room_id?: number | null } = {
+    const payload: { name: string; custom_id: string; identification_category_id?: number | null; room_id?: number | null } = {
       name: formData.name,
       custom_id: formData.custom_id,
     };
+    if (formData.identification_category_id) {
+      payload.identification_category_id = Number(formData.identification_category_id);
+    }
     if (formData.room_id) {
       payload.room_id = Number(formData.room_id);
     }
@@ -64,7 +75,7 @@ const CreateEquipment = () => {
     if (response.success) {
       setMessage(response.message || "Equipamento criado com sucesso!");
       setError("");
-      setFormData({ name: "", custom_id: "", room_id: "" });
+      setFormData({ name: "", custom_id: "", identification_category_id: "", room_id: "" });
       setTimeout(() => {
         navigate(-1);
       }, 1500);
@@ -113,6 +124,22 @@ const CreateEquipment = () => {
               required
             />
             <small className="field-hint">Identificador único do equipamento no laboratório</small>
+          </div>
+          <div className="form-field">
+            <label htmlFor="identification_category_id">Categoria de Identificação (opcional)</label>
+            <select
+              id="identification_category_id"
+              name="identification_category_id"
+              value={formData.identification_category_id}
+              onChange={handleChange}
+            >
+              <option value="">Nenhuma</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="form-field">
             <label htmlFor="room_id">Sala (opcional)</label>

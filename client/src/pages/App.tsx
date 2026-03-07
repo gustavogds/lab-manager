@@ -37,6 +37,7 @@ import ResearchAreaEditor from "../components/Modals/ResearchAreaEditor/Research
 import ProjectManageEditor from "../components/Modals/ProjectManageEditor/ProjectManageEditor";
 import PartnershipManageEditor from "../components/Modals/PartnershipManageEditor/PartnershipManageEditor";
 import RoomEditor from "../components/Modals/RoomEditor/RoomEditor";
+import IdentificationCategoryEditor from "../components/Modals/IdentificationCategoryEditor/IdentificationCategoryEditor";
 
 const PrivateRoute = ({
   user,
@@ -94,6 +95,7 @@ const App = () => {
     ModalsHandler.registerModal("ProjectManageEditor", ProjectManageEditor);
     ModalsHandler.registerModal("PartnershipManageEditor", PartnershipManageEditor);
     ModalsHandler.registerModal("RoomEditor", RoomEditor);
+    ModalsHandler.registerModal("IdentificationCategoryEditor", IdentificationCategoryEditor);
   }, []);
 
   if (!readyToRender) {

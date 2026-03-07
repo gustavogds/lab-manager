@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { listApprovedUsers, updateEquipment, deleteEquipment } from "helpers/api/content";
-import type { Equipment, User, Room } from "helpers/api/content";
+import type { Equipment, User, Room, IdentificationCategory } from "helpers/api/content";
 
 import { ModalsHandler } from "components/my-own-modal-handler";
 import MultiSelect from "components/MultiSelect/MultiSelect";
@@ -9,6 +9,7 @@ import "pages/Manage/ManageContent.scss";
 interface EquipmentEditorProps {
   equipment: Equipment;
   rooms: Room[];
+  categories: IdentificationCategory[];
   onConfirm: () => void;
   onCancel?: () => void;
 }
@@ -16,12 +17,14 @@ interface EquipmentEditorProps {
 const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
   equipment,
   rooms,
+  categories,
   onConfirm,
   onCancel,
 }) => {
   const [formData, setFormData] = useState({
     name: equipment.name,
     custom_id: equipment.custom_id,
+    identification_category_id: equipment.identification_category?.id ?? (null as number | null),
     room_id: equipment.room?.id ?? (null as number | null),
     assigned_to: equipment.assigned_to?.id || (null as number | null),
   });
@@ -59,6 +62,14 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     }));
   };
 
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      identification_category_id: value ? Number(value) : null,
+    }));
+  };
+
   const handleAssignedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setFormData((prev) => ({
@@ -85,6 +96,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     const payload: Record<string, any> = {
       name: formData.name,
       custom_id: formData.custom_id,
+      identification_category_id: formData.identification_category_id,
       room_id: formData.room_id,
       assigned_to: formData.assigned_to,
       users: selectedUsers.map((u) => u.id),
@@ -216,6 +228,23 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
             <small className="field-hint">
               Identificador único do equipamento no laboratório
             </small>
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="eq-category">Categoria de Identificação</label>
+            <select
+              id="eq-category"
+              name="identification_category_id"
+              value={formData.identification_category_id ?? ""}
+              onChange={handleCategoryChange}
+            >
+              <option value="">Nenhuma</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-field">

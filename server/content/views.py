@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Max
 
-from .models import ResearchArea, Project, Partnership, Equipment, Room
+from .models import ResearchArea, Project, Partnership, Equipment, Room, IdentificationCategory
 from accounts.models import User
 
 
@@ -440,6 +440,7 @@ def create_equipment(request):
     name = data.get("name", "").strip()
     custom_id = data.get("custom_id", "").strip()
     room_id = data.get("room_id")
+    identification_category_id = data.get("identification_category_id")
 
     if not name:
         return JsonResponse({"error": "Nome é obrigatório."}, status=400)
@@ -457,11 +458,19 @@ def create_equipment(request):
         except Room.DoesNotExist:
             return JsonResponse({"error": "Sala não encontrada."}, status=404)
 
+    identification_category = None
+    if identification_category_id:
+        try:
+            identification_category = IdentificationCategory.objects.get(id=identification_category_id)
+        except IdentificationCategory.DoesNotExist:
+            return JsonResponse({"error": "Categoria de identificação não encontrada."}, status=404)
+
     max_order = Equipment.objects.aggregate(Max("order"))["order__max"] or 0
 
     equipment = Equipment.objects.create(
         name=name,
         custom_id=custom_id,
+        identification_category=identification_category,
         room=room,
         order=max_order + 1,
     )
@@ -543,6 +552,21 @@ def update_equipment(request, equipment_id):
                     updated = True
             except Room.DoesNotExist:
                 return JsonResponse({"error": "Sala não encontrada."}, status=404)
+
+    if "identification_category_id" in data:
+        category_id = data["identification_category_id"]
+        if category_id is None:
+            if equipment.identification_category is not None:
+                equipment.identification_category = None
+                updated = True
+        else:
+            try:
+                category = IdentificationCategory.objects.get(id=category_id)
+                if equipment.identification_category_id != category.id:
+                    equipment.identification_category = category
+                    updated = True
+            except IdentificationCategory.DoesNotExist:
+                return JsonResponse({"error": "Categoria de identificação não encontrada."}, status=404)
 
     if "assigned_to" in data:
         assigned_to_id = data["assigned_to"]
@@ -739,3 +763,101 @@ def delete_room(request, room_id):
         )
     except Room.DoesNotExist:
         return JsonResponse({"error": "Sala não encontrada."}, status=404)
+
+
+# Identification Category Views
+
+@login_required
+@require_http_methods(["POST"])
+def create_identification_category(request):
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    name = data.get("name", "").strip()
+
+    if not name:
+        return JsonResponse({"error": "Nome é obrigatório."}, status=400)
+
+    max_order = IdentificationCategory.objects.aggregate(Max("order"))["order__max"] or 0
+
+    category = IdentificationCategory.objects.create(
+        name=name,
+        order=max_order + 1,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Categoria de identificação criada com sucesso.",
+            "data": category.export(),
+        }
+    )
+
+
+@login_required
+@require_http_methods(["GET"])
+def list_identification_categories(request):
+    categories = IdentificationCategory.objects.all()
+    return JsonResponse(
+        {
+            "success": True,
+            "data": [category.export() for category in categories],
+        }
+    )
+
+
+@login_required
+@require_http_methods(["PATCH"])
+def update_identification_category(request, category_id):
+    try:
+        category = IdentificationCategory.objects.get(id=category_id)
+    except IdentificationCategory.DoesNotExist:
+        return JsonResponse({"error": "Categoria não encontrada."}, status=404)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    allowed_fields = ["name", "order"]
+    updated = False
+
+    for field in allowed_fields:
+        if field in data:
+            new_value = data[field]
+            current_value = getattr(category, field)
+            if current_value != new_value:
+                setattr(category, field, new_value)
+                updated = True
+
+    if updated:
+        category.save()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Categoria atualizada com sucesso.",
+                "data": category.export(),
+            }
+        )
+
+    return JsonResponse(
+        {"success": False, "message": "Nenhuma alteração foi feita."}
+    )
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_identification_category(request, category_id):
+    try:
+        category = IdentificationCategory.objects.get(id=category_id)
+        category.delete()
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Categoria deletada com sucesso.",
+            }
+        )
+    except IdentificationCategory.DoesNotExist:
+        return JsonResponse({"error": "Categoria não encontrada."}, status=404)

@@ -367,10 +367,19 @@ export type Room = {
   updated_at: string;
 };
 
+export type IdentificationCategory = {
+  id: number;
+  name: string;
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Equipment = {
   id: number;
   name: string;
   custom_id: string;
+  identification_category: IdentificationCategory | null;
   room: Room | null;
   assigned_to: {
     id: number;
@@ -394,6 +403,7 @@ export const createEquipment = async (data: {
   name: string;
   custom_id: string;
   room_id?: number | null;
+  identification_category_id?: number | null;
 }) => {
   const response = await api
     .post("/content/equipment/create/", data)
@@ -483,6 +493,47 @@ export const updateRoom = async (roomId: number, data: Partial<Room>) => {
 export const deleteRoom = async (roomId: number) => {
   const response = await api
     .delete(`/content/rooms/${roomId}/delete/`)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+// Identification Category APIs
+
+export const createIdentificationCategory = async (data: { name: string }) => {
+  const response = await api
+    .post("/content/identification-categories/create/", data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const listIdentificationCategories = async () => {
+  const response = await api
+    .get("/content/identification-categories/")
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, data: response.data.data || [] };
+};
+
+export const updateIdentificationCategory = async (
+  categoryId: number,
+  data: Partial<IdentificationCategory>
+) => {
+  const response = await api
+    .patch(`/content/identification-categories/${categoryId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+  return { success: response.status === 200, ...response.data };
+};
+
+export const deleteIdentificationCategory = async (categoryId: number) => {
+  const response = await api
+    .delete(`/content/identification-categories/${categoryId}/delete/`)
     .catch((error) => {
       return error.response ? error.response : error;
     });

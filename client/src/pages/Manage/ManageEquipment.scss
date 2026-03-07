@@ -138,6 +138,130 @@
       opacity: 0.7;
     }
   }
+
+  // Create dropdown
+  .create-dropdown {
+    position: relative;
+
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      svg:last-child {
+        font-size: 0.7rem;
+        margin-left: 0.25rem;
+      }
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      min-width: 220px;
+      z-index: 100;
+      overflow: hidden;
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        font-size: 0.9rem;
+        color: #333;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        text-align: start;
+
+        svg {
+          font-size: 0.85rem;
+          color: #2d7a73;
+        }
+
+        &:hover {
+          background-color: #f0f7f6;
+        }
+      }
+    }
+  }
+
+  // Categories section
+  .categories-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #d0e8e6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    .categories-header {
+      margin-bottom: 0.75rem;
+
+      h2 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2d7a73;
+        margin: 0;
+
+        .category-icon {
+          font-size: 0.9rem;
+          color: #6b9591;
+        }
+      }
+    }
+
+    .categories-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .category-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      background: #e8f4f2;
+      border-radius: 6px;
+
+      .category-name {
+        font-size: 0.85rem;
+        color: #2d7a73;
+        font-weight: 500;
+      }
+
+      .btn-icon {
+        padding: 0.2rem;
+        
+        svg {
+          font-size: 0.7rem;
+        }
+      }
+    }
+  }
+
+  // Category tag in table
+  .cell-category {
+    .category-tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      background: #e8f4f2;
+      color: #2d7a73;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+  }
 }
 
 @media (max-width: 768px) {

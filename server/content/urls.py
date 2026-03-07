@@ -30,5 +30,9 @@ urlpatterns = [
     path("rooms/create/", views.create_room, name="create_room"),
     path("rooms/<int:room_id>/update/", views.update_room, name="update_room"),
     path("rooms/<int:room_id>/delete/", views.delete_room, name="delete_room"),
+    path("identification-categories/", views.list_identification_categories, name="list_identification_categories"),
+    path("identification-categories/create/", views.create_identification_category, name="create_identification_category"),
+    path("identification-categories/<int:category_id>/update/", views.update_identification_category, name="update_identification_category"),
+    path("identification-categories/<int:category_id>/delete/", views.delete_identification_category, name="delete_identification_category"),
     path("reports/generate/", reports.generate_report, name="generate_report"),
 ]
