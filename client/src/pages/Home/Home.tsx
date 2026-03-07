@@ -1,5 +1,5 @@
 import "./Home.scss";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -76,6 +76,14 @@ type LabSettings = {
   email?: string;
   phone?: string;
   about_images?: Array<{ id: number; image: string; order: number }>;
+  home_use_gradient?: boolean;
+  home_bg_color_start?: string;
+  home_bg_color_middle?: string;
+  home_bg_color_end?: string;
+  home_accent_color?: string;
+  home_border_hover_color?: string;
+  home_icon_color?: string;
+  home_text_color?: string;
 };
 
 const Home = () => {
@@ -413,6 +421,45 @@ const Home = () => {
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
+
+  const customStyles = useMemo(() => {
+    if (!labSettings) return {};
+
+    const styles: Record<string, string> = {};
+    const useGradient = labSettings.home_use_gradient !== false;
+
+    if (labSettings.home_text_color) {
+      styles["--home-ink"] = labSettings.home_text_color;
+    }
+    if (labSettings.home_icon_color) {
+      styles["--home-icon"] = labSettings.home_icon_color;
+    }
+    if (labSettings.home_accent_color) {
+      styles["--home-accent"] = labSettings.home_accent_color;
+    }
+    if (labSettings.home_border_hover_color) {
+      styles["--home-border-hover"] = labSettings.home_border_hover_color;
+    }
+    if (useGradient) {
+      if (labSettings.home_bg_color_start) {
+        styles["--home-bg-start"] = labSettings.home_bg_color_start;
+      }
+      if (labSettings.home_bg_color_middle) {
+        styles["--home-bg-middle"] = labSettings.home_bg_color_middle;
+      }
+      if (labSettings.home_bg_color_end) {
+        styles["--home-bg-end"] = labSettings.home_bg_color_end;
+      }
+    } else {
+      const solidColor = labSettings.home_bg_color_start || "#eef7f6";
+      styles["--home-bg-start"] = solidColor;
+      styles["--home-bg-middle"] = solidColor;
+      styles["--home-bg-end"] = solidColor;
+    }
+    styles["--home-use-gradient"] = useGradient ? "1" : "0";
+
+    return styles;
+  }, [labSettings]);
 
   const openSectionEditor = async (sectionId: string) => {
     const editor = sectionEditors[sectionId];
@@ -1103,7 +1150,7 @@ const Home = () => {
   };
 
   return (
-    <div className={`home ${isNavVisible ? "nav-visible" : "nav-hidden"}`}>
+    <div className={`home ${isNavVisible ? "nav-visible" : "nav-hidden"}`} style={customStyles as React.CSSProperties}>
       <button className="toggle-nav" onClick={toggleNav}>
         {isNavVisible ? <FaChevronLeft /> : <FaChevronRight />}
       </button>

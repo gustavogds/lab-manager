@@ -33,6 +33,14 @@ def update_lab_settings(request):
         "partners",
         "contact_email",
         "contact_phone",
+        "home_use_gradient",
+        "home_bg_color_start",
+        "home_bg_color_middle",
+        "home_bg_color_end",
+        "home_accent_color",
+        "home_border_hover_color",
+        "home_icon_color",
+        "home_text_color",
     ]
 
     updated = False
@@ -44,7 +52,11 @@ def update_lab_settings(request):
 
     for field in allowed_fields:
         if field in data:
-            setattr(lab_settings, field, data[field] or None)
+            value = data[field]
+            if field == "home_use_gradient":
+                setattr(lab_settings, field, bool(value))
+            else:
+                setattr(lab_settings, field, value or None)
             updated = True
 
     for frontend_field, backend_field in field_mapping.items():

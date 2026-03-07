@@ -16,6 +16,15 @@ class LabSettings(models.Model):
     address_details = models.TextField(blank=True, null=True)
     maps_link = models.URLField(max_length=500, blank=True, null=True)
 
+    home_use_gradient = models.BooleanField(default=True)
+    home_bg_color_start = models.CharField(max_length=7, blank=True, null=True)
+    home_bg_color_middle = models.CharField(max_length=7, blank=True, null=True)
+    home_bg_color_end = models.CharField(max_length=7, blank=True, null=True)
+    home_accent_color = models.CharField(max_length=7, blank=True, null=True)
+    home_border_hover_color = models.CharField(max_length=7, blank=True, null=True)
+    home_icon_color = models.CharField(max_length=7, blank=True, null=True)
+    home_text_color = models.CharField(max_length=7, blank=True, null=True)
+
     def __str__(self):
         return self.lab_name
 
@@ -44,6 +53,14 @@ class LabSettings(models.Model):
             "partners": self.partners,
             "email": self.contact_email,
             "phone": self.contact_phone,
+            "home_use_gradient": self.home_use_gradient,
+            "home_bg_color_start": self.home_bg_color_start,
+            "home_bg_color_middle": self.home_bg_color_middle,
+            "home_bg_color_end": self.home_bg_color_end,
+            "home_accent_color": self.home_accent_color,
+            "home_border_hover_color": self.home_border_hover_color,
+            "home_icon_color": self.home_icon_color,
+            "home_text_color": self.home_text_color,
         }
 
         if include is None:
