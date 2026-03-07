@@ -10,7 +10,7 @@ import {
 } from "helpers/api/content";
 import type { Equipment, Room, IdentificationCategory } from "helpers/api/content";
 import { ModalsHandler } from "components/my-own-modal-handler";
-import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag, FaSearch } from "react-icons/fa";
 import "./ManageContent.scss";
 import "./ManageEquipment.scss";
 
@@ -27,6 +27,7 @@ const ManageEquipment = () => {
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dragItem = useRef<{ equipmentId: number } | null>(null);
   const [dragOverRoom, setDragOverRoom] = useState<number | null>(null);
@@ -48,7 +49,6 @@ const ManageEquipment = () => {
     fetchData();
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -188,13 +188,31 @@ const ManageEquipment = () => {
       return 0;
     });
 
+  const filterEquipment = (items: Equipment[]) => {
+    if (!searchTerm.trim()) return items;
+    const term = searchTerm.toLowerCase();
+    return items.filter(
+      (eq) =>
+        eq.name.toLowerCase().includes(term) ||
+        eq.custom_id.toLowerCase().includes(term) ||
+        (eq.identification_category?.name.toLowerCase().includes(term) ?? false) ||
+        (eq.assigned_to?.name.toLowerCase().includes(term) ?? false) ||
+        (eq.users?.some((u) => u.name.toLowerCase().includes(term)) ?? false)
+    );
+  };
+
+  const filteredEquipment = useMemo(
+    () => filterEquipment(equipment),
+    [equipment, searchTerm]
+  );
+
   const unassignedEquipment = useMemo(
-    () => sortActiveFirst(equipment.filter((eq) => !eq.room)),
-    [equipment]
+    () => sortActiveFirst(filteredEquipment.filter((eq) => !eq.room)),
+    [filteredEquipment]
   );
 
   const getEquipmentForRoom = (roomId: number) =>
-    sortActiveFirst(equipment.filter((eq) => eq.room?.id === roomId));
+    sortActiveFirst(filteredEquipment.filter((eq) => eq.room?.id === roomId));
 
   const sortedRooms = useMemo(
     () => [...rooms].sort((a, b) => a.order - b.order),
@@ -354,6 +372,25 @@ const ManageEquipment = () => {
           </div>
         </header>
 
+        <div className="search-bar">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Pesquisar por categoria, ID, nome ou usuário..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              className="clear-search"
+              onClick={() => setSearchTerm("")}
+              title="Limpar pesquisa"
+            >
+              ×
+            </button>
+          )}
+        </div>
+
         {showNewRoomInput && (
           <div className="new-room-input-bar">
             <input
@@ -431,7 +468,7 @@ const ManageEquipment = () => {
         ) : !hasContent ? (
           <div className="empty-state">
             <p>Nenhum equipamento ou sala cadastrado.</p>
-            <button onClick={() => navigate("/create/equipment")}>
+            <button className="btn-confirm" onClick={() => navigate("/create/equipment")}>
               Cadastrar primeiro equipamento
             </button>
           </div>

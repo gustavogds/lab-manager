@@ -37,6 +37,63 @@
 
   }
 
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #d0e8e6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s ease;
+
+    &:focus-within {
+      border-color: #2d7a73;
+    }
+
+    .search-icon {
+      color: #aaa;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      color: #333;
+      background: transparent;
+
+      &::placeholder {
+        color: #aaa;
+      }
+    }
+
+    .clear-search {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: #e8e8e8;
+      border-radius: 50%;
+      color: #666;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+
+      &:hover {
+        background: #d0d0d0;
+        color: #333;
+      }
+    }
+  }
+
   .rooms-layout {
     display: flex;
     flex-direction: column;
