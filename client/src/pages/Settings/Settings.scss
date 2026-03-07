@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+
 .settings-layout {
   display: flex;
   flex-direction: row;
@@ -75,7 +77,19 @@
       align-items: center;
       gap: 0.5rem;
     }
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: $accent-teal;
+    }
+  }
 
+  .multi-select-wrapper {
+    margin-bottom: 1rem;
+    label {
+      margin: 0;
+    }
   }
 
   .profile-image-field {

@@ -8,6 +8,14 @@ interface ResearcherCardProps {
 }
 
 const ResearcherCard = ({ researcher, onClick }: ResearcherCardProps) => {
+  const visiblePositions = (researcher.positions || [])
+    .filter((p) => p.is_visible)
+    .map((p) => p.name)
+    .join(", ");
+
+  // Fallback to single position for backward compatibility
+  const positionDisplay = visiblePositions || (researcher.position?.is_visible !== false ? researcher.position?.name : null);
+
   return (
     <div className="researcher-card" onClick={onClick}>
       <div className="researcher-avatar">
@@ -18,8 +26,8 @@ const ResearcherCard = ({ researcher, onClick }: ResearcherCardProps) => {
         )}
       </div>
       <h3 className="researcher-name">{researcher.name}</h3>
-      {researcher.position && (
-        <p className="researcher-position">{researcher.position.name}</p>
+      {positionDisplay && (
+        <p className="researcher-position">{positionDisplay}</p>
       )}
     </div>
   );

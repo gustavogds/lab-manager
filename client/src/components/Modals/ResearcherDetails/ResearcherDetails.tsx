@@ -9,6 +9,14 @@ interface ResearcherDetailsProps {
 }
 
 const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetailsProps) => {
+  const visiblePositions = (researcher.positions || [])
+    .filter((p) => p.is_visible)
+    .map((p) => p.name)
+    .join(", ");
+
+  // Fallback to single position for backward compatibility
+  const positionDisplay = visiblePositions || (researcher.position?.is_visible !== false ? researcher.position?.name : null);
+
   return (
     <div className="researcher-details-modal" onClick={onConfirm}>
       <div className="researcher-details-content" onClick={(e) => e.stopPropagation()}>
@@ -23,8 +31,8 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
             </div>
             <div className="researcher-info">
               <h2>{researcher.name}</h2>
-              {researcher.position && (
-                <p className="position">{researcher.position.name}</p>
+              {positionDisplay && (
+                <p className="position">{positionDisplay}</p>
               )}
             </div>
           </div>

@@ -195,6 +195,7 @@ export type User = {
   username?: string;
   profile_image: string | null;
   position?: Position | null;
+  positions?: Position[];
   room?: Room | null;
   researcher_order?: number;
   show_in_researchers?: boolean;
@@ -376,6 +377,7 @@ export type Room = {
 export type Position = {
   id: number;
   name: string;
+  is_visible: boolean;
   order: number;
 };
 
@@ -675,7 +677,10 @@ export const createPosition = async (data: { name: string }) => {
   };
 };
 
-export const updatePosition = async (id: number, data: { name?: string; order?: number }) => {
+export const updatePosition = async (
+  id: number,
+  data: { name?: string; order?: number; is_visible?: boolean }
+) => {
   const response = await api
     .patch(`/accounts/positions/${id}/update/`, data)
     .catch((error) => {
@@ -718,6 +723,7 @@ export const updateUser = async (
   id: number,
   data: {
     roles?: string[];
+    position_ids?: number[];
     position_id?: number | null;
     room_id?: number | null;
     is_active?: boolean;

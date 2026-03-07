@@ -18,6 +18,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     name: position.name,
+    is_visible: position.is_visible,
     order: position.order,
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -27,7 +28,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "number" ? Number(value) : value,
+      [name]: type === "checkbox" ? e.target.checked : type === "number" ? Number(value) : value,
     }));
   };
 
@@ -45,6 +46,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
     const response = await updatePosition(position.id, {
       name: formData.name.trim(),
       order: formData.order,
+      is_visible: formData.is_visible,
     });
     setIsSaving(false);
 
@@ -69,7 +71,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
   const handleDelete = async () => {
     if (
       !confirm(
-        `Tem certeza que deseja excluir o cargo "${position.name}"? Os usuários com este cargo ficarão sem cargo definido.`
+        `Tem certeza que deseja excluir o cargo "${position.name}"? Ele será removido dos usuários vinculados.`
       )
     )
       return;
@@ -147,6 +149,20 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
               min={0}
             />
             <span className="field-hint">Menor valor = aparece primeiro na lista</span>
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="position-visible">Visibilidade</label>
+            <label className="checkbox-label">
+              <input
+                id="position-visible"
+                type="checkbox"
+                name="is_visible"
+                checked={formData.is_visible}
+                onChange={handleChange}
+              />
+              Mostrar cargo nas informações do usuário
+            </label>
           </div>
 
           <div className="modal-actions">

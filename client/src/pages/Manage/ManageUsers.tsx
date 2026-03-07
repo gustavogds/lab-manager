@@ -299,7 +299,9 @@ const ManageUsers = () => {
                 <div className="categories-list">
                   {positions.map((position) => (
                     <div key={position.id} className="category-item position-item">
-                      <span className="category-name">{position.name}</span>
+                      <span className="category-name">
+                        {position.name} {!position.is_visible && "(oculto)"}
+                      </span>
                       <button
                         className="btn-icon"
                         onClick={() => handleEditPosition(position)}
@@ -350,7 +352,7 @@ const ManageUsers = () => {
                       <tr>
                         <th>Nome</th>
                         <th>Email</th>
-                        <th>Cargo</th>
+                        <th>Cargos</th>
                         <th>Sala</th>
                         <th>Funções</th>
                         <th>Status</th>
@@ -377,7 +379,9 @@ const ManageUsers = () => {
                           </td>
                           <td className="cell-email">{user.email}</td>
                           <td className="cell-position">
-                            {user.position?.name || "-"}
+                            {user.positions && user.positions.length > 0
+                              ? user.positions.map((position) => position.name).join(", ")
+                              : "-"}
                           </td>
                           <td className="cell-room">
                             {user.room?.name || "-"}

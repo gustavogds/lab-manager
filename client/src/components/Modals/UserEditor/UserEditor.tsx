@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { updateUser, deleteUser } from "helpers/api/content";
 import type { User, Room, Position } from "helpers/api/content";
 import { ModalsHandler } from "components/my-own-modal-handler";
+import MultiSelect from "components/MultiSelect/MultiSelect";
 import "pages/Manage/ManageContent.scss";
 import "./UserEditor.scss";
 
@@ -14,11 +15,13 @@ interface UserEditorProps {
 }
 
 const AVAILABLE_ROLES = [
-  { value: "professor", label: "Professor" },
-  { value: "student", label: "Estudante" },
-  { value: "collaborator", label: "Colaborador" },
-  { value: "inventory_manager", label: "Gestor de Inventário" },
+  { id: 1, name: "Professor", value: "professor" },
+  { id: 2, name: "Estudante", value: "student" },
+  { id: 3, name: "Colaborador", value: "collaborator" },
+  { id: 4, name: "Gestor de Inventário", value: "inventory_manager" },
 ];
+
+type RoleOption = (typeof AVAILABLE_ROLES)[number];
 
 const UserEditor: React.FC<UserEditorProps> = ({
   user,
@@ -27,28 +30,27 @@ const UserEditor: React.FC<UserEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const initialPositions = user.positions || (user.position ? [user.position] : []);
+  const initialRoles = AVAILABLE_ROLES.filter((r) => (user.roles || []).includes(r.value));
   const [formData, setFormData] = useState({
-    roles: user.roles || [],
-    position_id: user.position?.id ?? (null as number | null),
+    selectedRoles: initialRoles,
+    selectedPositions: initialPositions,
     room_id: user.room?.id ?? (null as number | null),
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const handleRoleToggle = (role: string) => {
-    setFormData((prev) => {
-      const newRoles = prev.roles.includes(role)
-        ? prev.roles.filter((r) => r !== role)
-        : [...prev.roles, role];
-      return { ...prev, roles: newRoles };
-    });
-  };
-
-  const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleRolesChange = (selected: RoleOption[]) => {
     setFormData((prev) => ({
       ...prev,
-      position_id: value ? Number(value) : null,
+      selectedRoles: selected,
+    }));
+  };
+
+  const handlePositionsChange = (selected: Position[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedPositions: selected,
     }));
   };
 
@@ -63,7 +65,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.roles.length === 0) {
+    if (formData.selectedRoles.length === 0) {
       setError("O usuário deve ter pelo menos uma função.");
       return;
     }
@@ -72,8 +74,8 @@ const UserEditor: React.FC<UserEditorProps> = ({
     setError("");
 
     const response = await updateUser(user.id, {
-      roles: formData.roles,
-      position_id: formData.position_id,
+      roles: formData.selectedRoles.map((r) => r.value),
+      position_ids: formData.selectedPositions.map((p) => p.id),
       room_id: formData.room_id,
     });
 
@@ -180,35 +182,23 @@ const UserEditor: React.FC<UserEditorProps> = ({
           {error && <div className="msg-error">{error}</div>}
 
           <div className="form-field">
-            <label>Funções</label>
-            <div className="roles-checkboxes">
-              {AVAILABLE_ROLES.map((role) => (
-                <label key={role.value} className="checkbox-item">
-                  <input
-                    type="checkbox"
-                    checked={formData.roles.includes(role.value)}
-                    onChange={() => handleRoleToggle(role.value)}
-                  />
-                  <span>{role.label}</span>
-                </label>
-              ))}
-            </div>
+            <MultiSelect
+              label="Funções"
+              options={AVAILABLE_ROLES}
+              selected={formData.selectedRoles}
+              onChange={handleRolesChange}
+              placeholder="Selecione as funções..."
+            />
           </div>
 
           <div className="form-field">
-            <label htmlFor="position_id">Cargo</label>
-            <select
-              id="position_id"
-              value={formData.position_id || ""}
-              onChange={handlePositionChange}
-            >
-              <option value="">Nenhum</option>
-              {positions.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            <MultiSelect
+              label="Cargos"
+              options={positions}
+              selected={formData.selectedPositions}
+              onChange={handlePositionsChange}
+              placeholder="Selecione os cargos..."
+            />
           </div>
 
           <div className="form-field">

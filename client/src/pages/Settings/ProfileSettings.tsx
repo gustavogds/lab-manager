@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useGlobalData } from "helpers/context/globalContext";
 import { saveProfile, uploadProfileImage } from "helpers/api/settings";
 import { listPositions, type Position } from "helpers/api/content";
+import MultiSelect from "components/MultiSelect/MultiSelect";
 import "./Settings.scss";
 
 registerLocale("pt-BR", ptBR);
@@ -15,7 +16,7 @@ const ProfileSettings = () => {
 
   const [formData, setFormData] = useState({
     name: "",
-    position_id: null as number | null,
+    selectedPositions: [] as Position[],
     phone: "",
     contact_email: "",
     social_media: "",
@@ -36,9 +37,10 @@ const ProfileSettings = () => {
     MAX_PROFILE_IMAGE_SIZE_MB * 1024 * 1024;
 
   useEffect(() => {
+    const userPositions = initialData.positions || (initialData.position ? [initialData.position] : []);
     setFormData({
       name: initialData.name || "",
-      position_id: initialData.position?.id ?? null,
+      selectedPositions: userPositions,
       phone: initialData.phone || "",
       contact_email: initialData.contact_email || "",
       social_media: initialData.social_media || "",
@@ -137,7 +139,13 @@ const ProfileSettings = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const response = await saveProfile(formData);
+    const payload = {
+      ...formData,
+      position_ids: formData.selectedPositions.map((p) => p.id),
+    };
+    delete (payload as any).selectedPositions;
+    
+    const response = await saveProfile(payload);
 
     if (response.success) {
       setMessage(response.message);
@@ -151,6 +159,13 @@ const ProfileSettings = () => {
       setMessage("");
       setError("");
     }, 4000);
+  };
+
+  const handlePositionsChange = (selected: Position[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedPositions: selected,
+    }));
   };
 
   return (
@@ -185,27 +200,13 @@ const ProfileSettings = () => {
           Nome:
           <input name="name" value={formData.name} onChange={handleChange} />
         </label>
-        <label>
-          Posição/Cargo:
-          <select
-            name="position_id"
-            value={formData.position_id || ""}
-            onChange={(e) => {
-              const value = e.target.value;
-              setFormData((prev) => ({
-                ...prev,
-                position_id: value ? Number(value) : null,
-              }));
-            }}
-          >
-            <option value="">Nenhum</option>
-            {positions.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <MultiSelect
+          label="Posições/Cargos"
+          options={positions}
+          selected={formData.selectedPositions}
+          onChange={handlePositionsChange}
+          placeholder="Selecione os cargos..."
+        />
         <label>
           Telefone:
           <input name="phone" value={formData.phone} onChange={handleChange} />

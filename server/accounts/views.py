@@ -42,7 +42,28 @@ def update_user_settings(request):
                 setattr(user, field, new_value)
                 updated = True
 
-    if "position_id" in data:
+    if "position_ids" in data:
+        position_ids = data.get("position_ids") or []
+        if not isinstance(position_ids, list):
+            return JsonResponse({"error": "Invalid position_ids."}, status=400)
+
+        positions = list(Position.objects.filter(id__in=position_ids))
+        found_ids = {position.id for position in positions}
+        invalid_ids = [position_id for position_id in position_ids if position_id not in found_ids]
+        if invalid_ids:
+            return JsonResponse({"error": "Some positions were not found."}, status=404)
+
+        current_ids = set(user.positions.values_list("id", flat=True))
+        new_ids = set(position_ids)
+        if current_ids != new_ids:
+            user.positions.set(positions)
+            updated = True
+
+        primary_position = positions[0] if positions else None
+        if user.position != primary_position:
+            user.position = primary_position
+            updated = True
+    elif "position_id" in data:
         position_id = data.get("position_id")
         if position_id:
             try:
@@ -50,11 +71,16 @@ def update_user_settings(request):
                 if user.position != position:
                     user.position = position
                     updated = True
+                user.positions.set([position])
+                updated = True
             except Position.DoesNotExist:
                 pass
         else:
             if user.position is not None:
                 user.position = None
+                updated = True
+            if user.positions.exists():
+                user.positions.clear()
                 updated = True
 
     if updated:
@@ -134,7 +160,7 @@ def reject_user(request):
 @login_required
 @require_http_methods(["GET"])
 def list_unapproved_users(request):
-    unapproved_users = User.objects.filter(is_approved=False, email_validated=True)
+    unapproved_users = User.objects.filter(is_approved=False, email_validated=True).prefetch_related("positions")
     users_data = [user.export() for user in unapproved_users]
     return JsonResponse({"users": users_data}, safe=False)
 
@@ -142,7 +168,7 @@ def list_unapproved_users(request):
 @login_required
 @require_http_methods(["GET"])
 def list_approved_users(request):
-    approved_users = User.objects.filter(is_approved=True)
+    approved_users = User.objects.filter(is_approved=True).prefetch_related("positions")
     users_data = [user.export() for user in approved_users]
     return JsonResponse({"users": users_data}, safe=False)
 
@@ -153,7 +179,7 @@ def list_researchers(request):
         is_approved=True,
         is_public=True,
         show_in_researchers=True,
-    ).order_by("researcher_order", "name")
+    ).prefetch_related("positions").order_by("researcher_order", "name")
     
     researcher_roles = ["professor", "collaborator", "student"]
     researchers = [user for user in all_users if user.has_any_role(researcher_roles)]
@@ -167,7 +193,7 @@ def list_researchers(request):
 def list_all_researchers(request):
     all_users = User.objects.filter(
         is_approved=True,
-    ).order_by("researcher_order", "name")
+    ).prefetch_related("positions").order_by("researcher_order", "name")
     
     researcher_roles = ["professor", "collaborator", "student"]
     researchers = [user for user in all_users if user.has_any_role(researcher_roles)]
@@ -259,6 +285,8 @@ def update_position(request, position_id):
         position.name = data["name"].strip()
     if "order" in data:
         position.order = data["order"]
+    if "is_visible" in data:
+        position.is_visible = bool(data["is_visible"])
     
     position.save()
     return JsonResponse({
@@ -289,7 +317,7 @@ def list_all_users(request):
     if not request.user.has_role("professor"):
         return JsonResponse({"error": "Permission denied."}, status=403)
     
-    users = User.objects.select_related("position", "room").all().order_by("name")
+    users = User.objects.select_related("position", "room").prefetch_related("positions").all().order_by("name")
     return JsonResponse({
         "success": True,
         "data": [u.export() for u in users]
@@ -319,15 +347,31 @@ def update_user(request, user_id):
             return JsonResponse({"error": "Invalid roles."}, status=400)
         user.roles = roles
     
-    if "position_id" in data:
+    if "position_ids" in data:
+        position_ids = data["position_ids"] or []
+        if not isinstance(position_ids, list):
+            return JsonResponse({"error": "Invalid position_ids."}, status=400)
+
+        positions = list(Position.objects.filter(id__in=position_ids))
+        found_ids = {position.id for position in positions}
+        invalid_ids = [position_id for position_id in position_ids if position_id not in found_ids]
+        if invalid_ids:
+            return JsonResponse({"error": "Some positions were not found."}, status=404)
+
+        user.positions.set(positions)
+        user.position = positions[0] if positions else None
+    elif "position_id" in data:
         position_id = data["position_id"]
         if position_id:
             try:
-                user.position = Position.objects.get(id=position_id)
+                position = Position.objects.get(id=position_id)
+                user.position = position
+                user.positions.set([position])
             except Position.DoesNotExist:
                 return JsonResponse({"error": "Position not found."}, status=404)
         else:
             user.position = None
+            user.positions.clear()
     
     if "room_id" in data:
         room_id = data["room_id"]

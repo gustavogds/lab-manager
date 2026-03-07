@@ -10,6 +10,7 @@ from django.utils import timezone
 
 class Position(models.Model):
     name = models.CharField(max_length=100)
+    is_visible = models.BooleanField(default=True)
     order = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -24,6 +25,7 @@ class Position(models.Model):
         return {
             "id": self.id,
             "name": self.name,
+            "is_visible": self.is_visible,
             "order": self.order,
         }
 
@@ -105,6 +107,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         related_name="users"
     )
+    positions = models.ManyToManyField(
+        Position,
+        blank=True,
+        related_name="users_multi",
+    )
     room = models.ForeignKey(
         "content.Room",
         on_delete=models.SET_NULL,
@@ -156,11 +163,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.has_role("professor")
 
     def export(self, include=None):
+        user_positions = list(self.positions.all())
+        visible_positions = [position for position in user_positions if position.is_visible]
+        primary_position = visible_positions[0] if visible_positions else None
+
         data = {
             "id": self.id,
             "username": self.username,
             "name": self.name,
-            "position": self.position.export() if self.position else None,
+            "position": primary_position.export() if primary_position else None,
+            "positions": [position.export() for position in user_positions],
             "room": self.room.export() if self.room else None,
             "researcher_order": self.researcher_order,
             "show_in_researchers": self.show_in_researchers,
