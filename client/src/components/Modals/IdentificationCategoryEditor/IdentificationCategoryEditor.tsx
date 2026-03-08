@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateIdentificationCategory, deleteIdentificationCategory } from "helpers/api/content";
 import type { IdentificationCategory } from "helpers/api/content";
 
@@ -16,6 +17,7 @@ const IdentificationCategoryEditor: React.FC<IdentificationCategoryEditorProps> 
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: category.name,
   });
@@ -31,7 +33,7 @@ const IdentificationCategoryEditor: React.FC<IdentificationCategoryEditorProps> 
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
 
@@ -43,26 +45,26 @@ const IdentificationCategoryEditor: React.FC<IdentificationCategoryEditorProps> 
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Categoria atualizada com sucesso!",
+        title: t("Success"),
+        message: t("Category updated successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar categoria.",
+        title: t("Error"),
+        message: response.error || t("Failed to update category."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar categoria.");
+      setError(response.error || t("Failed to update category."));
     }
   };
 
   const handleDelete = async () => {
     if (
       !confirm(
-        `Tem certeza que deseja excluir a categoria "${category.name}"? Os equipamentos desta categoria ficarão sem categoria definida.`
+        t(`Are you sure you want to delete the category "{{name}}"? Equipment in this category will have no category defined.`, { name: category.name })
       )
     )
       return;
@@ -74,19 +76,19 @@ const IdentificationCategoryEditor: React.FC<IdentificationCategoryEditorProps> 
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Categoria excluída com sucesso!",
+        title: t("Success"),
+        message: t("Category deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir categoria.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete category."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir categoria.");
+      setError(response.error || t("Failed to delete category."));
     }
   };
 
@@ -108,7 +110,7 @@ const IdentificationCategoryEditor: React.FC<IdentificationCategoryEditorProps> 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Categoria de Identificação</h2>
+          <h2>{t("Edit Identification Category")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -118,14 +120,14 @@ const IdentificationCategoryEditor: React.FC<IdentificationCategoryEditorProps> 
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="category-name">Nome *</label>
+            <label htmlFor="category-name">{t("Name")} *</label>
             <input
               id="category-name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nome da categoria"
+              placeholder={t("Category name")}
               maxLength={255}
               required
               autoFocus
@@ -140,15 +142,15 @@ const IdentificationCategoryEditor: React.FC<IdentificationCategoryEditorProps> 
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import type { User } from "helpers/api/content";
 import { createProject, listApprovedUsers } from "helpers/api/content";
 import MultiSelect from "components/MultiSelect/MultiSelect";
@@ -7,6 +8,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import "./CreateProject.scss";
 
 const CreateProject = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
@@ -43,12 +45,12 @@ const CreateProject = () => {
     e.preventDefault();
     
     if (!formData.title.trim()) {
-      setError("O título é obrigatório.");
+      setError(t("Title is required."));
       return;
     }
 
     if (!formData.description.trim()) {
-      setError("A descrição é obrigatória.");
+      setError(t("Description is required."));
       return;
     }
 
@@ -67,7 +69,7 @@ const CreateProject = () => {
     setIsSubmitting(false);
 
     if (response.success) {
-      setMessage(response.message || "Projeto criado com sucesso!");
+      setMessage(response.message || t("Project created successfully!"));
       setError("");
       setFormData({ title: "", description: "", members: [] });
       
@@ -75,7 +77,7 @@ const CreateProject = () => {
         navigate(-1);
       }, 1500);
     } else {
-      setError(response.error || "Falha ao criar projeto.");
+      setError(response.error || t("Failed to create project."));
       setMessage("");
     }
   };
@@ -84,12 +86,12 @@ const CreateProject = () => {
     <div className="page-layout">
       <div className="page-container">
         <button className="btn-back" onClick={() => navigate(-1)}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
-          <h1>Novo Projeto</h1>
-          <p>Preencha os campos abaixo para criar um novo projeto</p>
+          <h1>{t("New Project")}</h1>
+          <p>{t("Fill in the fields below to create a new project")}</p>
         </header>
 
         {message && <div className="msg-success">{message}</div>}
@@ -97,27 +99,27 @@ const CreateProject = () => {
 
         <form onSubmit={handleSubmit} className="project-form">
           <div className="form-field">
-            <label htmlFor="title">Título *</label>
+            <label htmlFor="title">{t("Title")} *</label>
             <input
               id="title"
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Ex: Sistema de Gestão Laboratorial"
+              placeholder={t("Ex: Laboratory Management System")}
               maxLength={255}
               required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="description">Descrição *</label>
+            <label htmlFor="description">{t("Description")} *</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Descreva o projeto, objetivos, metodologia e resultados esperados..."
+              placeholder={t("Describe the project, objectives, methodology and expected results...")}
               rows={6}
               required
             />
@@ -125,11 +127,11 @@ const CreateProject = () => {
 
           <div className="form-field">
             <MultiSelect
-              label="Integrantes"
+              label={t("Members")}
               options={availableUsers}
               selected={formData.members}
               onChange={handleMembersChange}
-              placeholder="Selecione os integrantes do projeto..."
+              placeholder={t("Select project members...")}
             />
           </div>
 
@@ -140,14 +142,14 @@ const CreateProject = () => {
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               className="btn-confirm"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Criando..." : "Criar Projeto"}
+              {isSubmitting ? t("Creating...") : t("Create Project")}
             </button>
           </div>
         </form>

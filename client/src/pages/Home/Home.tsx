@@ -1,5 +1,6 @@
 import "./Home.scss";
 import { useEffect, useState, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -46,23 +47,6 @@ import { isEmptyObject, canManageAll } from "helpers/utils";
 import { ModalsHandler } from "components/my-own-modal-handler";
 import type { SectionEditorField } from "components/Modals/SectionEditor/SectionEditor";
 
-const sections = [
-  { id: "about", label: "Sobre", icon: <FaInfoCircle /> },
-  { id: "research", label: "Áreas de Pesquisa", icon: <FaFlask /> },
-  { id: "projects", label: "Projetos", icon: <FaProjectDiagram /> },
-  { id: "researchers", label: "Pesquisadores", icon: <FaUsers /> },
-  { id: "partnerships", label: "Parcerias", icon: <FaHandshake /> },
-  { id: "contact-location", label: "Contato & Localização", icon: <FaEnvelope /> },
-];
-
-const sectionDescriptions: Record<string, string> = {
-  research: "Resumo das principais linhas e areas de pesquisa do laboratorio.",
-  projects: "Lista e descricao dos projetos em andamento e concluidos.",
-  researchers: "Equipe, perfis dos pesquisadores e estudantes envolvidos.",
-  partnerships: "Instituicoes parceiras e colaboracoes estrategicas.",
-  "contact-location": "Informacoes de contato e localizacao do laboratorio.",
-};
-
 type LabSettings = {
   mission?: string;
   address?: string;
@@ -87,8 +71,26 @@ type LabSettings = {
 };
 
 const Home = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<string>("about");
+
+  const sections = useMemo(() => [
+    { id: "about", label: t("About"), icon: <FaInfoCircle /> },
+    { id: "research", label: t("Research Areas"), icon: <FaFlask /> },
+    { id: "projects", label: t("Projects"), icon: <FaProjectDiagram /> },
+    { id: "researchers", label: t("Researchers"), icon: <FaUsers /> },
+    { id: "partnerships", label: t("Partnerships"), icon: <FaHandshake /> },
+    { id: "contact-location", label: t("Contact & Location"), icon: <FaEnvelope /> },
+  ], [t]);
+
+  const sectionDescriptions: Record<string, string> = useMemo(() => ({
+    research: t("Summary of the main research lines and areas of the laboratory."),
+    projects: t("List and description of ongoing and completed projects."),
+    researchers: t("Team, profiles of researchers and students involved."),
+    partnerships: t("Partner institutions and strategic collaborations."),
+    "contact-location": t("Contact information and laboratory location."),
+  }), [t]);
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [labSettings, setLabSettings] = useState<LabSettings | null>(null);
   const [researchAreas, setResearchAreas] = useState<ResearchArea[]>([]);
@@ -110,18 +112,18 @@ const Home = () => {
     }
   > = {
     about: {
-      title: "Editar sobre",
+      title: t("Edit about"),
       fields: [
         {
           name: "mission",
-          label: "Missão",
+          label: t("Mission"),
           type: "textarea",
-          placeholder: "Descreva a missão do laboratório",
+          placeholder: t("Describe the laboratory's mission"),
           rows: 6,
         },
         {
           name: "images",
-          label: "Imagens",
+          label: t("Images"),
           type: "image-upload",
         },
       ],
@@ -140,17 +142,17 @@ const Home = () => {
       },
     },
     contact: {
-      title: "Editar contato",
+      title: t("Edit contact"),
       fields: [
         {
           name: "email",
-          label: "Email",
+          label: t("Email"),
           type: "email",
           placeholder: "contato@laboratorio.com",
         },
         {
           name: "phone",
-          label: "Telefone",
+          label: t("Phone"),
           type: "tel",
           placeholder: "(00) 00000-0000",
         },
@@ -175,24 +177,24 @@ const Home = () => {
       },
     },
     location: {
-      title: "Editar localização",
+      title: t("Edit location"),
       fields: [
         {
           name: "address",
-          label: "Endereço",
+          label: t("Address"),
           type: "textarea",
-          placeholder: "Endereço completo (rua, número, bairro, cidade, estado, CEP)",
+          placeholder: t("Full address (street, number, neighborhood, city, state, ZIP code)"),
           rows: 3,
         },
         {
           name: "address_details",
-          label: "Outras informações",
+          label: t("Other information"),
           type: "text",
-          placeholder: "Ex: Quarto andar, salas 403-406",
+          placeholder: t("Ex: Fourth floor, rooms 403-406"),
         },
         {
           name: "maps_link",
-          label: "Link do Google Maps",
+          label: t("Google Maps Link"),
           type: "text",
           placeholder: "https://maps.google.com/...",
         },
@@ -220,13 +222,13 @@ const Home = () => {
       },
     },
     research: {
-      title: "Editar áreas de pesquisa",
+      title: t("Edit research areas"),
       fields: [
         {
           name: "areas",
-          label: "Áreas principais",
+          label: t("Main areas"),
           type: "textarea",
-          placeholder: "Liste as principais áreas de pesquisa",
+          placeholder: t("List the main research areas"),
           rows: 5,
         },
       ],
@@ -245,13 +247,13 @@ const Home = () => {
       },
     },
     projects: {
-      title: "Editar projetos",
+      title: t("Edit projects"),
       fields: [
         {
           name: "highlights",
-          label: "Projetos em destaque",
+          label: t("Featured projects"),
           type: "textarea",
-          placeholder: "Descreva os projetos principais",
+          placeholder: t("Describe the main projects"),
           rows: 5,
         },
       ],
@@ -270,19 +272,19 @@ const Home = () => {
       },
     },
     researchers: {
-      title: "Editar pesquisadores",
+      title: t("Edit researchers"),
       fields: [
         {
           name: "lead",
-          label: "Responsável",
+          label: t("Lead"),
           type: "text",
-          placeholder: "Nome do responsável",
+          placeholder: t("Lead's name"),
         },
         {
           name: "team",
-          label: "Equipe",
+          label: t("Team"),
           type: "textarea",
-          placeholder: "Nomes e funcoes",
+          placeholder: t("Names and roles"),
           rows: 5,
         },
       ],
@@ -306,13 +308,13 @@ const Home = () => {
       },
     },
     partnerships: {
-      title: "Editar parcerias",
+      title: t("Edit partnerships"),
       fields: [
         {
           name: "partners",
-          label: "Instituicoes",
+          label: t("Institutions"),
           type: "textarea",
-          placeholder: "Liste as instituicoes parceiras",
+          placeholder: t("List the partner institutions"),
           rows: 4,
         },
       ],
@@ -342,7 +344,7 @@ const Home = () => {
       if (result.success) {
         setLabSettings(result.data);
       } else {
-        setLabSettings({ mission: "Missao nao disponivel." });
+        setLabSettings({ mission: t("Mission not available.") });
       }
     };
 
@@ -482,8 +484,8 @@ const Home = () => {
           about_images: images,
         }));
       },
-      confirmLabel: "Salvar",
-      cancelLabel: "Cancelar",
+      confirmLabel: t("Save"),
+      cancelLabel: t("Cancel"),
     });
 
     const result = await promise;
@@ -498,20 +500,20 @@ const Home = () => {
 
   const openResearchAreaEditor = async (area: ResearchArea) => {
     const { promise } = ModalsHandler.createModal("SectionEditor", {
-      headerTitle: "Editar Área de Pesquisa",
+      headerTitle: t("Edit Research Area"),
       fields: [
         {
           name: "title",
-          label: "Título",
+          label: t("Title"),
           type: "text",
-          placeholder: "Ex: Inteligência Artificial",
+          placeholder: t("Ex: Artificial Intelligence"),
           required: true,
         },
         {
           name: "description",
-          label: "Descrição",
+          label: t("Description"),
           type: "textarea",
-          placeholder: "Descreva a área de pesquisa...",
+          placeholder: t("Describe the research area..."),
           rows: 6,
           required: true,
         },
@@ -520,8 +522,8 @@ const Home = () => {
         title: area.title,
         description: area.description,
       },
-      confirmLabel: "Salvar",
-      cancelLabel: "Cancelar",
+      confirmLabel: t("Save"),
+      cancelLabel: t("Cancel"),
     });
 
     const result = await promise;
@@ -545,14 +547,14 @@ const Home = () => {
       );
 
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Área de pesquisa atualizada com sucesso!",
+        title: t("Success"),
+        message: t("Research area updated successfully!"),
         type: "success",
       });
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.message || "Falha ao atualizar área de pesquisa.",
+        title: t("Error"),
+        message: response.message || t("Failed to update research area."),
         type: "error",
       });
     }
@@ -560,11 +562,11 @@ const Home = () => {
 
   const handleDeleteResearchArea = async (area: ResearchArea) => {
     const { promise } = ModalsHandler.createModal("Notification", {
-      title: "Confirmar exclusão",
-      message: `Tem certeza que deseja excluir a área "${area.title}"?`,
+      title: t("Confirm deletion"),
+      message: `${t("Are you sure you want to delete the area")} "${area.title}"?`,
       type: "warning",
-      confirmLabel: "Excluir",
-      cancelLabel: "Cancelar",
+      confirmLabel: t("Delete"),
+      cancelLabel: t("Cancel"),
     });
 
     const result = await promise;
@@ -578,14 +580,14 @@ const Home = () => {
       setResearchAreas((prev) => prev.filter((a) => a.id !== area.id));
 
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Área de pesquisa excluída com sucesso!",
+        title: t("Success"),
+        message: t("Research area deleted successfully!"),
         type: "success",
       });
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir área de pesquisa.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete research area."),
         type: "error",
       });
     }
@@ -605,16 +607,16 @@ const Home = () => {
       );
 
       ModalsHandler.createNotification({
-        title: "Sucesso",
+        title: t("Success"),
         message: newStatus
-          ? "Área de pesquisa ativada!"
-          : "Área de pesquisa desativada!",
+          ? t("Research area activated!")
+          : t("Research area deactivated!"),
         type: "success",
       });
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.message || "Falha ao atualizar visibilidade.",
+        title: t("Error"),
+        message: response.message || t("Failed to update visibility."),
         type: "error",
       });
     }
@@ -656,14 +658,14 @@ const Home = () => {
       );
 
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Projeto atualizado com sucesso!",
+        title: t("Success"),
+        message: t("Project updated successfully!"),
         type: "success",
       });
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.message || "Falha ao atualizar projeto.",
+        title: t("Error"),
+        message: response.message || t("Failed to update project."),
         type: "error",
       });
     }
@@ -671,11 +673,11 @@ const Home = () => {
 
   const handleDeleteProject = async (project: Project) => {
     const { promise } = ModalsHandler.createModal("Notification", {
-      title: "Confirmar exclusão",
-      message: `Tem certeza que deseja excluir o projeto "${project.title}"?`,
+      title: t("Confirm deletion"),
+      message: `${t("Are you sure you want to delete the project")} "${project.title}"?`,
       type: "warning",
-      confirmLabel: "Excluir",
-      cancelLabel: "Cancelar",
+      confirmLabel: t("Delete"),
+      cancelLabel: t("Cancel"),
     });
 
     const result = await promise;
@@ -689,14 +691,14 @@ const Home = () => {
       setProjects((prev) => prev.filter((p) => p.id !== project.id));
 
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Projeto excluído com sucesso!",
+        title: t("Success"),
+        message: t("Project deleted successfully!"),
         type: "success",
       });
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir projeto.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete project."),
         type: "error",
       });
     }
@@ -716,16 +718,16 @@ const Home = () => {
       );
 
       ModalsHandler.createNotification({
-        title: "Sucesso",
+        title: t("Success"),
         message: newStatus
-          ? "Projeto ativado!"
-          : "Projeto desativado!",
+          ? t("Project activated!")
+          : t("Project deactivated!"),
         type: "success",
       });
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.message || "Falha ao atualizar visibilidade.",
+        title: t("Error"),
+        message: response.message || t("Failed to update visibility."),
         type: "error",
       });
     }
@@ -777,14 +779,14 @@ const Home = () => {
       }
 
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Configuração dos pesquisadores atualizada!",
+        title: t("Success"),
+        message: t("Researchers configuration updated!"),
         type: "success",
       });
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.message || "Falha ao atualizar configuração.",
+        title: t("Error"),
+        message: response.message || t("Failed to update configuration."),
         type: "error",
       });
     }
@@ -835,8 +837,8 @@ const Home = () => {
     }
 
     ModalsHandler.createNotification({
-      title: "Sucesso",
-      message: "Parcerias atualizadas!",
+      title: t("Success"),
+      message: t("Partnerships updated!"),
       type: "success",
     });
   };
@@ -875,7 +877,7 @@ const Home = () => {
 
         return (
           <>
-            <p>{labSettings?.mission || "Carregando missão..."}</p>
+            <p>{labSettings?.mission || t("Loading mission...")}</p>
             {labSettings?.about_images && labSettings.about_images.length > 0 && (
               <div className="about-carousel">
                 <Slider {...sliderSettings}>
@@ -905,21 +907,21 @@ const Home = () => {
                         <button
                           className="btn-icon btn-icon--primary"
                           onClick={() => handleToggleResearchAreaVisibility(area)}
-                          title={area.is_active ? "Esconder" : "Mostrar"}
+                          title={area.is_active ? t("Hide") : t("Show")}
                         >
                           {area.is_active ? <FaEye /> : <FaEyeSlash />}
                         </button>
                         <button
                           className="btn-icon btn-icon--primary"
                           onClick={() => openResearchAreaEditor(area)}
-                          title="Editar"
+                          title={t("Edit")}
                         >
                           <FaEdit />
                         </button>
                         <button
                           className="btn-icon btn-icon--danger"
                           onClick={() => handleDeleteResearchArea(area)}
-                          title="Excluir"
+                          title={t("Delete")}
                         >
                           <FaTrash />
                         </button>
@@ -931,8 +933,8 @@ const Home = () => {
             ) : (
               <p>
                 {isProfessor
-                  ? "Nenhuma área de pesquisa cadastrada. Clique no botão + para adicionar."
-                  : "Nenhuma área de pesquisa disponível no momento."}
+                  ? t("No research areas registered. Click the + button to add.")
+                  : t("No research areas available at the moment.")}
               </p>
             )}
             {isProfessor && (
@@ -940,7 +942,7 @@ const Home = () => {
                 className="btn-add"
                 onClick={() => navigate("/create/research-area")}
               >
-                <FaPlus /> Adicionar Área de Pesquisa
+                <FaPlus /> {t("Add Research Area")}
               </button>
             )}
           </div>
@@ -968,7 +970,7 @@ const Home = () => {
                             e.stopPropagation();
                             handleToggleProjectVisibility(project);
                           }}
-                          title={project.is_active ? "Esconder" : "Mostrar"}
+                          title={project.is_active ? t("Hide") : t("Show")}
                         >
                           {project.is_active ? <FaEye /> : <FaEyeSlash />}
                         </button>
@@ -978,7 +980,7 @@ const Home = () => {
                             e.stopPropagation();
                             openProjectEditor(project);
                           }}
-                          title="Editar"
+                          title={t("Edit")}
                         >
                           <FaEdit />
                         </button>
@@ -988,7 +990,7 @@ const Home = () => {
                             e.stopPropagation();
                             handleDeleteProject(project);
                           }}
-                          title="Excluir"
+                          title={t("Delete")}
                         >
                           <FaTrash />
                         </button>
@@ -1000,8 +1002,8 @@ const Home = () => {
             ) : (
               <p>
                 {isProfessor
-                  ? "Nenhum projeto cadastrado. Clique no botão + para adicionar."
-                  : "Nenhum projeto disponível no momento."}
+                  ? t("No projects registered. Click the + button to add.")
+                  : t("No projects available at the moment.")}
               </p>
             )}
             {isProfessor && (
@@ -1009,7 +1011,7 @@ const Home = () => {
                 className="btn-add"
                 onClick={() => navigate("/create/project")}
               >
-                <FaPlus /> Adicionar Projeto
+                <FaPlus /> {t("Add Project")}
               </button>
             )}
           </div>
@@ -1030,11 +1032,11 @@ const Home = () => {
                 ))}
               </div>
             ) : (
-              <p>Nenhum pesquisador disponível no momento.</p>
+              <p>{t("No researchers available at the moment.")}</p>
             )}
             {formerResearchers.length > 0 && (
               <div className="former-members-section">
-                <h3 className="former-members-title">Ex-membros</h3>
+                <h3 className="former-members-title">{t("Former members")}</h3>
                 <div className="researchers-grid former-grid">
                   {formerResearchers.map((researcher) => (
                     <ResearcherCard
@@ -1063,8 +1065,8 @@ const Home = () => {
             ) : (
               <p>
                 {isProfessor
-                  ? "Nenhuma parceria cadastrada. Clique no botão + para adicionar."
-                  : "Nenhuma parceria disponível no momento."}
+                  ? t("No partnerships registered. Click the + button to add.")
+                  : t("No partnerships available at the moment.")}
               </p>
             )}
             {isProfessor && (
@@ -1072,7 +1074,7 @@ const Home = () => {
                 className="btn-add"
                 onClick={() => navigate("/create/partnership")}
               >
-                <FaPlus /> Adicionar Parceria
+                <FaPlus /> {t("Add Partnership")}
               </button>
             )}
           </div>
@@ -1084,37 +1086,37 @@ const Home = () => {
         return (
           <div className="contact-location-section">
             <div className="contact-column">
-              <h3><FaEnvelope /> Contato</h3>
+              <h3><FaEnvelope /> {t("Contact")}</h3>
               {isProfessor && (
                 <button
                   className="btn-icon btn-icon--primary column-edit-btn"
                   type="button"
                   onClick={() => openSectionEditor("contact")}
-                  title="Editar contato"
+                  title={t("Edit contact")}
                 >
                   <FaEdit />
                 </button>
               )}
               <div className="column-content">
                 {labSettings?.email && (
-                  <p><strong>Email:</strong> {labSettings.email}</p>
+                  <p><strong>{t("Email")}:</strong> {labSettings.email}</p>
                 )}
                 {labSettings?.phone && (
-                  <p><strong>Telefone:</strong> {labSettings.phone}</p>
+                  <p><strong>{t("Phone")}:</strong> {labSettings.phone}</p>
                 )}
                 {!hasContact && (
-                  <p className="empty-message">Informações de contato não disponíveis.</p>
+                  <p className="empty-message">{t("Contact information not available.")}</p>
                 )}
               </div>
             </div>
             <div className="location-column">
-              <h3><FaMapMarkerAlt /> Localização</h3>
+              <h3><FaMapMarkerAlt /> {t("Location")}</h3>
               {isProfessor && (
                 <button
                   className="btn-icon btn-icon--primary column-edit-btn"
                   type="button"
                   onClick={() => openSectionEditor("location")}
-                  title="Editar localização"
+                  title={t("Edit location")}
                 >
                   <FaEdit />
                 </button>
@@ -1133,19 +1135,19 @@ const Home = () => {
                         rel="noopener noreferrer"
                         className="map-link-btn"
                       >
-                        <FaMapMarkerAlt /> Ver no mapa
+                        <FaMapMarkerAlt /> {t("View on map")}
                       </a>
                     )}
                   </>
                 ) : (
-                  <p className="empty-message">Endereço não disponível.</p>
+                  <p className="empty-message">{t("Address not available.")}</p>
                 )}
               </div>
             </div>
           </div>
         );
       default:
-        return <p>{sectionDescriptions[sectionId] || "Conteúdo em construção."}</p>;
+        return <p>{sectionDescriptions[sectionId] || t("Content under construction.")}</p>;
     }
   };
 
@@ -1180,7 +1182,7 @@ const Home = () => {
                   onClick={() => openSectionEditor(id)}
                 >
                   <FaEdit />
-                  Editar
+                  {t("Edit")}
                 </button>
               )}
               {isProfessor && id === "researchers" && (
@@ -1190,7 +1192,7 @@ const Home = () => {
                   onClick={openResearchersEditor}
                 >
                   <FaEdit />
-                  Editar
+                  {t("Edit")}
                 </button>
               )}
               {isProfessor && id === "partnerships" && (
@@ -1200,7 +1202,7 @@ const Home = () => {
                   onClick={openPartnershipsEditor}
                 >
                   <FaEdit />
-                  Editar
+                  {t("Edit")}
                 </button>
               )}
             </div>

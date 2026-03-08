@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { generateReport, getReportConfig } from "helpers/api/content";
 import type { ReportConfig, ReportSections } from "helpers/api/content";
 import { FaArrowLeft, FaChevronDown, FaChevronRight } from "react-icons/fa";
@@ -18,6 +19,7 @@ type SectionsState = {
 };
 
 const CreateReport = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [format, setFormat] = useState<"pdf" | "xlsx">("pdf");
@@ -141,7 +143,7 @@ const CreateReport = () => {
     e.preventDefault();
 
     if (!name.trim()) {
-      setError("O nome do relatório é obrigatório.");
+      setError(t("Report name is required."));
       return;
     }
 
@@ -157,7 +159,7 @@ const CreateReport = () => {
     }
 
     if (Object.keys(selectedSections).length === 0) {
-      setError("Selecione pelo menos uma seção com colunas para o relatório.");
+      setError(t("Select at least one section with columns for the report."));
       return;
     }
 
@@ -174,10 +176,10 @@ const CreateReport = () => {
     setIsSubmitting(false);
 
     if (response.success) {
-      setMessage("Relatório gerado com sucesso!");
+      setMessage(t("Report generated successfully!"));
       setError("");
     } else {
-      setError(response.error || "Falha ao gerar relatório.");
+      setError(response.error || t("Failed to generate report."));
       setMessage("");
     }
   };
@@ -186,7 +188,7 @@ const CreateReport = () => {
     return (
       <div className="page-layout">
         <div className="page-container">
-          <p>Carregando configurações...</p>
+          <p>{t("Loading configurations...")}</p>
         </div>
       </div>
     );
@@ -196,12 +198,12 @@ const CreateReport = () => {
     <div className="page-layout">
       <div className="page-container">
         <button className="btn-back" onClick={() => navigate(-1)}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
-          <h1>Novo Relatório</h1>
-          <p>Configure e gere um relatório com os dados do laboratório</p>
+          <h1>{t("New Report")}</h1>
+          <p>{t("Configure and generate a report with lab data")}</p>
         </header>
 
         {message && <div className="msg-success">{message}</div>}
@@ -209,20 +211,20 @@ const CreateReport = () => {
 
         <form onSubmit={handleSubmit} className="report-form">
           <div className="form-field">
-            <label htmlFor="report-name">Nome do Relatório *</label>
+            <label htmlFor="report-name">{t("Report Name")} *</label>
             <input
               id="report-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Relatório Anual 2025"
+              placeholder={t("Ex: Annual Report 2025")}
               maxLength={255}
               required
             />
           </div>
 
           <div className="form-field">
-            <label>Formato *</label>
+            <label>{t("Format")} *</label>
             <div className="format-options">
               <label className={`format-option ${format === "pdf" ? "selected" : ""}`}>
                 <input
@@ -233,7 +235,7 @@ const CreateReport = () => {
                   onChange={() => setFormat("pdf")}
                 />
                 <span className="format-label">PDF</span>
-                <span className="format-description">Documento para impressão e visualização</span>
+                <span className="format-description">{t("Document for printing and viewing")}</span>
               </label>
               <label className={`format-option ${format === "xlsx" ? "selected" : ""}`}>
                 <input
@@ -244,15 +246,15 @@ const CreateReport = () => {
                   onChange={() => setFormat("xlsx")}
                 />
                 <span className="format-label">Excel (XLSX)</span>
-                <span className="format-description">Planilha para análise e edição de dados</span>
+                <span className="format-description">{t("Spreadsheet for data analysis and editing")}</span>
               </label>
             </div>
           </div>
 
           <div className="form-field">
-            <label>Seções do Relatório *</label>
+            <label>{t("Report Sections")} *</label>
             <p className="field-hint">
-              Selecione as seções e personalize as colunas que aparecerão em cada tabela
+              {t("Select sections and customize columns that will appear in each table")}
             </p>
             <div className="sections-container">
               {reportConfig && Object.entries(reportConfig).map(([sectionKey, config]) => {
@@ -280,7 +282,7 @@ const CreateReport = () => {
                         <span className="section-label">{config.label}</span>
                         {state.selected && (
                           <span className="columns-count">
-                            {state.columns.length} de {config.columns.length} colunas
+                            {state.columns.length} {t("of")} {config.columns.length} {t("columns")}
                           </span>
                         )}
                       </div>
@@ -301,15 +303,15 @@ const CreateReport = () => {
                     {state.selected && state.expanded && (
                       <div className="section-content">
                         <div className="columns-header">
-                          <span>Colunas da tabela</span>
+                          <span>{t("Table columns")}</span>
                           <button
                             type="button"
                             className="select-all-btn"
                             onClick={() => toggleAllColumns(sectionKey)}
                           >
                             {config.columns.every((c) => state.columns.includes(c.key))
-                              ? "Desmarcar Todas"
-                              : "Selecionar Todas"}
+                              ? t("Deselect All")
+                              : t("Select All")}
                           </button>
                         </div>
                         <div className="columns-grid">
@@ -332,7 +334,7 @@ const CreateReport = () => {
 
                         {(config.supports_room_grouping || config.supports_section_grouping) && (
                           <div className="grouping-options">
-                            <span className="grouping-label">Agrupar por:</span>
+                            <span className="grouping-label">{t("Group by:")}</span>
                             {config.supports_room_grouping && (
                               <label
                                 className={`grouping-option ${state.group_by_room ? "selected" : ""}`}
@@ -343,7 +345,7 @@ const CreateReport = () => {
                                   onChange={() => toggleGroupByRoom(sectionKey)}
                                 />
                                 <span className="checkmark" />
-                                <span>Sala</span>
+                                <span>{t("Room")}</span>
                               </label>
                             )}
                             {config.supports_section_grouping && (
@@ -356,7 +358,7 @@ const CreateReport = () => {
                                   onChange={() => toggleGroupBySection(sectionKey)}
                                 />
                                 <span className="checkmark" />
-                                <span>Seção</span>
+                                <span>{t("Section")}</span>
                               </label>
                             )}
                           </div>
@@ -376,14 +378,14 @@ const CreateReport = () => {
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               className="btn-confirm"
               disabled={isSubmitting || getSelectedSectionsCount() === 0}
             >
-              {isSubmitting ? "Gerando..." : "Gerar Relatório"}
+              {isSubmitting ? t("Generating...") : t("Generate Report")}
             </button>
           </div>
         </form>

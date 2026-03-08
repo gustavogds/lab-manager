@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { listAllPartnerships } from "helpers/api/content";
 import type { Partnership } from "helpers/api/content";
@@ -7,6 +8,7 @@ import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import "./ManageContent.scss";
 
 const ManagePartnerships = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,31 +84,31 @@ const ManagePartnerships = () => {
     <div className="manage-content-page">
       <div className="manage-content-container">
         <button className="btn-back" onClick={() => navigate("/manage")}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
           <div className="header-content">
-            <h1>Parcerias</h1>
-            <p>Gerencie as parcerias do laboratório</p>
+            <h1>{t("Partnerships")}</h1>
+            <p>{t("Manage the partnerships of the laboratory")}</p>
           </div>
           {!isLoading && hasPartnerships && (
             <button
               className="btn-add btn-sm"
               onClick={() => navigate("/create/partnership")}
             >
-              <FaPlus /> Nova Parceria
+              <FaPlus /> {t("New Partnership")}
             </button>
           )}
         </header>
 
         {isLoading ? (
-          <div className="loading-state">Carregando parcerias...</div>
+          <div className="loading-state">{t("Loading partnerships...")}</div>
         ) : !hasPartnerships ? (
           <div className="empty-state">
-            <p>Nenhuma parceria cadastrada.</p>
+            <p>{t("No partnership registered.")}</p>
             <button onClick={() => navigate("/create/partnership")}>
-              Cadastrar primeira parceria
+              {t("Register first partnership")}
             </button>
           </div>
         ) : (
@@ -118,7 +120,7 @@ const ManagePartnerships = () => {
                     className={sortKey === "name" ? "sortable active" : "sortable"}
                     onClick={() => handleSort("name")}
                   >
-                    Nome
+                    {t("Name")}
                     <span className="sort-indicator">
                       {sortKey === "name" && (sortDirection === "asc" ? "▲" : "▼")}
                     </span>
@@ -127,13 +129,13 @@ const ManagePartnerships = () => {
                     className={sortKey === "link" ? "sortable active" : "sortable"}
                     onClick={() => handleSort("link")}
                   >
-                    Link
+                    {t("Link")}
                     <span className="sort-indicator">
                       {sortKey === "link" && (sortDirection === "asc" ? "▲" : "▼")}
                     </span>
                   </th>
-                  <th>Logo</th>
-                  <th>Status</th>
+                  <th>{t("Logo")}</th>
+                  <th>{t("Status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -162,7 +164,7 @@ const ManagePartnerships = () => {
                       <span
                         className={`status-badge ${item.is_active ? "active" : "inactive"}`}
                       >
-                        {item.is_active ? "Ativo" : "Inativo"}
+                        {item.is_active ? t("Active") : t("Inactive")}
                       </span>
                     </td>
                   </tr>

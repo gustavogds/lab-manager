@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ptBR } from "date-fns/locale/pt-BR";
 import "react-datepicker/dist/react-datepicker.css";
@@ -11,6 +12,7 @@ import "./Settings.scss";
 registerLocale("pt-BR", ptBR);
 
 const ProfileSettings = () => {
+  const { t } = useTranslation();
   const { user }: any = useGlobalData();
   const initialData = user?.state || {};
 
@@ -170,18 +172,18 @@ const ProfileSettings = () => {
 
   return (
     <div className="profile-settings">
-      <h1>Configurações de Perfil</h1>
+      <h1>{t("Profile Settings")}</h1>
       {message && <div className="msg-success">{message}</div>}
       {error && <div className="msg-error">{error}</div>}
       <form onSubmit={handleSubmit} className="profile-settings__form">
         <label>
-          Imagem de Perfil:
+          {t("Profile Image:")}
           <div className="profile-image-field">
             <div className="profile-image-preview">
               {profileImageUrl ? (
-                <img src={profileImageUrl} alt="Imagem de perfil" />
+                <img src={profileImageUrl} alt={t("Profile Image")} />
               ) : (
-                <span>Sem imagem</span>
+                <span>{t("No image")}</span>
               )}
             </div>
             <div className="profile-image-actions">
@@ -191,28 +193,28 @@ const ProfileSettings = () => {
                 onChange={handleProfileImageChange}
               />
               <small>
-                Tamanho máximo: {MAX_PROFILE_IMAGE_SIZE_MB}MB
+                {t("Maximum size:")} {MAX_PROFILE_IMAGE_SIZE_MB}MB
               </small>
             </div>
           </div>
         </label>
         <label>
-          Nome:
+          {t("Name")}
           <input name="name" value={formData.name} onChange={handleChange} />
         </label>
         <MultiSelect
-          label="Posições/Cargos"
+          label={t("Positions/Roles")}
           options={positions}
           selected={formData.selectedPositions}
           onChange={handlePositionsChange}
-          placeholder="Selecione os cargos..."
+          placeholder={t("Select positions...")}
         />
         <label>
-          Telefone:
+          {t("Phone")}
           <input name="phone" value={formData.phone} onChange={handleChange} />
         </label>
         <label>
-          Email de Contato:
+          {t("Contact Email")}
           <input
             name="contact_email"
             value={formData.contact_email}
@@ -220,16 +222,16 @@ const ProfileSettings = () => {
           />
         </label>
         <label>
-          Página:
+          {t("Page")}
           <input
             name="social_media"
             value={formData.social_media}
             onChange={handleChange}
-            placeholder="LinkedIn, página pessoal, etc."
+            placeholder={t("LinkedIn, personal page, etc.")}
           />
         </label>
         <label>
-          Lattes:
+          Lattes
           <input
             name="lattes"
             value={formData.lattes}
@@ -237,17 +239,17 @@ const ProfileSettings = () => {
           />
         </label>
         <label>
-          Bio:
+          {t("Bio")}
           <textarea
             name="bio"
             value={formData.bio}
             onChange={handleChange}
-            placeholder="Escreva uma breve descrição sobre você..."
+            placeholder={t("Write a brief description about yourself...")}
             rows={4}
           />
         </label>
         <label>
-          Data de Nascimento:
+          {t("Date of Birth")}
           <DatePicker
             selected={selectedDate}
             onChange={handleDateChange}
@@ -268,10 +270,10 @@ const ProfileSettings = () => {
             checked={formData.is_public}
             onChange={handleChange}
           />
-          Perfil Público
+          {t("Public Profile")}
         </label>
         <button type="submit" className="btn-confirm">
-          Salvar Alterações
+          {t("Save Changes")}
         </button>
       </form>
     </div>

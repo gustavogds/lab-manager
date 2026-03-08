@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updatePosition, deletePosition } from "helpers/api/content";
 import type { Position } from "helpers/api/content";
 
@@ -16,6 +17,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: position.name,
     is_visible: position.is_visible,
@@ -36,7 +38,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
 
@@ -52,26 +54,26 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Cargo atualizado com sucesso!",
+        title: t("Success"),
+        message: t("Position updated successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar cargo.",
+        title: t("Error"),
+        message: response.error || t("Failed to update position."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar cargo.");
+      setError(response.error || t("Failed to update position."));
     }
   };
 
   const handleDelete = async () => {
     if (
       !confirm(
-        `Tem certeza que deseja excluir o cargo "${position.name}"? Ele será removido dos usuários vinculados.`
+        t(`Are you sure you want to delete the position "{{name}}"? It will be removed from associated users.`, { name: position.name })
       )
     )
       return;
@@ -83,19 +85,19 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Cargo excluído com sucesso!",
+        title: t("Success"),
+        message: t("Position deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir cargo.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete position."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir cargo.");
+      setError(response.error || t("Failed to delete position."));
     }
   };
 
@@ -114,7 +116,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
     >
       <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header-shared">
-          <h2>Editar Cargo</h2>
+          <h2>{t("Edit Position")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -124,14 +126,14 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
           {error && <div className="msg-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="position-name">Nome *</label>
+            <label htmlFor="position-name">{t("Name")} *</label>
             <input
               id="position-name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nome do cargo"
+              placeholder={t("Position name")}
               maxLength={255}
               required
               autoFocus
@@ -139,7 +141,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
           </div>
 
           <div className="form-field">
-            <label htmlFor="position-order">Ordem</label>
+            <label htmlFor="position-order">{t("Order")}</label>
             <input
               id="position-order"
               type="number"
@@ -148,11 +150,11 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
               onChange={handleChange}
               min={0}
             />
-            <span className="field-hint">Menor valor = aparece primeiro na lista</span>
+            <span className="field-hint">{t("Lower value = appears first in the list")}</span>
           </div>
 
           <div className="form-field">
-            <label htmlFor="position-visible">Visibilidade</label>
+            <label htmlFor="position-visible">{t("Visibility")}</label>
             <label className="checkbox-label">
               <input
                 id="position-visible"
@@ -161,7 +163,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
                 checked={formData.is_visible}
                 onChange={handleChange}
               />
-              Mostrar cargo nas informações do usuário
+              {t("Show position in user information")}
             </label>
           </div>
 
@@ -173,15 +175,15 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

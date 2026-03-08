@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { listApprovedUsers, updateProject, deleteProject } from "helpers/api/content";
 import type { Project, User } from "helpers/api/content";
 
@@ -17,6 +18,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: project.title,
     description: project.description || "",
@@ -53,7 +55,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
     e.preventDefault();
 
     if (!formData.title.trim()) {
-      setError("O título é obrigatório.");
+      setError(t("Title is required."));
       return;
     }
 
@@ -71,19 +73,19 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Projeto atualizado!",
+        title: t("Success"),
+        message: t("Project updated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar projeto.",
+        title: t("Error"),
+        message: response.error || t("Failed to update project."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar projeto.");
+      setError(response.error || t("Failed to update project."));
     }
   };
 
@@ -97,21 +99,21 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
+        title: t("Success"),
         message: project.is_active
-          ? "Projeto desativado!"
-          : "Projeto ativado!",
+          ? t("Project deactivated!")
+          : t("Project activated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
-      setError(response.error || "Falha ao atualizar projeto.");
+      setError(response.error || t("Failed to update project."));
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Tem certeza que deseja excluir "${project.title}"?`)) return;
+    if (!confirm(t(`Are you sure you want to delete "{{title}}"?`, { title: project.title }))) return;
 
     setIsSaving(true);
     setError("");
@@ -120,19 +122,19 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Projeto excluído com sucesso!",
+        title: t("Success"),
+        message: t("Project deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir projeto.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete project."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir projeto.");
+      setError(response.error || t("Failed to delete project."));
     }
   };
 
@@ -154,7 +156,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Projeto</h2>
+          <h2>{t("Edit Project")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -164,41 +166,41 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="pj-title">Título *</label>
+            <label htmlFor="pj-title">{t("Title")} *</label>
             <input
               id="pj-title"
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Título do projeto"
+              placeholder={t("Project title")}
               maxLength={255}
               required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="pj-description">Descrição</label>
+            <label htmlFor="pj-description">{t("Description")}</label>
             <textarea
               id="pj-description"
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Descrição do projeto"
+              placeholder={t("Project description")}
               rows={4}
             />
           </div>
 
           <div className="form-field">
             {isLoadingUsers ? (
-              <p>Carregando usuários...</p>
+              <p>{t("Loading users...")}</p>
             ) : (
               <MultiSelect
-                label="Integrantes"
+                label={t("Members")}
                 options={availableUsers}
                 selected={formData.members}
                 onChange={handleMembersChange}
-                placeholder="Selecione os integrantes..."
+                placeholder={t("Select members...")}
               />
             )}
           </div>
@@ -211,7 +213,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
               <button
                 type="button"
@@ -219,15 +221,15 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
-                {project.is_active ? "Desativar" : "Ativar"}
+                {project.is_active ? t("Deactivate") : t("Activate")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

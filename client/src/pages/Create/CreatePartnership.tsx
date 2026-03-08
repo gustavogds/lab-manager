@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { createPartnership } from "helpers/api/content";
 import { FaArrowLeft, FaUpload } from "react-icons/fa";
 import "./CreatePartnership.scss";
 
 const CreatePartnership = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -29,12 +31,12 @@ const CreatePartnership = () => {
     if (!file) return;
 
     if (file.size > MAX_LOGO_SIZE_BYTES) {
-      setError(`O logo deve ter no máximo ${MAX_LOGO_SIZE_MB}MB.`);
+      setError(t("Logo must be at most") + ` ${MAX_LOGO_SIZE_MB}MB.`);
       return;
     }
 
     if (!file.type.startsWith("image/")) {
-      setError("O arquivo deve ser uma imagem.");
+      setError(t("The file must be an image."));
       return;
     }
 
@@ -47,12 +49,12 @@ const CreatePartnership = () => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
 
     if (!logoFile) {
-      setError("O logo é obrigatório.");
+      setError(t("Logo is required."));
       return;
     }
 
@@ -72,7 +74,7 @@ const CreatePartnership = () => {
     setIsSubmitting(false);
 
     if (response.success) {
-      setMessage(response.message || "Parceria criada com sucesso!");
+      setMessage(response.message || t("Partnership created successfully!"));
       setError("");
       setFormData({ name: "", link: "" });
       setLogoFile(null);
@@ -82,7 +84,7 @@ const CreatePartnership = () => {
         navigate(-1);
       }, 1500);
     } else {
-      setError(response.error || "Falha ao criar parceria.");
+      setError(response.error || t("Failed to create partnership."));
       setMessage("");
     }
   };
@@ -91,12 +93,12 @@ const CreatePartnership = () => {
     <div className="page-layout">
       <div className="page-container">
         <button className="btn-back" onClick={() => navigate(-1)}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
-          <h1>Nova Parceria</h1>
-          <p>Preencha os campos abaixo para adicionar uma nova instituição parceira</p>
+          <h1>{t("New Partnership")}</h1>
+          <p>{t("Fill in the fields below to add a new partner institution")}</p>
         </header>
 
         {message && <div className="msg-success">{message}</div>}
@@ -104,11 +106,11 @@ const CreatePartnership = () => {
 
         <form onSubmit={handleSubmit} className="partnership-form">
           <div className="form-field">
-            <label>Logo da Instituição *</label>
+            <label>{t("Institution Logo")} *</label>
             <div className="logo-upload-area">
               {logoPreview ? (
                 <div className="logo-preview">
-                  <img src={logoPreview} alt="Preview do logo" />
+                  <img src={logoPreview} alt={t("Logo preview")} />
                   <button
                     type="button"
                     className="remove-logo"
@@ -123,8 +125,8 @@ const CreatePartnership = () => {
               ) : (
                 <label className="upload-placeholder">
                   <FaUpload />
-                  <span>Clique para selecionar o logo</span>
-                  <small>Tamanho máximo: {MAX_LOGO_SIZE_MB}MB</small>
+                  <span>{t("Click to select the logo")}</span>
+                  <small>{t("Maximum size:")} {MAX_LOGO_SIZE_MB}MB</small>
                   <input
                     type="file"
                     accept="image/*"
@@ -137,28 +139,28 @@ const CreatePartnership = () => {
           </div>
 
           <div className="form-field">
-            <label htmlFor="name">Nome da Instituição *</label>
+            <label htmlFor="name">{t("Institution Name")} *</label>
             <input
               id="name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Ex: UFSC, USP, UNICAMP..."
+              placeholder={t("Ex: UFSC, USP, UNICAMP...")}
               maxLength={255}
               required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="link">Link do Site (opcional)</label>
+            <label htmlFor="link">{t("Website Link (optional)")}</label>
             <input
               id="link"
               type="url"
               name="link"
               value={formData.link}
               onChange={handleChange}
-              placeholder="https://www.instituicao.edu.br"
+              placeholder="https://www.institution.edu"
             />
           </div>
 
@@ -169,14 +171,14 @@ const CreatePartnership = () => {
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               className="btn-confirm"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Criando..." : "Criar Parceria"}
+              {isSubmitting ? t("Creating...") : t("Create Partnership")}
             </button>
           </div>
         </form>

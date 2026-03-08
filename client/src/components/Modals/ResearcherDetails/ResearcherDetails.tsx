@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import "./ResearcherDetails.scss";
 import Icons from "components/Icons/Icons";
 import type { Researcher, Project } from "helpers/api/content";
@@ -9,6 +10,7 @@ interface ResearcherDetailsProps {
 }
 
 const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetailsProps) => {
+  const { t } = useTranslation();
   const visiblePositions = (researcher.positions || [])
     .filter((p) => p.is_visible)
     .map((p) => p.name)
@@ -44,25 +46,25 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
         <div className="researcher-details-body">
           {researcher.bio && (
             <section className="bio-section">
-              <h3>Sobre</h3>
+              <h3>{t("About")}</h3>
               <p className="bio-text">{researcher.bio}</p>
             </section>
           )}
 
           <section className="contact-section">
             {researcher.contact_email || researcher.phone ? (
-              <h3>Contato</h3>
+              <h3>{t("Contact")}</h3>
             ) : null}
             <div className="contact-list">
               {researcher.contact_email && researcher.contact_email !== researcher.email && (
                 <div className="contact-item">
-                  <span className="label">Email de contato:</span>
+                  <span className="label">{t("Contact email")}:</span>
                   <a href={`mailto:${researcher.contact_email}`}>{researcher.contact_email}</a>
                 </div>
               )}
               {researcher.phone && (
                 <div className="contact-item">
-                  <span className="label">Telefone:</span>
+                  <span className="label">{t("Phone")}:</span>
                   <span>{researcher.phone}</span>
                 </div>
               )}
@@ -71,7 +73,7 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
 
           {(researcher.social_media || researcher.lattes) && (
             <section className="links-section">
-              <h3>Links</h3>
+              <h3>{t("Links")}</h3>
               <div className="links-list">
                 {researcher.lattes && (
                   <a 
@@ -80,7 +82,7 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
                     rel="noopener noreferrer"
                     className="link-item"
                   >
-                    Currículo Lattes
+                    {t("Lattes CV")}
                   </a>
                 )}
                 {researcher.social_media && (
@@ -90,7 +92,7 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
                     rel="noopener noreferrer"
                     className="link-item"
                   >
-                    Página
+                    {t("Page")}
                   </a>
                 )}
               </div>
@@ -99,7 +101,7 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
 
           {projects.length > 0 && (
             <section className="projects-section">
-              <h3>Projetos ({projects.length})</h3>
+              <h3>{t("Projects")} ({projects.length})</h3>
               <div className="projects-list">
                 {projects.map((project) => (
                   <div key={project.id} className="project-item">

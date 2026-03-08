@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { listResearchAreas } from "helpers/api/content";
 import type { ResearchArea } from "helpers/api/content";
@@ -7,6 +8,7 @@ import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import "./ManageContent.scss";
 
 const ManageResearchAreas = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [areas, setAreas] = useState<ResearchArea[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,31 +84,31 @@ const ManageResearchAreas = () => {
     <div className="manage-content-page">
       <div className="manage-content-container">
         <button className="btn-back" onClick={() => navigate("/manage")}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
           <div className="header-content">
-            <h1>Áreas de Pesquisa</h1>
-            <p>Gerencie as áreas de pesquisa do laboratório</p>
+            <h1>{t("Research Areas")}</h1>
+            <p>{t("Manage the research areas of the laboratory")}</p>
           </div>
           {!isLoading && hasAreas && (
             <button
               className="btn-add btn-sm"
               onClick={() => navigate("/create/research-area")}
             >
-              <FaPlus /> Nova Área de Pesquisa
+              <FaPlus /> {t("New Research Area")}
             </button>
           )}
         </header>
 
         {isLoading ? (
-          <div className="loading-state">Carregando áreas de pesquisa...</div>
+          <div className="loading-state">{t("Loading research areas...")}</div>
         ) : !hasAreas ? (
           <div className="empty-state">
-            <p>Nenhuma área de pesquisa cadastrada.</p>
+            <p>{t("No research area registered.")}</p>
             <button onClick={() => navigate("/create/research-area")}>
-              Cadastrar primeira área de pesquisa
+              {t("Register first research area")}
             </button>
           </div>
         ) : (
@@ -118,7 +120,7 @@ const ManageResearchAreas = () => {
                     className={sortKey === "title" ? "sortable active" : "sortable"}
                     onClick={() => handleSort("title")}
                   >
-                    Título
+                    {t("Title")}
                     <span className="sort-indicator">
                       {sortKey === "title" && (sortDirection === "asc" ? "▲" : "▼")}
                     </span>
@@ -127,12 +129,12 @@ const ManageResearchAreas = () => {
                     className={sortKey === "description" ? "sortable active" : "sortable"}
                     onClick={() => handleSort("description")}
                   >
-                    Descrição
+                    {t("Description")}
                     <span className="sort-indicator">
                       {sortKey === "description" && (sortDirection === "asc" ? "▲" : "▼")}
                     </span>
                   </th>
-                  <th>Status</th>
+                  <th>{t("Status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -150,7 +152,7 @@ const ManageResearchAreas = () => {
                       <span
                         className={`status-badge ${item.is_active ? "active" : "inactive"}`}
                       >
-                        {item.is_active ? "Ativo" : "Inativo"}
+                        {item.is_active ? t("Active") : t("Inactive")}
                       </span>
                     </td>
                   </tr>

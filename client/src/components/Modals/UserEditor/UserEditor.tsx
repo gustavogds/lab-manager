@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateUser, deleteUser } from "helpers/api/content";
 import type { User, Room, Position } from "helpers/api/content";
 import { ModalsHandler } from "components/my-own-modal-handler";
@@ -16,9 +17,9 @@ interface UserEditorProps {
 
 const AVAILABLE_ROLES = [
   { id: 1, name: "Professor", value: "professor" },
-  { id: 2, name: "Estudante", value: "student" },
-  { id: 3, name: "Colaborador", value: "collaborator" },
-  { id: 4, name: "Gestor de Inventário", value: "inventory_manager" },
+  { id: 2, name: "Student", value: "student" },
+  { id: 3, name: "Collaborator", value: "collaborator" },
+  { id: 4, name: "Inventory Manager", value: "inventory_manager" },
 ];
 
 type RoleOption = (typeof AVAILABLE_ROLES)[number];
@@ -30,12 +31,14 @@ const UserEditor: React.FC<UserEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const initialPositions = user.positions || (user.position ? [user.position] : []);
   const initialRoles = AVAILABLE_ROLES.filter((r) => (user.roles || []).includes(r.value));
+  const initialRoom = user.room ? [user.room] : [];
   const [formData, setFormData] = useState({
     selectedRoles: initialRoles,
     selectedPositions: initialPositions,
-    room_id: user.room?.id ?? (null as number | null),
+    selectedRoom: initialRoom as Room[],
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
@@ -54,11 +57,10 @@ const UserEditor: React.FC<UserEditorProps> = ({
     }));
   };
 
-  const handleRoomChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleRoomChange = (selected: Room[]) => {
     setFormData((prev) => ({
       ...prev,
-      room_id: value ? Number(value) : null,
+      selectedRoom: selected,
     }));
   };
 
@@ -66,7 +68,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
     e.preventDefault();
 
     if (formData.selectedRoles.length === 0) {
-      setError("O usuário deve ter pelo menos uma função.");
+      setError(t("User must have at least one role."));
       return;
     }
 
@@ -76,26 +78,26 @@ const UserEditor: React.FC<UserEditorProps> = ({
     const response = await updateUser(user.id, {
       roles: formData.selectedRoles.map((r) => r.value),
       position_ids: formData.selectedPositions.map((p) => p.id),
-      room_id: formData.room_id,
+      room_id: formData.selectedRoom.length > 0 ? formData.selectedRoom[0].id : null,
     });
 
     setIsSaving(false);
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Usuário atualizado com sucesso!",
+        title: t("Success"),
+        message: t("User updated successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar usuário.",
+        title: t("Error"),
+        message: response.error || t("Failed to update user."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar usuário.");
+      setError(response.error || t("Failed to update user."));
     }
   };
 
@@ -109,19 +111,19 @@ const UserEditor: React.FC<UserEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: user.is_active ? "Usuário desativado!" : "Usuário ativado!",
+        title: t("Success"),
+        message: user.is_active ? t("User deactivated!") : t("User activated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
-      setError(response.error || "Falha ao atualizar usuário.");
+      setError(response.error || t("Failed to update user."));
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Tem certeza que deseja excluir "${user.name || user.email}"?`)) return;
+    if (!confirm(t(`Are you sure you want to delete "{{name}}"?`, { name: user.name || user.email }))) return;
 
     setIsSaving(true);
     setError("");
@@ -130,19 +132,19 @@ const UserEditor: React.FC<UserEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Usuário excluído com sucesso!",
+        title: t("Success"),
+        message: t("User deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir usuário.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete user."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir usuário.");
+      setError(response.error || t("Failed to delete user."));
     }
   };
 
@@ -161,7 +163,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
     >
       <div className="modal-panel user-editor-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header-shared">
-          <h2>Editar Usuário</h2>
+          <h2>{t("Edit User")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -173,7 +175,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
               <img src={user.profile_image} alt="" className="user-avatar-large" />
             )}
             <div className="user-details">
-              <span className="user-name">{user.name || "Sem nome"}</span>
+              <span className="user-name">{user.name || t("No name")}</span>
               <span className="user-email">{user.email}</span>
               {user.username && <span className="user-username">@{user.username}</span>}
             </div>
@@ -183,38 +185,33 @@ const UserEditor: React.FC<UserEditorProps> = ({
 
           <div className="form-field">
             <MultiSelect
-              label="Funções"
+              label={t("Roles")}
               options={AVAILABLE_ROLES}
               selected={formData.selectedRoles}
               onChange={handleRolesChange}
-              placeholder="Selecione as funções..."
+              placeholder={t("Select roles...")}
             />
           </div>
 
           <div className="form-field">
             <MultiSelect
-              label="Cargos"
+              label={t("Positions")}
               options={positions}
               selected={formData.selectedPositions}
               onChange={handlePositionsChange}
-              placeholder="Selecione os cargos..."
+              placeholder={t("Select positions...")}
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="room_id">Sala</label>
-            <select
-              id="room_id"
-              value={formData.room_id || ""}
+            <MultiSelect
+              label={t("Room")}
+              options={rooms}
+              selected={formData.selectedRoom}
               onChange={handleRoomChange}
-            >
-              <option value="">Nenhuma</option>
-              {rooms.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
+              singleSelect
+              placeholder={t("None")}
+            />
           </div>
 
           <div className="modal-actions">
@@ -225,7 +222,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
-                {user.is_active ? "Desativar" : "Ativar"}
+                {user.is_active ? t("Deactivate") : t("Activate")}
               </button>
               <button
                 type="button"
@@ -233,7 +230,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
             </div>
             <div className="right-actions">
@@ -242,14 +239,14 @@ const UserEditor: React.FC<UserEditorProps> = ({
                 className="btn-cancel"
                 onClick={handleCancel}
               >
-                Cancelar
+                {t("Cancel")}
               </button>
               <button
                 type="submit"
                 className="btn-confirm"
                 disabled={isSaving}
               >
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

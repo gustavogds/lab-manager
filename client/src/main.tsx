@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import "helpers/i18n";
 import App from "./pages/App";
 import { BrowserRouter } from "react-router";
 import { ModalProvider } from "./components/my-own-modal-handler";

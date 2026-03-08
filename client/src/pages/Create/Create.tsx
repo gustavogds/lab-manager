@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { FaFlask, FaPlus, FaProjectDiagram, FaHandshake, FaTools, FaFileAlt, FaUserPlus } from "react-icons/fa";
 import "./Create.scss";
 
@@ -11,13 +12,14 @@ type CreateOption = {
 };
 
 const Create = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const createOptions: CreateOption[] = [
     {
       id: "invitation",
-      title: "Convidar Membro",
-      description: "Convidar um novo membro por e-mail para o laboratório",
+      title: t("Invite Member"),
+      description: t("Invite a new member by email to the lab"),
       icon: <FaUserPlus />,
       action: () => {
         navigate("/create/invitation");
@@ -25,8 +27,8 @@ const Create = () => {
     },
     {
       id: "research-area",
-      title: "Área de Pesquisa",
-      description: "Criar uma nova área de pesquisa para o laboratório",
+      title: t("Research Area"),
+      description: t("Create a new research area for the lab"),
       icon: <FaFlask />,
       action: () => {
         navigate("/create/research-area");
@@ -34,8 +36,8 @@ const Create = () => {
     },
     {
       id: "project",
-      title: "Projeto",
-      description: "Criar um novo projeto de pesquisa",
+      title: t("Project"),
+      description: t("Create a new research project"),
       icon: <FaProjectDiagram />,
       action: () => {
         navigate("/create/project");
@@ -43,8 +45,8 @@ const Create = () => {
     },
     {
       id: "partnership",
-      title: "Parceria",
-      description: "Adicionar uma nova instituição parceira",
+      title: t("Partnership"),
+      description: t("Add a new partner institution"),
       icon: <FaHandshake />,
       action: () => {
         navigate("/create/partnership");
@@ -52,8 +54,8 @@ const Create = () => {
     },
     {
       id: "equipment",
-      title: "Equipamento",
-      description: "Registrar um novo material ou equipamento do laboratório",
+      title: t("Equipment"),
+      description: t("Register new lab material or equipment"),
       icon: <FaTools />,
       action: () => {
         navigate("/create/equipment");
@@ -61,8 +63,8 @@ const Create = () => {
     },
     {
       id: "report",
-      title: "Relatório",
-      description: "Gerar um relatório com os dados do laboratório",
+      title: t("Report"),
+      description: t("Generate a report with the lab data"),
       icon: <FaFileAlt />,
       action: () => {
         navigate("/create/report");
@@ -74,8 +76,8 @@ const Create = () => {
     <div className="page-layout">
       <div className="page-container">
         <header className="page-header">
-          <h1>Criar Novo Conteúdo</h1>
-          <p>Selecione o tipo de conteúdo que deseja criar</p>
+          <h1>{t("Create New Content")}</h1>
+          <p>{t("Select the type of content you want to create")}</p>
         </header>
 
         <div className="option-cards-grid">
@@ -99,7 +101,7 @@ const Create = () => {
 
         {createOptions.length === 0 && (
           <div className="no-options">
-            <p>Nenhuma opção de criação disponível no momento.</p>
+            <p>{t("No creation options available at the moment.")}</p>
           </div>
         )}
       </div>

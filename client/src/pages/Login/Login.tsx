@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FaEnvelope, FaLock, FaUser, FaIdBadge, FaEye, FaEyeSlash } from "react-icons/fa";
 
 import "./Login.scss";
@@ -27,6 +28,7 @@ const SignUp = ({
   isLoading: boolean;
   invitationData?: InvitationData;
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: invitationData?.email || "",
     username: "",
@@ -55,17 +57,17 @@ const SignUp = ({
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.email.trim()) newErrors.email = "E-mail é obrigatório.";
+    if (!formData.email.trim()) newErrors.email = t("Email is required.");
     if (!formData.username.trim())
-      newErrors.username = "Nome de usuário é obrigatório.";
-    if (!formData.name.trim()) newErrors.name = "Nome completo é obrigatório.";
+      newErrors.username = t("Username is required.");
+    if (!formData.name.trim()) newErrors.name = t("Full name is required.");
     // Skip role validation if invitation provides roles
-    if (!invitationData && !formData.role) newErrors.role = "Selecione uma função.";
-    if (!formData.password) newErrors.password = "Senha é obrigatória.";
+    if (!invitationData && !formData.role) newErrors.role = t("Select a role.");
+    if (!formData.password) newErrors.password = t("Password is required.");
     else if (formData.password.length < 6)
-      newErrors.password = "A senha deve ter pelo menos 6 caracteres.";
+      newErrors.password = t("Password must be at least 6 characters.");
     if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "As senhas não coincidem.";
+      newErrors.confirmPassword = t("Passwords do not match.");
     return newErrors;
   };
 
@@ -81,32 +83,32 @@ const SignUp = ({
 
   const getRoleDisplayName = (role: string) => {
     const roleNames: Record<string, string> = {
-      professor: "Professor",
-      student: "Estudante",
-      collaborator: "Colaborador",
-      inventory_manager: "Gestor de Inventário",
+      professor: t("Professor"),
+      student: t("Student"),
+      collaborator: t("Collaborator"),
+      inventory_manager: t("Inventory Manager"),
     };
     return roleNames[role] || role;
   };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <h2>{invitationData ? "Completar Cadastro" : "Criar Conta"}</h2>
+      <h2>{invitationData ? t("Complete Registration") : t("Create Account")}</h2>
       <p className="form-subtitle">
         {invitationData
-          ? "Complete seu cadastro usando o convite recebido"
-          : "Preencha os dados para se cadastrar"}
+          ? t("Complete your registration using the received invitation")
+          : t("Fill in the data to register")}
       </p>
 
       {invitationData && (
         <div className="invitation-banner">
-          <span>✉️ Você foi convidado com a função: </span>
+          <span>✉️ {t("You have been invited with the role:")} </span>
           <strong>{invitationData.roles.map(getRoleDisplayName).join(", ")}</strong>
         </div>
       )}
 
       <div className={`form-field ${errors.name ? "has-error" : ""}`}>
-        <label htmlFor="name">Nome Completo</label>
+        <label htmlFor="name">{t("Full Name")}</label>
         <div className="input-wrapper">
           <FaUser className="input-icon" />
           <input
@@ -115,14 +117,14 @@ const SignUp = ({
             type="text"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Seu nome completo"
+            placeholder={t("Your full name")}
           />
         </div>
         {errors.name && <span className="field-error">{errors.name}</span>}
       </div>
 
       <div className={`form-field ${errors.email ? "has-error" : ""} ${invitationData ? "disabled" : ""}`}>
-        <label htmlFor="email">E-mail</label>
+        <label htmlFor="email">{t("Email")}</label>
         <div className="input-wrapper">
           <FaEnvelope className="input-icon" />
           <input
@@ -138,12 +140,12 @@ const SignUp = ({
         </div>
         {errors.email && <span className="field-error">{errors.email}</span>}
         {invitationData && (
-          <span className="field-hint">E-mail definido pelo convite</span>
+          <span className="field-hint">{t("Email defined by invitation")}</span>
         )}
       </div>
 
       <div className={`form-field ${errors.username ? "has-error" : ""}`}>
-        <label htmlFor="username">Nome de Usuário</label>
+        <label htmlFor="username">{t("Username")}</label>
         <div className="input-wrapper">
           <FaIdBadge className="input-icon" />
           <input
@@ -152,7 +154,7 @@ const SignUp = ({
             type="text"
             value={formData.username}
             onChange={handleChange}
-            placeholder="nome_de_usuario"
+            placeholder={t("username")}
           />
         </div>
         {errors.username && (
@@ -162,7 +164,7 @@ const SignUp = ({
 
       {!invitationData && (
         <div className={`form-field ${errors.role ? "has-error" : ""}`}>
-          <label htmlFor="role">Função</label>
+          <label htmlFor="role">{t("Role")}</label>
           <select
             id="role"
             name="role"
@@ -170,18 +172,18 @@ const SignUp = ({
             onChange={handleChange}
           >
             <option value="" disabled>
-              Selecione uma função
+              {t("Select a role")}
             </option>
-            <option value="professor">Professor</option>
-            <option value="student">Estudante</option>
-            <option value="collaborator">Colaborador</option>
+            <option value="professor">{t("Professor")}</option>
+            <option value="student">{t("Student")}</option>
+            <option value="collaborator">{t("Collaborator")}</option>
           </select>
           {errors.role && <span className="field-error">{errors.role}</span>}
         </div>
       )}
 
       <div className={`form-field ${errors.password ? "has-error" : ""}`}>
-        <label htmlFor="password">Senha</label>
+        <label htmlFor="password">{t("Password")}</label>
         <div className="input-wrapper">
           <FaLock className="input-icon" />
           <input
@@ -190,7 +192,7 @@ const SignUp = ({
             type={showPassword ? "text" : "password"}
             value={formData.password}
             onChange={handleChange}
-            placeholder="Mínimo 6 caracteres"
+            placeholder={t("Minimum 6 characters")}
           />
           <button
             type="button"
@@ -207,7 +209,7 @@ const SignUp = ({
       </div>
 
       <div className={`form-field ${errors.confirmPassword ? "has-error" : ""}`}>
-        <label htmlFor="confirmPassword">Confirmar Senha</label>
+        <label htmlFor="confirmPassword">{t("Confirm Password")}</label>
         <div className="input-wrapper">
           <FaLock className="input-icon" />
           <input
@@ -216,7 +218,7 @@ const SignUp = ({
             type={showConfirm ? "text" : "password"}
             value={formData.confirmPassword}
             onChange={handleChange}
-            placeholder="Repita a senha"
+            placeholder={t("Repeat the password")}
           />
           <button
             type="button"
@@ -233,7 +235,7 @@ const SignUp = ({
       </div>
 
       <button type="submit" className="submit-btn" disabled={isLoading}>
-        {isLoading ? "Criando conta..." : "Criar Conta"}
+        {isLoading ? t("Creating account...") : t("Create Account")}
       </button>
     </form>
   );
@@ -241,23 +243,23 @@ const SignUp = ({
 
 const VERIFIED_MESSAGES: Record<string, { title: string; message: string; type: "success" | "info" | "error" }> = {
   success: {
-    title: "E-mail Verificado",
-    message: "Seu e-mail foi verificado com sucesso! Aguarde a aprovação de um administrador para acessar sua conta.",
+    title: "Email Verified",
+    message: "Your email has been verified successfully! Wait for an administrator to approve your account.",
     type: "success",
   },
   expired: {
-    title: "Link Expirado",
-    message: "O link de verificação expirou ou é inválido. Crie uma nova conta para receber um novo link.",
+    title: "Expired Link",
+    message: "The verification link has expired or is invalid. Create a new account to receive a new link.",
     type: "error",
   },
   invalid: {
-    title: "Link Inválido",
-    message: "O link de verificação é inválido.",
+    title: "Invalid Link",
+    message: "The verification link is invalid.",
     type: "error",
   },
   already: {
-    title: "E-mail Já Verificado",
-    message: "Seu e-mail já foi verificado anteriormente.",
+    title: "Email Already Verified",
+    message: "Your email has already been verified.",
     type: "info",
   },
 };
@@ -269,6 +271,7 @@ const SignIn = ({
   onSubmit: (data: any) => void;
   isLoading: boolean;
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -298,8 +301,8 @@ const SignIn = ({
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.email.trim())
-      newErrors.email = "E-mail ou nome de usuário é obrigatório.";
-    if (!formData.password) newErrors.password = "Senha é obrigatória.";
+      newErrors.email = t("Email or username is required.");
+    if (!formData.password) newErrors.password = t("Password is required.");
     return newErrors;
   };
 
@@ -315,11 +318,11 @@ const SignIn = ({
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <h2>Entrar</h2>
-      <p className="form-subtitle">Acesse sua conta do laboratório</p>
+      <h2>{t("Sign In")}</h2>
+      <p className="form-subtitle">{t("Access your laboratory account")}</p>
 
       <div className={`form-field ${errors.email ? "has-error" : ""}`}>
-        <label htmlFor="email">E-mail ou Nome de Usuário</label>
+        <label htmlFor="email">{t("Email or Username")}</label>
         <div className="input-wrapper">
           <FaEnvelope className="input-icon" />
           <input
@@ -335,7 +338,7 @@ const SignIn = ({
       </div>
 
       <div className={`form-field ${errors.password ? "has-error" : ""}`}>
-        <label htmlFor="password">Senha</label>
+        <label htmlFor="password">{t("Password")}</label>
         <div className="input-wrapper">
           <FaLock className="input-icon" />
           <input
@@ -344,7 +347,7 @@ const SignIn = ({
             type={showPassword ? "text" : "password"}
             value={formData.password}
             onChange={handleChange}
-            placeholder="Sua senha"
+            placeholder={t("Your password")}
           />
           <button
             type="button"
@@ -361,7 +364,7 @@ const SignIn = ({
       </div>
 
       <button type="submit" className="submit-btn" disabled={isLoading}>
-        {isLoading ? "Entrando..." : "Entrar"}
+        {isLoading ? t("Signing in...") : t("Sign In")}
       </button>
 
       <button
@@ -369,13 +372,14 @@ const SignIn = ({
         className="forgot-link"
         onClick={() => navigate("/password/reset")}
       >
-        Esqueceu sua senha?
+        {t("Forgot your password?")}
       </button>
     </form>
   );
 };
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
 
@@ -388,20 +392,19 @@ const ForgotPassword = () => {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <h2>Recuperar Senha</h2>
+      <h2>{t("Recover Password")}</h2>
       <p className="form-subtitle">
-        Informe seu e-mail e enviaremos um link para redefinir sua senha
+        {t("Enter your email and we will send you a link to reset your password")}
       </p>
 
       {sent ? (
         <div className="success-banner">
-          Se o e-mail estiver cadastrado, você receberá um link de recuperação em
-          breve.
+          {t("If the email is registered, you will receive a recovery link shortly.")}
         </div>
       ) : (
         <>
           <div className="form-field">
-            <label htmlFor="reset-email">E-mail</label>
+            <label htmlFor="reset-email">{t("Email")}</label>
             <div className="input-wrapper">
               <FaEnvelope className="input-icon" />
               <input
@@ -415,7 +418,7 @@ const ForgotPassword = () => {
           </div>
 
           <button type="submit" className="submit-btn">
-            Enviar Link
+            {t("Send Link")}
           </button>
         </>
       )}
@@ -430,6 +433,7 @@ const Login = ({
   isSignUp?: boolean;
   isPasswordReset?: boolean;
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [labLogo, setLabLogo] = useState("");
@@ -462,8 +466,8 @@ const Login = ({
           setSearchParams({}, { replace: true });
         } else {
           ModalsHandler.createNotification({
-            title: "Convite Inválido",
-            message: response.error || "O convite não é válido ou expirou.",
+            title: t("Invalid Invitation"),
+            message: response.error || t("The invitation is not valid or has expired."),
             type: "error",
           });
           navigate("/signup");
@@ -488,8 +492,8 @@ const Login = ({
       if (result.success) {
         if (result.autoApproved) {
           ModalsHandler.createNotification({
-            title: "Conta Criada",
-            message: "Sua conta foi criada com sucesso! Você já pode fazer login.",
+            title: t("Account Created"),
+            message: t("Your account has been created successfully! You can now log in."),
             type: "success",
           });
           setTimeout(() => {
@@ -497,9 +501,9 @@ const Login = ({
           }, 2000);
         } else {
           ModalsHandler.createNotification({
-            title: "Conta Criada",
+            title: t("Account Created"),
             message:
-              "Sua conta foi criada com sucesso! Verifique seu e-mail para ativar o cadastro.",
+              t("Your account has been created successfully! Check your email to activate your registration."),
             type: "success",
           });
           setTimeout(() => {
@@ -508,7 +512,7 @@ const Login = ({
         }
       } else {
         ModalsHandler.createNotification({
-          title: "Erro no Cadastro",
+          title: t("Registration Error"),
           message: result.message,
           type: "error",
         });
@@ -520,7 +524,7 @@ const Login = ({
         window.location.href = "/";
       } else {
         ModalsHandler.createNotification({
-          title: "Erro no Login",
+          title: t("Login Error"),
           message: result.message,
           type: "error",
         });
@@ -535,16 +539,16 @@ const Login = ({
   let switchPath: string;
 
   if (isPasswordReset) {
-    switchText = "Lembrou a senha?";
-    switchLabel = "Entrar";
+    switchText = t("Remembered your password?");
+    switchLabel = t("Sign In");
     switchPath = "/signin";
   } else if (isSignUpPage) {
-    switchText = "Já possui uma conta?";
-    switchLabel = "Entrar";
+    switchText = t("Already have an account?");
+    switchLabel = t("Sign In");
     switchPath = "/signin";
   } else {
-    switchText = "Não possui uma conta?";
-    switchLabel = "Cadastrar";
+    switchText = t("Don't have an account?");
+    switchLabel = t("Sign Up");
     switchPath = "/signup";
   }
 
@@ -562,7 +566,7 @@ const Login = ({
           </div>
           <div className="login-form-area">
             <div className="loading-invitation">
-              <p>Validando convite...</p>
+              <p>{t("Validating invitation...")}</p>
             </div>
           </div>
         </div>

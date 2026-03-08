@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { createResearchArea } from "helpers/api/content";
 import { FaArrowLeft } from "react-icons/fa";
 import "./CreateResearchArea.scss";
 
 const CreateResearchArea = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
@@ -25,12 +27,12 @@ const CreateResearchArea = () => {
     e.preventDefault();
     
     if (!formData.title.trim()) {
-      setError("O título é obrigatório.");
+      setError(t("Title is required."));
       return;
     }
 
     if (!formData.description.trim()) {
-      setError("A descrição é obrigatória.");
+      setError(t("Description is required."));
       return;
     }
 
@@ -43,17 +45,16 @@ const CreateResearchArea = () => {
     setIsSubmitting(false);
 
     if (response.success) {
-      setMessage(response.message || "Área de pesquisa criada com sucesso!");
+      setMessage(response.message || t("Research area created successfully!"));
       setError("");
       
-      // Limpar formulário
       setFormData({ title: "", description: "" });
       
       setTimeout(() => {
         navigate(-1);
       }, 1500);
     } else {
-      setError(response.error || "Falha ao criar área de pesquisa.");
+      setError(response.error || t("Failed to create research area."));
       setMessage("");
     }
   };
@@ -62,12 +63,12 @@ const CreateResearchArea = () => {
     <div className="page-layout">
       <div className="page-container">
         <button className="btn-back" onClick={() => navigate(-1)}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
-          <h1>Nova Área de Pesquisa</h1>
-          <p>Preencha os campos abaixo para criar uma nova área de pesquisa</p>
+          <h1>{t("New Research Area")}</h1>
+          <p>{t("Fill in the fields below to create a new research area")}</p>
         </header>
 
         {message && <div className="msg-success">{message}</div>}
@@ -75,27 +76,27 @@ const CreateResearchArea = () => {
 
         <form onSubmit={handleSubmit} className="research-area-form">
           <div className="form-field">
-            <label htmlFor="title">Título *</label>
+            <label htmlFor="title">{t("Title")} *</label>
             <input
               id="title"
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Ex: Inteligência Artificial"
+              placeholder={t("Ex: Artificial Intelligence")}
               maxLength={255}
               required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="description">Descrição *</label>
+            <label htmlFor="description">{t("Description")} *</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Descreva a área de pesquisa, objetivos e linhas de investigação..."
+              placeholder={t("Describe the research area, objectives and lines of investigation...")}
               rows={6}
               required
             />
@@ -108,14 +109,14 @@ const CreateResearchArea = () => {
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               className="btn-confirm"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Criando..." : "Criar Área de Pesquisa"}
+              {isSubmitting ? t("Creating...") : t("Create Research Area")}
             </button>
           </div>
         </form>

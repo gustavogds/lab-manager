@@ -1,9 +1,11 @@
 import { NavLink } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useGlobalData } from "helpers/context/globalContext";
 import { canManageAll } from "helpers/utils";
 import "./Settings.scss";
 
 const Sidebar = () => {
+  const { t } = useTranslation();
   const { user }: any = useGlobalData();
 
   return (
@@ -17,7 +19,7 @@ const Sidebar = () => {
               : "settings-sidebar__link"
           }
         >
-          Profile Settings
+          {t("Profile Settings")}
         </NavLink>
 
         {canManageAll(user?.state) && (
@@ -29,7 +31,7 @@ const Sidebar = () => {
                 : "settings-sidebar__link"
             }
           >
-            Lab Settings
+            {t("Lab Settings")}
           </NavLink>
         )}
       </nav>

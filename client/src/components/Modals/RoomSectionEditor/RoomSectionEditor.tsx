@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateRoomSection, deleteRoomSection } from "helpers/api/content";
 import type { RoomSection } from "helpers/api/content";
 
@@ -18,6 +19,7 @@ const RoomSectionEditor: React.FC<RoomSectionEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: section.name,
   });
@@ -33,7 +35,7 @@ const RoomSectionEditor: React.FC<RoomSectionEditorProps> = ({
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
 
@@ -45,26 +47,26 @@ const RoomSectionEditor: React.FC<RoomSectionEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Seção atualizada com sucesso!",
+        title: t("Success"),
+        message: t("Section updated successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar seção.",
+        title: t("Error"),
+        message: response.error || t("Failed to update section."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar seção.");
+      setError(response.error || t("Failed to update section."));
     }
   };
 
   const handleDelete = async () => {
     if (
       !confirm(
-        `Tem certeza que deseja excluir a seção "${section.name}"? Os equipamentos desta seção ficarão sem seção definida.`
+        t(`Are you sure you want to delete the section "{{name}}"? Equipment in this section will have no section defined.`, { name: section.name })
       )
     )
       return;
@@ -76,19 +78,19 @@ const RoomSectionEditor: React.FC<RoomSectionEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Seção excluída com sucesso!",
+        title: t("Success"),
+        message: t("Section deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir seção.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete section."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir seção.");
+      setError(response.error || t("Failed to delete section."));
     }
   };
 
@@ -110,7 +112,7 @@ const RoomSectionEditor: React.FC<RoomSectionEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Seção</h2>
+          <h2>{t("Edit Section")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -120,19 +122,19 @@ const RoomSectionEditor: React.FC<RoomSectionEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-info">
-            <span className="info-label">Sala:</span>
+            <span className="info-label">{t("Room")}:</span>
             <span className="info-value">{roomName}</span>
           </div>
 
           <div className="form-field">
-            <label htmlFor="section-name">Nome *</label>
+            <label htmlFor="section-name">{t("Name")} *</label>
             <input
               id="section-name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nome da seção"
+              placeholder={t("Section name")}
               maxLength={255}
               required
               autoFocus
@@ -147,15 +149,15 @@ const RoomSectionEditor: React.FC<RoomSectionEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

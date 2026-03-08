@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./PartnershipsEditor.scss";
 import { FaTrash } from "react-icons/fa";
 import type { Partnership } from "helpers/api/content";
@@ -19,6 +20,7 @@ interface PartnershipsEditorProps {
 }
 
 const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsEditorProps) => {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<PartnershipConfig[]>(() =>
     partnerships
       .map((p) => ({
@@ -74,7 +76,7 @@ const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsE
     <div className="partnerships-editor-modal" onClick={onCancel}>
       <div className="partnerships-editor-content" onClick={(e) => e.stopPropagation()}>
         <header className="modal-header-shared">
-          <h2>Editar Parcerias</h2>
+          <h2>{t("Edit Partnerships")}</h2>
           <button className="btn-close-modal" onClick={onCancel}>
             ×
           </button>
@@ -82,7 +84,7 @@ const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsE
 
         <div className="editor-body">
           <p className="editor-description">
-            Reordene as parcerias, alterne a visibilidade ou marque para exclusão.
+            {t("Reorder partnerships, toggle visibility, or mark for deletion.")}
           </p>
 
           <div className="partnerships-list">
@@ -96,7 +98,7 @@ const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsE
                     onClick={() => moveUp(index)}
                     disabled={index === 0}
                     className="order-btn"
-                    title="Mover para cima"
+                    title={t("Move up")}
                   >
                     ▲
                   </button>
@@ -104,7 +106,7 @@ const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsE
                     onClick={() => moveDown(index)}
                     disabled={index === config.length - 1}
                     className="order-btn"
-                    title="Mover para baixo"
+                    title={t("Move down")}
                   >
                     ▼
                   </button>
@@ -133,7 +135,7 @@ const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsE
                 <button
                   className={`delete-btn ${partnership.deleted ? "active" : ""}`}
                   onClick={() => markForDeletion(partnership.id)}
-                  title={partnership.deleted ? "Cancelar exclusão" : "Marcar para exclusão"}
+                  title={partnership.deleted ? t("Cancel deletion") : t("Mark for deletion")}
                 >
                   <FaTrash />
                 </button>
@@ -143,17 +145,17 @@ const PartnershipsEditor = ({ partnerships, onConfirm, onCancel }: PartnershipsE
 
           {config.filter((p) => p.deleted).length > 0 && (
             <div className="deletion-warning">
-              ⚠️ {config.filter((p) => p.deleted).length} parceria(s) será(ão) excluída(s) permanentemente ao salvar.
+              ⚠️ {config.filter((p) => p.deleted).length} {t("partnership(s) will be permanently deleted upon saving.")}
             </div>
           )}
         </div>
 
         <footer className="editor-footer">
           <button className="btn-cancel" onClick={onCancel}>
-            Cancelar
+            {t("Cancel")}
           </button>
           <button className="btn-confirm" onClick={handleSave}>
-            Salvar
+            {t("Save")}
           </button>
         </footer>
       </div>

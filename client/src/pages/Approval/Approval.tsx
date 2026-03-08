@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./Approval.scss";
 import {
   listUnapprovedUsers,
@@ -14,6 +15,7 @@ type User = {
 };
 
 const Approval = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,11 +54,11 @@ const Approval = () => {
 
   return (
     <div className="approval-container">
-      <h1 className="approval-title">Pending User Approvals</h1>
+      <h1 className="approval-title">{t("Pending User Approvals")}</h1>
       {loading ? (
-        <p className="approval-loading">Loading...</p>
+        <p className="approval-loading">{t("Loading...")}</p>
       ) : users.length === 0 ? (
-        <p className="approval-empty">No users waiting for approval.</p>
+        <p className="approval-empty">{t("No users waiting for approval.")}</p>
       ) : (
         <div className="approval-list">
           {users.map((user) => (
@@ -64,20 +66,20 @@ const Approval = () => {
               <div className="approval-info">
                 <p className="approval-name">{user.name}</p>
                 <p className="approval-email">{user.email}</p>
-                <p className="approval-role">Funções: {user.roles?.join(", ") || "Nenhuma"}</p>
+                <p className="approval-role">{t("Roles:")} {user.roles?.join(", ") || t("None")}</p>
               </div>
               <div className="approval-actions">
                 <button
                   className="btn-approve"
                   onClick={() => handleApprove(user.id)}
                 >
-                  Approve
+                  {t("Approve")}
                 </button>
                 <button
                   className="btn-reject"
                   onClick={() => handleReject(user.id)}
                 >
-                  Reject
+                  {t("Reject")}
                 </button>
               </div>
             </div>

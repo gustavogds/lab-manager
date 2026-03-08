@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import {
   listAllEquipment,
@@ -19,6 +20,7 @@ import "./ManageContent.scss";
 import "./ManageEquipment.scss";
 
 const ManageEquipment = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -104,15 +106,15 @@ const ManageEquipment = () => {
       setNewRoomName("");
       setShowNewRoomInput(false);
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Sala criada com sucesso!",
+        title: t("Success"),
+        message: t("Room created successfully!"),
         type: "success",
       });
       fetchData();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao criar sala.",
+        title: t("Error"),
+        message: response.error || t("Failed to create room."),
         type: "error",
       });
     }
@@ -127,15 +129,15 @@ const ManageEquipment = () => {
       setNewCategoryName("");
       setShowNewCategoryInput(false);
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Categoria criada com sucesso!",
+        title: t("Success"),
+        message: t("Category created successfully!"),
         type: "success",
       });
       fetchData();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao criar categoria.",
+        title: t("Error"),
+        message: response.error || t("Failed to create category."),
         type: "error",
       });
     }
@@ -157,15 +159,15 @@ const ManageEquipment = () => {
       setNewStateName("");
       setShowNewStateInput(false);
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Estado criado com sucesso!",
+        title: t("Success"),
+        message: t("State created successfully!"),
         type: "success",
       });
       fetchData();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao criar estado.",
+        title: t("Error"),
+        message: response.error || t("Failed to create state."),
         type: "error",
       });
     }
@@ -187,15 +189,15 @@ const ManageEquipment = () => {
       setNewSectionName("");
       setShowNewSectionInput(null);
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Seção criada com sucesso!",
+        title: t("Success"),
+        message: t("Section created successfully!"),
         type: "success",
       });
       fetchData();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao criar seção.",
+        title: t("Error"),
+        message: response.error || t("Failed to create section."),
         type: "error",
       });
     }
@@ -310,15 +312,15 @@ const ManageEquipment = () => {
     const failures = results.filter((r) => !r.success).length;
     if (failures > 0) {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: `Falha ao mover ${failures} equipamento(s).`,
+        title: t("Error"),
+        message: t("Failed to move {{count}} equipment(s).", { count: failures }),
         type: "error",
       });
       fetchData();
     } else if (itemsToMove.length > 1) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: `${itemsToMove.length} equipamentos movidos com sucesso!`,
+        title: t("Success"),
+        message: t("{{count}} equipment moved successfully!", { count: itemsToMove.length }),
         type: "success",
       });
     }
@@ -399,7 +401,7 @@ const ManageEquipment = () => {
                       if (el) el.indeterminate = someSelected && !allSelected;
                     }}
                     onChange={() => toggleSelectAll(items)}
-                    title="Selecionar todos"
+                    title={t("Select all")}
                   />
                 </th>
                 <th style={{ width: 40 }} />
@@ -502,7 +504,7 @@ const ManageEquipment = () => {
                       <span
                         className={`status-badge ${item.is_active ? "active" : "inactive"}`}
                       >
-                        {item.is_active ? "Ativo" : "Inativo"}
+                        {item.is_active ? t("Active") : t("Inactive")}
                       </span>
                     </td>
                   </tr>
@@ -521,13 +523,13 @@ const ManageEquipment = () => {
     <div className="manage-content-page manage-equipment-page">
       <div className="manage-content-container">
         <button className="btn-back" onClick={() => navigate("/manage")}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
           <div className="header-content">
-            <h1>Equipamentos</h1>
-            <p>Gerencie os materiais, equipamentos e salas do laboratório</p>
+            <h1>{t("Equipments")}</h1>
+            <p>{t("Manage the materials, equipment and rooms of the laboratory")}</p>
           </div>
           <div className="header-actions">
             <div className="create-dropdown" ref={dropdownRef}>
@@ -535,7 +537,7 @@ const ManageEquipment = () => {
                 className="btn-add btn-sm"
                 onClick={() => setShowCreateDropdown(!showCreateDropdown)}
               >
-                <FaPlus /> Criar <FaChevronDown />
+                <FaPlus /> {t("Create")} <FaChevronDown />
               </button>
               {showCreateDropdown && (
                 <div className="dropdown-menu">
@@ -545,7 +547,7 @@ const ManageEquipment = () => {
                       setShowCreateDropdown(false);
                     }}
                   >
-                    <FaPlus /> Equipamento
+                    <FaPlus /> {t("Equipments")}
                   </button>
                   <button
                     onClick={() => {
@@ -553,7 +555,7 @@ const ManageEquipment = () => {
                       setShowCreateDropdown(false);
                     }}
                   >
-                    <FaDoorOpen /> Sala
+                    <FaDoorOpen /> {t("Room")}
                   </button>
                   <button
                     onClick={() => {
@@ -561,7 +563,7 @@ const ManageEquipment = () => {
                       setShowCreateDropdown(false);
                     }}
                   >
-                    <FaTag /> Categoria de Identificação
+                    <FaTag /> {t("Identification Category")}
                   </button>
                   <button
                     onClick={() => {
@@ -569,7 +571,7 @@ const ManageEquipment = () => {
                       setShowCreateDropdown(false);
                     }}
                   >
-                    <FaClipboard /> Estado do Equipamento
+                    <FaClipboard /> {t("Equipment State")}
                   </button>
                 </div>
               )}
@@ -581,7 +583,7 @@ const ManageEquipment = () => {
           <FaSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Pesquisar por categoria, ID, nome ou usuário..."
+            placeholder={t("Search by category, ID, name or user...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -589,7 +591,7 @@ const ManageEquipment = () => {
             <button
               className="clear-search"
               onClick={() => setSearchTerm("")}
-              title="Limpar pesquisa"
+              title={t("Clear search")}
             >
               ×
             </button>
@@ -600,10 +602,10 @@ const ManageEquipment = () => {
           <div className="selection-bar">
             <div className="selection-info">
               <span className="selection-count">{selectedEquipment.size}</span>
-              <span>equipamento{selectedEquipment.size !== 1 ? "s" : ""} selecionado{selectedEquipment.size !== 1 ? "s" : ""}</span>
+              <span>{t("items selected")}</span>
             </div>
-            <span className="selection-hint">Arraste para mover para outra sala</span>
-            <button className="btn-clear-selection" onClick={clearSelection} title="Limpar seleção">
+            <span className="selection-hint">{t("Drag to move to another room")}</span>
+            <button className="btn-clear-selection" onClick={clearSelection} title={t("Clear selection")}>
               <FaTimes />
             </button>
           </div>
@@ -613,7 +615,7 @@ const ManageEquipment = () => {
           <div className="new-input-bar">
             <input
               type="text"
-              placeholder="Nome da nova sala..."
+              placeholder={t("Name of the new room...")}
               value={newRoomName}
               onChange={(e) => setNewRoomName(e.target.value)}
               onKeyDown={(e) => {
@@ -631,7 +633,7 @@ const ManageEquipment = () => {
               onClick={handleCreateRoom}
               disabled={isCreatingRoom || !newRoomName.trim()}
             >
-              {isCreatingRoom ? "Criando..." : "Criar"}
+              {isCreatingRoom ? t("Creating...") : t("Create")}
             </button>
             <button
               className="btn-cancel"
@@ -640,7 +642,7 @@ const ManageEquipment = () => {
                 setNewRoomName("");
               }}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
           </div>
         )}
@@ -649,7 +651,7 @@ const ManageEquipment = () => {
           <div className="new-input-bar">
             <input
               type="text"
-              placeholder="Nome da nova categoria..."
+              placeholder={t("Name of the new category...")}
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
               onKeyDown={(e) => {
@@ -667,7 +669,7 @@ const ManageEquipment = () => {
               onClick={handleCreateCategory}
               disabled={isCreatingCategory || !newCategoryName.trim()}
             >
-              {isCreatingCategory ? "Criando..." : "Criar"}
+              {isCreatingCategory ? t("Creating...") : t("Create")}
             </button>
             <button
               className="btn-cancel"
@@ -676,7 +678,7 @@ const ManageEquipment = () => {
                 setNewCategoryName("");
               }}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
           </div>
         )}
@@ -685,7 +687,7 @@ const ManageEquipment = () => {
           <div className="new-input-bar">
             <input
               type="text"
-              placeholder="Nome do novo estado..."
+              placeholder={t("Name of the new state...")}
               value={newStateName}
               onChange={(e) => setNewStateName(e.target.value)}
               onKeyDown={(e) => {
@@ -703,7 +705,7 @@ const ManageEquipment = () => {
               onClick={handleCreateState}
               disabled={isCreatingState || !newStateName.trim()}
             >
-              {isCreatingState ? "Criando..." : "Criar"}
+              {isCreatingState ? t("Creating...") : t("Create")}
             </button>
             <button
               className="btn-cancel"
@@ -712,18 +714,18 @@ const ManageEquipment = () => {
                 setNewStateName("");
               }}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
           </div>
         )}
 
         {isLoading ? (
-          <div className="loading-state">Carregando equipamentos...</div>
+          <div className="loading-state">{t("Loading equipment...")}</div>
         ) : !hasContent ? (
           <div className="empty-state">
-            <p>Nenhum equipamento ou sala cadastrado.</p>
+            <p>{t("No equipment or room registered.")}</p>
             <button className="btn-confirm" onClick={() => navigate("/create/equipment")}>
-              Cadastrar primeiro equipamento
+              {t("Register first equipment")}
             </button>
           </div>
         ) : (
@@ -731,7 +733,7 @@ const ManageEquipment = () => {
             {categories.length > 0 && (
               <div className="categories-section">
                 <div className="categories-header">
-                  <h2><FaTag className="category-icon" /> Categorias de Identificação</h2>
+                  <h2><FaTag className="category-icon" /> {t("Identification Categories")}</h2>
                 </div>
                 <div className="categories-list">
                   {categories.map((category) => (
@@ -740,7 +742,7 @@ const ManageEquipment = () => {
                       <button
                         className="btn-icon btn-icon--primary btn-icon--sm"
                         onClick={() => handleEditCategory(category)}
-                        title="Editar categoria"
+                        title={t("Edit category")}
                       >
                         <FaPen />
                       </button>
@@ -753,7 +755,7 @@ const ManageEquipment = () => {
             {states.length > 0 && (
               <div className="categories-section states-section">
                 <div className="categories-header">
-                  <h2><FaClipboard className="category-icon" /> Estados do Equipamento</h2>
+                  <h2><FaClipboard className="category-icon" /> {t("Equipment States")}</h2>
                 </div>
                 <div className="categories-list">
                   {states.map((state) => (
@@ -762,7 +764,7 @@ const ManageEquipment = () => {
                       <button
                         className="btn-icon btn-icon--primary btn-icon--sm"
                         onClick={() => handleEditState(state)}
-                        title="Editar estado"
+                        title={t("Edit state")}
                       >
                         <FaPen />
                       </button>
@@ -775,14 +777,14 @@ const ManageEquipment = () => {
             {unassignedEquipment.length > 0 && (
               <div className="room-section">
                 <div className="room-header">
-                  <h2>Sem sala definida</h2>
+                  <h2>{t("Unassigned")}</h2>
                 </div>
                 <div className="content-table-wrapper">
                   {renderEquipmentTable(
                     unassignedEquipment,
                     null,
                     null,
-                    "Nenhum equipamento sem sala."
+                    t("No equipment without room.")
                   )}
                 </div>
               </div>
@@ -802,7 +804,7 @@ const ManageEquipment = () => {
                       <button
                         className="btn-icon btn-icon--primary btn-icons-sm"
                         onClick={() => setShowNewSectionInput(showNewSectionInput === room.id ? null : room.id)}
-                        title="Adicionar seção"
+                        title={t("Add section")}
                       >
                         <FaLayerGroup />
                         <FaPlus className="icon-small" />
@@ -810,7 +812,7 @@ const ManageEquipment = () => {
                       <button
                         className="btn-icon btn-icon--primary"
                         onClick={() => handleEditRoom(room)}
-                        title="Editar sala"
+                        title={t("Edit room")}
                       >
                         <FaPen />
                       </button>
@@ -821,7 +823,7 @@ const ManageEquipment = () => {
                     <div className="new-input-bar">
                       <input
                         type="text"
-                        placeholder="Nome da nova seção..."
+                        placeholder={t("Name of the new section...")}
                         value={newSectionName}
                         onChange={(e) => setNewSectionName(e.target.value)}
                         onKeyDown={(e) => {
@@ -839,7 +841,7 @@ const ManageEquipment = () => {
                         onClick={() => handleCreateSection(room.id)}
                         disabled={isCreatingSection || !newSectionName.trim()}
                       >
-                        {isCreatingSection ? "Criando..." : "Criar"}
+                        {isCreatingSection ? t("Creating...") : t("Create")}
                       </button>
                       <button
                         className="btn-cancel"
@@ -848,7 +850,7 @@ const ManageEquipment = () => {
                           setNewSectionName("");
                         }}
                       >
-                        Cancelar
+                        {t("Cancel")}
                       </button>
                     </div>
                   )}
@@ -857,14 +859,14 @@ const ManageEquipment = () => {
                     <div className="room-sections-container">
                       <div className="section-area">
                         <div className="section-area-header">
-                          <span className="section-area-title">Sem seção</span>
+                          <span className="section-area-title">{t("No section")}</span>
                         </div>
                         <div className="content-table-wrapper">
                           {renderEquipmentTable(
                             getEquipmentForSection(room.id, null),
                             room.id,
                             null,
-                            "Arraste equipamentos para esta área"
+                            t("Drag equipment to this area")
                           )}
                         </div>
                       </div>
@@ -877,7 +879,7 @@ const ManageEquipment = () => {
                             <button
                               className="btn-icon btn-icon--primary btn-icon--sm"
                               onClick={() => handleEditSection(section, room.name)}
-                              title="Editar seção"
+                              title={t("Edit section")}
                             >
                               <FaPen />
                             </button>
@@ -887,7 +889,7 @@ const ManageEquipment = () => {
                               getEquipmentForSection(room.id, section.id),
                               room.id,
                               section.id,
-                              `Arraste equipamentos para ${section.name}`
+                              t("Drag equipment to {{section}}", { section: section.name })
                             )}
                           </div>
                         </div>
@@ -899,7 +901,7 @@ const ManageEquipment = () => {
                         roomEquipment,
                         room.id,
                         null,
-                        "Arraste equipamentos para esta sala"
+                        t("Drag equipment to this room")
                       )}
                     </div>
                   )}

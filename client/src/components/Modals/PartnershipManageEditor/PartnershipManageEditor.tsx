@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updatePartnership, deletePartnership } from "helpers/api/content";
 import type { Partnership } from "helpers/api/content";
 
@@ -16,6 +17,7 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: partnership.name,
     link: partnership.link || "",
@@ -32,7 +34,7 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
 
@@ -49,19 +51,19 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Parceria atualizada!",
+        title: t("Success"),
+        message: t("Partnership updated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar parceria.",
+        title: t("Error"),
+        message: response.error || t("Failed to update partnership."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar parceria.");
+      setError(response.error || t("Failed to update partnership."));
     }
   };
 
@@ -75,21 +77,21 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
+        title: t("Success"),
         message: partnership.is_active
-          ? "Parceria desativada!"
-          : "Parceria ativada!",
+          ? t("Partnership deactivated!")
+          : t("Partnership activated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
-      setError(response.error || "Falha ao atualizar parceria.");
+      setError(response.error || t("Failed to update partnership."));
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Tem certeza que deseja excluir "${partnership.name}"?`)) return;
+    if (!confirm(t(`Are you sure you want to delete "{{name}}"?`, { name: partnership.name }))) return;
 
     setIsSaving(true);
     setError("");
@@ -98,19 +100,19 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Parceria excluída com sucesso!",
+        title: t("Success"),
+        message: t("Partnership deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir parceria.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete partnership."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir parceria.");
+      setError(response.error || t("Failed to delete partnership."));
     }
   };
 
@@ -132,7 +134,7 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Parceria</h2>
+          <h2>{t("Edit Partnership")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -142,21 +144,21 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="pt-name">Nome *</label>
+            <label htmlFor="pt-name">{t("Name")} *</label>
             <input
               id="pt-name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nome da parceria"
+              placeholder={t("Partnership name")}
               maxLength={255}
               required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="pt-link">Link</label>
+            <label htmlFor="pt-link">{t("Link")}</label>
             <input
               id="pt-link"
               type="url"
@@ -170,7 +172,7 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
 
           {partnership.logo && (
             <div className="form-field">
-              <label>Logo atual</label>
+              <label>{t("Current logo")}</label>
               <img
                 src={partnership.logo}
                 alt={partnership.name}
@@ -187,7 +189,7 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
               <button
                 type="button"
@@ -195,15 +197,15 @@ const PartnershipManageEditor: React.FC<PartnershipManageEditorProps> = ({
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
-                {partnership.is_active ? "Desativar" : "Ativar"}
+                {partnership.is_active ? t("Deactivate") : t("Activate")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { FaTools, FaFlask, FaProjectDiagram, FaHandshake, FaUsers, FaArrowRight } from "react-icons/fa";
 import "./ManageContent.scss";
 import { useGlobalData } from "helpers/context/globalContext";
@@ -14,6 +15,7 @@ type ManageOption = {
 };
 
 const Manage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user }: any = useGlobalData();
   const hasFullAccess = canManageAll(user.state);
@@ -21,8 +23,8 @@ const Manage = () => {
   const allOptions: ManageOption[] = [
     {
       id: "research-areas",
-      title: "Áreas de Pesquisa",
-      description: "Gerenciar as áreas de pesquisa do laboratório",
+      title: t("Research Areas"),
+      description: t("Manage lab research areas"),
       icon: <FaFlask />,
       action: () => {
         navigate("/manage/research-areas");
@@ -31,8 +33,8 @@ const Manage = () => {
     },
     {
       id: "projects",
-      title: "Projetos",
-      description: "Gerenciar os projetos do laboratório",
+      title: t("Projects"),
+      description: t("Manage lab projects"),
       icon: <FaProjectDiagram />,
       action: () => {
         navigate("/manage/projects");
@@ -41,8 +43,8 @@ const Manage = () => {
     },
     {
       id: "partnerships",
-      title: "Parcerias",
-      description: "Gerenciar as parcerias do laboratório",
+      title: t("Partnerships"),
+      description: t("Manage lab partnerships"),
       icon: <FaHandshake />,
       action: () => {
         navigate("/manage/partnerships");
@@ -51,8 +53,8 @@ const Manage = () => {
     },
     {
       id: "equipment",
-      title: "Equipamentos",
-      description: "Gerenciar materiais e equipamentos do laboratório",
+      title: t("Equipments"),
+      description: t("Manage lab materials and equipment"),
       icon: <FaTools />,
       action: () => {
         navigate("/manage/equipment");
@@ -61,8 +63,8 @@ const Manage = () => {
     },
     {
       id: "users",
-      title: "Usuários",
-      description: "Gerenciar usuários, cargos e permissões",
+      title: t("Users"),
+      description: t("Manage users, roles and permissions"),
       icon: <FaUsers />,
       action: () => {
         navigate("/manage/users");
@@ -79,8 +81,8 @@ const Manage = () => {
     <div className="page-layout">
       <div className="page-container">
         <header className="page-header">
-          <h1>Gerenciar</h1>
-          <p>Selecione o que deseja gerenciar</p>
+          <h1>{t("Manage")}</h1>
+          <p>{t("Select what you want to manage")}</p>
         </header>
 
         <div className="option-cards-grid">

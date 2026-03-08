@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { listApprovedUsers } from "helpers/api/content";
 import type { Project, User } from "helpers/api/content";
 import MultiSelect from "components/MultiSelect/MultiSelect";
@@ -18,6 +19,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: project.title,
     description: project.description,
@@ -51,11 +53,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      alert("Título é obrigatório");
+      alert(t("Title is required"));
       return;
     }
     if (!formData.description.trim()) {
-      alert("Descrição é obrigatória");
+      alert(t("Description is required"));
       return;
     }
     onConfirm(formData);
@@ -76,7 +78,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     >
       <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header-shared">
-          <h2>Editar Projeto</h2>
+          <h2>{t("Edit Project")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -84,26 +86,26 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
 
         <form onSubmit={handleSubmit} className="modal-body-shared">
           <div className="form-field">
-            <label htmlFor="title">Título *</label>
+            <label htmlFor="title">{t("Title")} *</label>
             <input
               id="title"
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Título do projeto"
+              placeholder="Project title"
               required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="description">Descrição *</label>
+            <label htmlFor="description">{t("Description")} *</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Descrição do projeto"
+              placeholder="Project description"
               rows={5}
               required
             />
@@ -111,24 +113,24 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
 
           <div className="form-field">
             {isLoading ? (
-              <p>Carregando usuários...</p>
+              <p>{t("Loading users...")}</p>
             ) : (
               <MultiSelect
-                label="Integrantes"
+                label={t("Members")}
                 options={availableUsers}
                 selected={formData.members}
                 onChange={handleMembersChange}
-                placeholder="Selecione os integrantes (Ordem definirá a ordem de exibição)..."
+                placeholder="Select members (Order will define display order)..."
               />
             )}
           </div>
 
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={handleCancel}>
-              Cancelar
+              {t("Cancel")}
             </button>
             <button type="submit" className="btn-confirm">
-              Salvar
+              {t("Save")}
             </button>
           </div>
         </form>

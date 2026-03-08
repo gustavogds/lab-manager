@@ -71,6 +71,12 @@
             line-height: 1.5;
           }
 
+          &.single {
+            background: transparent;
+            padding: 0;
+            min-height: auto;
+          }
+
           .remove-btn {
             display: flex;
             align-items: center;
@@ -158,6 +164,10 @@
 
           &:hover {
             background: #f9f9f9;
+          }
+
+          &.selected {
+            background: #f0f8f7;
           }
 
           .option-avatar {

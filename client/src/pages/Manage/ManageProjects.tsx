@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { listProjects } from "helpers/api/content";
 import type { Project } from "helpers/api/content";
@@ -7,6 +8,7 @@ import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import "./ManageContent.scss";
 
 const ManageProjects = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -84,31 +86,31 @@ const ManageProjects = () => {
     <div className="manage-content-page">
       <div className="manage-content-container">
         <button className="btn-back" onClick={() => navigate("/manage")}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
           <div className="header-content">
-            <h1>Projetos</h1>
-            <p>Gerencie os projetos do laboratório</p>
+            <h1>{t("Projects")}</h1>
+            <p>{t("Manage the projects of the laboratory")}</p>
           </div>
           {!isLoading && hasProjects && (
             <button
               className="btn-add btn-sm"
               onClick={() => navigate("/create/project")}
             >
-              <FaPlus /> Novo Projeto
+              <FaPlus /> {t("New Project")}
             </button>
           )}
         </header>
 
         {isLoading ? (
-          <div className="loading-state">Carregando projetos...</div>
+          <div className="loading-state">{t("Loading projects...")}</div>
         ) : !hasProjects ? (
           <div className="empty-state">
-            <p>Nenhum projeto cadastrado.</p>
+            <p>{t("No project registered.")}</p>
             <button onClick={() => navigate("/create/project")}>
-              Cadastrar primeiro projeto
+              {t("Register first project")}
             </button>
           </div>
         ) : (
@@ -120,7 +122,7 @@ const ManageProjects = () => {
                     className={sortKey === "title" ? "sortable active" : "sortable"}
                     onClick={() => handleSort("title")}
                   >
-                    Título
+                    {t("Title")}
                     <span className="sort-indicator">
                       {sortKey === "title" && (sortDirection === "asc" ? "▲" : "▼")}
                     </span>
@@ -129,7 +131,7 @@ const ManageProjects = () => {
                     className={sortKey === "description" ? "sortable active" : "sortable"}
                     onClick={() => handleSort("description")}
                   >
-                    Descrição
+                    {t("Description")}
                     <span className="sort-indicator">
                       {sortKey === "description" && (sortDirection === "asc" ? "▲" : "▼")}
                     </span>
@@ -138,12 +140,12 @@ const ManageProjects = () => {
                     className={sortKey === "members" ? "sortable active" : "sortable"}
                     onClick={() => handleSort("members")}
                   >
-                    Integrantes
+                    {t("Members")}
                     <span className="sort-indicator">
                       {sortKey === "members" && (sortDirection === "asc" ? "▲" : "▼")}
                     </span>
                   </th>
-                  <th>Status</th>
+                  <th>{t("Status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -179,7 +181,7 @@ const ManageProjects = () => {
                       <span
                         className={`status-badge ${item.is_active ? "active" : "inactive"}`}
                       >
-                        {item.is_active ? "Ativo" : "Inativo"}
+                        {item.is_active ? t("Active") : t("Inactive")}
                       </span>
                     </td>
                   </tr>

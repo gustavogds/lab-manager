@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { createInvitation } from "helpers/api/invitations";
 import { listPositions, type Position } from "helpers/api/content";
 import { FaArrowLeft, FaEnvelope, FaUser, FaPhone, FaGraduationCap } from "react-icons/fa";
@@ -12,15 +13,16 @@ type RoleOption = {
   value: string;
 };
 
-const ROLE_OPTIONS: RoleOption[] = [
-  { id: 1, name: "Professor", value: "professor" },
-  { id: 2, name: "Estudante", value: "student" },
-  { id: 3, name: "Colaborador", value: "collaborator" },
-  { id: 4, name: "Gestor de Inventário", value: "inventory_manager" },
-];
-
 const CreateInvitation = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const ROLE_OPTIONS: RoleOption[] = [
+    { id: 1, name: t("Professor"), value: "professor" },
+    { id: 2, name: t("Student"), value: "student" },
+    { id: 3, name: t("Collaborator"), value: "collaborator" },
+    { id: 4, name: t("Inventory Manager"), value: "inventory_manager" },
+  ];
   const [positions, setPositions] = useState<Position[]>([]);
   const [formData, setFormData] = useState({
     email: "",
@@ -56,19 +58,19 @@ const CreateInvitation = () => {
     e.preventDefault();
 
     if (!formData.email.trim()) {
-      setError("O e-mail é obrigatório.");
+      setError(t("Email is required."));
       return;
     }
 
     if (selectedRoles.length === 0) {
-      setError("Selecione pelo menos uma função.");
+      setError(t("Select at least one role."));
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError("Digite um e-mail válido.");
+      setError(t("Enter a valid email."));
       return;
     }
 
@@ -89,7 +91,7 @@ const CreateInvitation = () => {
     setIsSubmitting(false);
 
     if (response.success) {
-      setMessage(response.message || "Convite enviado com sucesso!");
+      setMessage(response.message || t("Invitation sent successfully!"));
       setError("");
 
       // Clear form
@@ -107,7 +109,7 @@ const CreateInvitation = () => {
         navigate(-1);
       }, 2000);
     } else {
-      setError(response.error || "Falha ao enviar convite.");
+      setError(response.error || t("Failed to send invitation."));
       setMessage("");
     }
   };
@@ -116,15 +118,13 @@ const CreateInvitation = () => {
     <div className="page-layout">
       <div className="page-container">
         <button className="btn-back" onClick={() => navigate(-1)}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
-          <h1>Convidar Novo Membro</h1>
+          <h1>{t("Invite New Member")}</h1>
           <p>
-            Envie um convite por e-mail para adicionar um novo membro ao
-            laboratório. O usuário receberá um link para completar o cadastro
-            e será aprovado automaticamente.
+            {t("Send an email invitation to add a new member to the lab. The user will receive a link to complete the registration and will be approved automatically.")}
           </p>
         </header>
 
@@ -133,12 +133,12 @@ const CreateInvitation = () => {
 
         <form onSubmit={handleSubmit} className="invitation-form">
           <div className="form-section">
-            <h3>Informações Obrigatórias</h3>
+            <h3>{t("Required Information")}</h3>
 
             <div className="form-field">
               <label htmlFor="email">
                 <FaEnvelope className="label-icon" />
-                E-mail *
+                {t("Email")} *
               </label>
               <input
                 id="email"
@@ -146,36 +146,35 @@ const CreateInvitation = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="email@exemplo.com"
+                placeholder="email@example.com"
                 required
               />
             </div>
 
             <div className="form-field">
-              <label>Função(ões) *</label>
+              <label>{t("Role(s)")} *</label>
               <MultiSelect
                 options={ROLE_OPTIONS}
                 selected={selectedRoles}
                 onChange={setSelectedRoles}
-                placeholder="Selecione as funções..."
+                placeholder={t("Select roles...")}
               />
               <span className="field-hint">
-                Selecione uma ou mais funções para o novo membro
+                {t("Select one or more roles for the new member")}
               </span>
             </div>
           </div>
 
           <div className="form-section">
-            <h3>Informações Opcionais (Pré-preenchimento)</h3>
+            <h3>{t("Optional Information (Pre-fill)")}</h3>
             <p className="section-description">
-              Esses campos serão preenchidos automaticamente no formulário de
-              cadastro do convidado.
+              {t("These fields will be pre-filled in the invitee's registration form.")}
             </p>
 
             <div className="form-field">
               <label htmlFor="name">
                 <FaUser className="label-icon" />
-                Nome Completo
+                {t("Full Name")}
               </label>
               <input
                 id="name"
@@ -183,14 +182,14 @@ const CreateInvitation = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Nome do convidado"
+                placeholder={t("Invitee's name")}
               />
             </div>
 
             <div className="form-field">
               <label htmlFor="phone">
                 <FaPhone className="label-icon" />
-                Telefone
+                {t("Phone")}
               </label>
               <input
                 id="phone"
@@ -213,28 +212,28 @@ const CreateInvitation = () => {
                 name="lattes"
                 value={formData.lattes}
                 onChange={handleChange}
-                placeholder="Link do currículo Lattes"
+                placeholder={t("Lattes CV link")}
               />
             </div>
 
             <div className="form-field">
-              <label>Posição/Cargo</label>
+              <label>{t("Position/Role")}</label>
               <MultiSelect
                 options={positions}
                 selected={selectedPositions}
                 onChange={setSelectedPositions}
-                placeholder="Selecione posições..."
+                placeholder={t("Select positions...")}
               />
             </div>
 
             <div className="form-field">
-              <label htmlFor="bio">Biografia</label>
+              <label htmlFor="bio">{t("Biography")}</label>
               <textarea
                 id="bio"
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
-                placeholder="Uma breve descrição sobre o convidado..."
+                placeholder={t("A brief description about the invitee...")}
                 rows={4}
               />
             </div>
@@ -247,14 +246,14 @@ const CreateInvitation = () => {
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               className="btn-confirm"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Enviando..." : "Enviar Convite"}
+              {isSubmitting ? t("Sending...") : t("Send Invitation")}
             </button>
           </div>
         </form>

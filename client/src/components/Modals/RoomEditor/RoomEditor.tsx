@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateRoom, deleteRoom } from "helpers/api/content";
 import type { Room } from "helpers/api/content";
 
@@ -16,6 +17,7 @@ const RoomEditor: React.FC<RoomEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: room.name,
   });
@@ -31,7 +33,7 @@ const RoomEditor: React.FC<RoomEditorProps> = ({
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
 
@@ -43,26 +45,26 @@ const RoomEditor: React.FC<RoomEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Sala atualizada com sucesso!",
+        title: t("Success"),
+        message: t("Room updated successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar sala.",
+        title: t("Error"),
+        message: response.error || t("Failed to update room."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar sala.");
+      setError(response.error || t("Failed to update room."));
     }
   };
 
   const handleDelete = async () => {
     if (
       !confirm(
-        `Tem certeza que deseja excluir a sala "${room.name}"? Os equipamentos desta sala ficarão sem sala definida.`
+        t(`Are you sure you want to delete the room "{{name}}"? Equipment in this room will have no room defined.`, { name: room.name })
       )
     )
       return;
@@ -74,19 +76,19 @@ const RoomEditor: React.FC<RoomEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Sala excluída com sucesso!",
+        title: t("Success"),
+        message: t("Room deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir sala.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete room."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir sala.");
+      setError(response.error || t("Failed to delete room."));
     }
   };
 
@@ -108,7 +110,7 @@ const RoomEditor: React.FC<RoomEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Sala</h2>
+          <h2>{t("Edit Room")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -118,14 +120,14 @@ const RoomEditor: React.FC<RoomEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="room-name">Nome *</label>
+            <label htmlFor="room-name">{t("Name")} *</label>
             <input
               id="room-name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nome da sala"
+              placeholder={t("Room name")}
               maxLength={255}
               required
               autoFocus
@@ -140,15 +142,15 @@ const RoomEditor: React.FC<RoomEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

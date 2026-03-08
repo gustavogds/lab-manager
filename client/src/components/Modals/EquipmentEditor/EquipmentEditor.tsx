@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { listApprovedUsers, updateEquipment, deleteEquipment, listAllSections } from "helpers/api/content";
 import type { Equipment, User, Room, IdentificationCategory, EquipmentState, RoomSection } from "helpers/api/content";
 import { FaPen } from "react-icons/fa";
@@ -26,15 +27,16 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: equipment.name,
     custom_id: equipment.custom_id,
     observation: equipment.observation || "",
-    identification_category_id: equipment.identification_category?.id ?? (null as number | null),
-    equipment_state_id: equipment.equipment_state?.id ?? (null as number | null),
-    room_id: equipment.room?.id ?? (null as number | null),
-    section_id: equipment.section?.id ?? (null as number | null),
-    assigned_to: equipment.assigned_to?.id || (null as number | null),
+    selectedCategory: equipment.identification_category ? [equipment.identification_category] : [] as IdentificationCategory[],
+    selectedState: equipment.equipment_state ? [equipment.equipment_state] : [] as EquipmentState[],
+    selectedRoom: equipment.room ? [equipment.room] : [] as Room[],
+    selectedSection: equipment.section ? [equipment.section] : [] as RoomSection[],
+    selectedAssignedTo: equipment.assigned_to ? [equipment.assigned_to] : [] as User[],
   });
   const [isEditingObservation, setIsEditingObservation] = useState(!equipment.observation);
   const [selectedUsers, setSelectedUsers] = useState<
@@ -70,46 +72,43 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRoomChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleRoomChange = (selected: Room[]) => {
     setFormData((prev) => ({
       ...prev,
-      room_id: value ? Number(value) : null,
-      section_id: null, // Clear section when room changes
+      selectedRoom: selected,
+      selectedSection: [],
     }));
   };
 
-  const handleSectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleSectionChange = (selected: RoomSection[]) => {
     setFormData((prev) => ({
       ...prev,
-      section_id: value ? Number(value) : null,
+      selectedSection: selected,
     }));
   };
 
-  const availableSections = allSections.filter((s) => s.room_id === formData.room_id);
+  const availableSections = allSections.filter(
+    (s) => formData.selectedRoom.length > 0 && s.room_id === formData.selectedRoom[0].id
+  );
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleCategoryChange = (selected: IdentificationCategory[]) => {
     setFormData((prev) => ({
       ...prev,
-      identification_category_id: value ? Number(value) : null,
+      selectedCategory: selected,
     }));
   };
 
-  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleStateChange = (selected: EquipmentState[]) => {
     setFormData((prev) => ({
       ...prev,
-      equipment_state_id: value ? Number(value) : null,
+      selectedState: selected,
     }));
   };
 
-  const handleAssignedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleAssignedChange = (selected: User[]) => {
     setFormData((prev) => ({
       ...prev,
-      assigned_to: value ? Number(value) : null,
+      selectedAssignedTo: selected,
     }));
   };
 
@@ -117,11 +116,11 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
     if (!formData.custom_id.trim()) {
-      setError("O ID do equipamento é obrigatório.");
+      setError(t("Equipment ID is required."));
       return;
     }
 
@@ -132,11 +131,11 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
       name: formData.name,
       custom_id: formData.custom_id,
       observation: formData.observation,
-      identification_category_id: formData.identification_category_id,
-      equipment_state_id: formData.equipment_state_id,
-      room_id: formData.room_id,
-      section_id: formData.section_id,
-      assigned_to: formData.assigned_to,
+      identification_category_id: formData.selectedCategory.length > 0 ? formData.selectedCategory[0].id : null,
+      equipment_state_id: formData.selectedState.length > 0 ? formData.selectedState[0].id : null,
+      room_id: formData.selectedRoom.length > 0 ? formData.selectedRoom[0].id : null,
+      section_id: formData.selectedSection.length > 0 ? formData.selectedSection[0].id : null,
+      assigned_to: formData.selectedAssignedTo.length > 0 ? formData.selectedAssignedTo[0].id : null,
       users: selectedUsers.map((u) => u.id),
     };
 
@@ -145,19 +144,19 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Equipamento atualizado com sucesso!",
+        title: t("Success"),
+        message: t("Equipment updated successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar equipamento.",
+        title: t("Error"),
+        message: response.error || t("Failed to update equipment."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar equipamento.");
+      setError(response.error || t("Failed to update equipment."));
     }
   };
 
@@ -171,21 +170,21 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
+        title: t("Success"),
         message: equipment.is_active
-          ? "Equipamento desativado!"
-          : "Equipamento ativado!",
+          ? t("Equipment deactivated!")
+          : t("Equipment activated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
-      setError(response.error || "Falha ao atualizar equipamento.");
+      setError(response.error || t("Failed to update equipment."));
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Tem certeza que deseja excluir "${equipment.name}"?`)) return;
+    if (!confirm(t(`Are you sure you want to delete "{{name}}"?`, { name: equipment.name }))) return;
 
     setIsSaving(true);
     setError("");
@@ -194,19 +193,19 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Equipamento excluído com sucesso!",
+        title: t("Success"),
+        message: t("Equipment deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir equipamento.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete equipment."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir equipamento.");
+      setError(response.error || t("Failed to delete equipment."));
     }
   };
 
@@ -228,7 +227,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Equipamento</h2>
+          <h2>{t("Edit Equipment")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -238,14 +237,14 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field observation-field">
-            <label htmlFor="eq-observation">Observação</label>
+            <label htmlFor="eq-observation">{t("Observation")}</label>
             {isEditingObservation ? (
               <textarea
                 id="eq-observation"
                 name="observation"
                 value={formData.observation}
                 onChange={(e) => setFormData((prev) => ({ ...prev, observation: e.target.value }))}
-                placeholder="Adicione uma observação sobre o equipamento..."
+                placeholder={t("Add an observation about the equipment...")}
                 rows={3}
                 onBlur={() => {
                   if (formData.observation.trim()) {
@@ -261,7 +260,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
                   type="button"
                   className="btn-icon btn-icon--primary"
                   onClick={() => setIsEditingObservation(true)}
-                  title="Editar observação"
+                  title={t("Edit observation")}
                 >
                   <FaPen />
                 </button>
@@ -270,21 +269,21 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
           </div>
 
           <div className="form-field">
-            <label htmlFor="eq-name">Nome *</label>
+            <label htmlFor="eq-name">{t("Name")} *</label>
             <input
               id="eq-name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nome do equipamento"
+              placeholder={t("Equipment Name")}
               maxLength={255}
               required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="eq-custom-id">ID do Equipamento *</label>
+            <label htmlFor="eq-custom-id">{t("Equipment ID")} *</label>
             <input
               id="eq-custom-id"
               type="text"
@@ -296,107 +295,87 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
               required
             />
             <small className="field-hint">
-              Identificador único do equipamento no laboratório
+              {t("Unique equipment identifier in the laboratory")}
             </small>
           </div>
 
           <div className="form-field">
-            <label htmlFor="eq-category">Categoria de Identificação</label>
-            <select
-              id="eq-category"
-              name="identification_category_id"
-              value={formData.identification_category_id ?? ""}
+            <MultiSelect
+              label={t("Identification Category")}
+              options={categories}
+              selected={formData.selectedCategory}
               onChange={handleCategoryChange}
-            >
-              <option value="">Nenhuma</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+              singleSelect
+              placeholder={t("None")}
+            />
           </div>
 
           <div className="form-field">
-            <label htmlFor="eq-room">Sala</label>
-            <select
-              id="eq-room"
-              name="room_id"
-              value={formData.room_id ?? ""}
+            <MultiSelect
+              label={t("Room")}
+              options={rooms}
+              selected={formData.selectedRoom}
               onChange={handleRoomChange}
-            >
-              <option value="">Nenhuma</option>
-              {rooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  {room.name}
-                </option>
-              ))}
-            </select>
+              singleSelect
+              placeholder={t("None")}
+            />
           </div>
 
-          {formData.room_id && availableSections.length > 0 && (
+          {formData.selectedRoom.length > 0 && availableSections.length > 0 && (
             <div className="form-field">
-              <label htmlFor="eq-section">Seção</label>
-              <select
-                id="eq-section"
-                name="section_id"
-                value={formData.section_id ?? ""}
+              <MultiSelect
+                label={t("Section")}
+                options={availableSections}
+                selected={formData.selectedSection}
                 onChange={handleSectionChange}
-              >
-                <option value="">Nenhuma</option>
-                {availableSections.map((section) => (
-                  <option key={section.id} value={section.id}>
-                    {section.name}
-                  </option>
-                ))}
-              </select>
+                singleSelect
+                placeholder={t("None")}
+              />
             </div>
           )}
 
           <div className="form-field">
-            <label htmlFor="eq-state">Estado do Equipamento</label>
-            <select
-              id="eq-state"
-              name="equipment_state_id"
-              value={formData.equipment_state_id ?? ""}
+            <MultiSelect
+              label={t("Equipment State")}
+              options={states}
+              selected={formData.selectedState}
               onChange={handleStateChange}
-            >
-              <option value="">Nenhum</option>
-              {states.map((state) => (
-                <option key={state.id} value={state.id}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
+              singleSelect
+              placeholder={t("None")}
+            />
           </div>
 
           <div className="form-field">
-            <label htmlFor="eq-assigned">Responsável</label>
             {isLoading ? (
-              <p>Carregando usuários...</p>
+              <p>{t("Loading users...")}</p>
             ) : (
-              <select
-                id="eq-assigned"
-                name="assigned_to"
-                value={formData.assigned_to ?? ""}
-                onChange={handleAssignedChange}
-              >
-                <option value="">Nenhum</option>
-                {availableUsers.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name} ({user.email})
-                  </option>
-                ))}
-              </select>
+              <MultiSelect
+                label={t("Assigned To")}
+                options={availableUsers.map((u) => ({
+                  id: u.id,
+                  name: u.name,
+                  email: u.email,
+                  profile_image: u.profile_image || null,
+                }))}
+                selected={formData.selectedAssignedTo.map((u) => ({
+                  id: u.id,
+                  name: u.name,
+                  email: u.email,
+                  profile_image: u.profile_image || null,
+                }))}
+                onChange={(selected) => handleAssignedChange(selected as User[])}
+                singleSelect
+                placeholder={t("None")}
+              />
             )}
           </div>
 
           <div className="form-field">
             {isLoading ? (
-              <p>Carregando usuários...</p>
+              <p>{t("Loading users...")}</p>
             ) : (
               <MultiSelect
-                label="Usuários"
+                label={t("Users")}
                 options={availableUsers.map((u) => ({
                   id: u.id,
                   name: u.name,
@@ -405,7 +384,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
                 }))}
                 selected={selectedUsers}
                 onChange={setSelectedUsers}
-                placeholder="Selecione os usuários..."
+                placeholder={t("Select users...")}
               />
             )}
           </div>
@@ -418,7 +397,7 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
               <button
                 type="button"
@@ -426,15 +405,15 @@ const EquipmentEditor: React.FC<EquipmentEditorProps> = ({
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
-                {equipment.is_active ? "Desativar" : "Ativar"}
+                {equipment.is_active ? t("Deactivate") : t("Activate")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

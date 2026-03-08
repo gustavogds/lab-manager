@@ -292,6 +292,7 @@
   }
 
   input[type="text"],
+  input[type="number"],
   input[type="url"],
   input[type="email"],
   input[type="password"],
@@ -338,6 +339,19 @@
     margin-top: 0.25rem;
     font-size: 0.8rem;
     color: $neutral-muted;
+  }
+
+  .checkbox-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: $accent-teal;
+    }
   }
 }
 

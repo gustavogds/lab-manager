@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import {
   listAllUsers,
@@ -15,12 +16,13 @@ import "./ManageUsers.scss";
 
 const ROLE_LABELS: Record<string, string> = {
   professor: "Professor",
-  student: "Estudante",
-  collaborator: "Colaborador",
-  inventory_manager: "Gestor de Inventário",
+  student: "Student",
+  collaborator: "Collaborator",
+  inventory_manager: "Inventory Manager",
 };
 
 const ManageUsers = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -95,15 +97,15 @@ const ManageUsers = () => {
       setNewRoomName("");
       setShowNewRoomInput(false);
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Sala criada com sucesso!",
+        title: t("Success"),
+        message: t("Room created successfully!"),
         type: "success",
       });
       fetchData();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao criar sala.",
+        title: t("Error"),
+        message: response.error || t("Failed to create room."),
         type: "error",
       });
     }
@@ -118,15 +120,15 @@ const ManageUsers = () => {
       setNewPositionName("");
       setShowNewPositionInput(false);
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Cargo criado com sucesso!",
+        title: t("Success"),
+        message: t("Position created successfully!"),
         type: "success",
       });
       fetchData();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao criar cargo.",
+        title: t("Error"),
+        message: response.error || t("Failed to create position."),
         type: "error",
       });
     }
@@ -156,13 +158,13 @@ const ManageUsers = () => {
     <div className="manage-content-page manage-users-page">
       <div className="manage-content-container">
         <button className="btn-back" onClick={() => navigate("/manage")}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
 
         <header className="page-header">
           <div className="header-content">
-            <h1>Usuários</h1>
-            <p>Gerencie os usuários, cargos e salas do sistema</p>
+            <h1>{t("Users")}</h1>
+            <p>{t("Manage the users, positions and rooms of the system")}</p>
           </div>
           <div className="header-actions">
             <div className="create-dropdown" ref={dropdownRef}>
@@ -170,7 +172,7 @@ const ManageUsers = () => {
                 className="btn-add btn-sm"
                 onClick={() => setShowCreateDropdown(!showCreateDropdown)}
               >
-                <FaPlus /> Criar <FaChevronDown />
+                <FaPlus /> {t("Create")} <FaChevronDown />
               </button>
               {showCreateDropdown && (
                 <div className="dropdown-menu">
@@ -180,7 +182,7 @@ const ManageUsers = () => {
                       setShowNewPositionInput(true);
                     }}
                   >
-                    <FaBriefcase /> Novo Cargo
+                    <FaBriefcase /> {t("New Position")}
                   </button>
                   <button
                     onClick={() => {
@@ -188,7 +190,7 @@ const ManageUsers = () => {
                       setShowNewRoomInput(true);
                     }}
                   >
-                    <FaDoorOpen /> Nova Sala
+                    <FaDoorOpen /> {t("New Room")}
                   </button>
                 </div>
               )}
@@ -200,7 +202,7 @@ const ManageUsers = () => {
           <FaSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Pesquisar por nome ou email..."
+            placeholder={t("Search by name or email...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -208,7 +210,7 @@ const ManageUsers = () => {
             <button
               className="clear-search"
               onClick={() => setSearchTerm("")}
-              title="Limpar pesquisa"
+              title={t("Clear search")}
             >
               ×
             </button>
@@ -219,7 +221,7 @@ const ManageUsers = () => {
           <div className="new-input-bar">
             <input
               type="text"
-              placeholder="Nome do novo cargo..."
+              placeholder={t("Name of the new position...")}
               value={newPositionName}
               onChange={(e) => setNewPositionName(e.target.value)}
               onKeyDown={(e) => {
@@ -237,7 +239,7 @@ const ManageUsers = () => {
               onClick={handleCreatePosition}
               disabled={isCreatingPosition || !newPositionName.trim()}
             >
-              {isCreatingPosition ? "Criando..." : "Criar"}
+              {isCreatingPosition ? t("Creating...") : t("Create")}
             </button>
             <button
               className="btn-cancel"
@@ -246,7 +248,7 @@ const ManageUsers = () => {
                 setNewPositionName("");
               }}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
           </div>
         )}
@@ -255,7 +257,7 @@ const ManageUsers = () => {
           <div className="new-input-bar">
             <input
               type="text"
-              placeholder="Nome da nova sala..."
+              placeholder={t("Name of the new room...")}
               value={newRoomName}
               onChange={(e) => setNewRoomName(e.target.value)}
               onKeyDown={(e) => {
@@ -273,7 +275,7 @@ const ManageUsers = () => {
               onClick={handleCreateRoom}
               disabled={isCreatingRoom || !newRoomName.trim()}
             >
-              {isCreatingRoom ? "Criando..." : "Criar"}
+              {isCreatingRoom ? t("Creating...") : t("Create")}
             </button>
             <button
               className="btn-cancel"
@@ -282,30 +284,30 @@ const ManageUsers = () => {
                 setNewRoomName("");
               }}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
           </div>
         )}
 
         {isLoading ? (
-          <div className="loading-state">Carregando usuários...</div>
+          <div className="loading-state">{t("Loading users...")}</div>
         ) : (
           <div className="users-layout">
             {positions.length > 0 && (
               <div className="categories-section positions-section">
                 <div className="categories-header">
-                  <h2><FaBriefcase className="category-icon" /> Cargos</h2>
+                  <h2><FaBriefcase className="category-icon" /> {t("Positions")}</h2>
                 </div>
                 <div className="categories-list">
                   {positions.map((position) => (
                     <div key={position.id} className="category-item position-item">
                       <span className="category-name">
-                        {position.name} {!position.is_visible && "(oculto)"}
+                        {position.name} {!position.is_visible && t("(hidden)")}
                       </span>
                       <button
                         className="btn-icon btn-icon--primary btn-icon--sm"
                         onClick={() => handleEditPosition(position)}
-                        title="Editar cargo"
+                        title={t("Edit position")}
                       >
                         <FaPen />
                       </button>
@@ -318,7 +320,7 @@ const ManageUsers = () => {
             {rooms.length > 0 && (
               <div className="categories-section rooms-section">
                 <div className="categories-header">
-                  <h2><FaDoorOpen className="category-icon" /> Salas</h2>
+                  <h2><FaDoorOpen className="category-icon" /> {t("Rooms")}</h2>
                 </div>
                 <div className="categories-list">
                   {rooms.map((room) => (
@@ -327,7 +329,7 @@ const ManageUsers = () => {
                       <button
                         className="btn-icon btn-icon--primary btn-icon--sm"
                         onClick={() => handleEditRoom(room)}
-                        title="Editar sala"
+                        title={t("Edit room")}
                       >
                         <FaPen />
                       </button>
@@ -339,12 +341,12 @@ const ManageUsers = () => {
 
             <div className="users-section">
               <div className="users-header">
-                <h2>Usuários ({sortedUsers.length})</h2>
+                <h2>{t("Users")} ({sortedUsers.length})</h2>
               </div>
               <div className="content-table-wrapper">
                 {sortedUsers.length === 0 ? (
                   <div className="empty-state">
-                    <p>Nenhum usuário encontrado.</p>
+                    <p>{t("No user found.")}</p>
                   </div>
                 ) : (
                   <table className="content-table">
@@ -397,9 +399,9 @@ const ManageUsers = () => {
                           </td>
                           <td className="cell-status">
                             {user.is_former_member ? (
-                              <span className="status-badge former">Ex-membro</span>
+                              <span className="status-badge former">{t("Former member")}</span>
                             ) : (
-                              <span className="status-badge active">Ativo</span>
+                              <span className="status-badge active">{t("Active")}</span>
                             )}
                           </td>
                         </tr>

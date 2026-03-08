@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateResearchArea, deleteResearchArea } from "helpers/api/content";
 import type { ResearchArea } from "helpers/api/content";
 
@@ -16,6 +17,7 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: researchArea.title,
     description: researchArea.description || "",
@@ -34,7 +36,7 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
     e.preventDefault();
 
     if (!formData.title.trim()) {
-      setError("O título é obrigatório.");
+      setError(t("Title is required."));
       return;
     }
 
@@ -51,19 +53,19 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Área de pesquisa atualizada!",
+        title: t("Success"),
+        message: t("Research area updated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar área de pesquisa.",
+        title: t("Error"),
+        message: response.error || t("Failed to update research area."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar área de pesquisa.");
+      setError(response.error || t("Failed to update research area."));
     }
   };
 
@@ -77,21 +79,21 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
+        title: t("Success"),
         message: researchArea.is_active
-          ? "Área de pesquisa desativada!"
-          : "Área de pesquisa ativada!",
+          ? t("Research area deactivated!")
+          : t("Research area activated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
-      setError(response.error || "Falha ao atualizar área de pesquisa.");
+      setError(response.error || t("Failed to update research area."));
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Tem certeza que deseja excluir "${researchArea.title}"?`)) return;
+    if (!confirm(t(`Are you sure you want to delete "{{title}}"?`, { title: researchArea.title }))) return;
 
     setIsSaving(true);
     setError("");
@@ -100,19 +102,19 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Área de pesquisa excluída com sucesso!",
+        title: t("Success"),
+        message: t("Research area deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir área de pesquisa.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete research area."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir área de pesquisa.");
+      setError(response.error || t("Failed to delete research area."));
     }
   };
 
@@ -134,7 +136,7 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Área de Pesquisa</h2>
+          <h2>{t("Edit Research Area")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -144,27 +146,27 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="ra-title">Título *</label>
+            <label htmlFor="ra-title">{t("Title")} *</label>
             <input
               id="ra-title"
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Título da área de pesquisa"
+              placeholder={t("Research area title")}
               maxLength={255}
               required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="ra-description">Descrição</label>
+            <label htmlFor="ra-description">{t("Description")}</label>
             <textarea
               id="ra-description"
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Descrição da área de pesquisa"
+              placeholder={t("Research area description")}
               rows={4}
             />
           </div>
@@ -177,7 +179,7 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
               <button
                 type="button"
@@ -185,15 +187,15 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
-                {researchArea.is_active ? "Desativar" : "Ativar"}
+                {researchArea.is_active ? t("Deactivate") : t("Activate")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

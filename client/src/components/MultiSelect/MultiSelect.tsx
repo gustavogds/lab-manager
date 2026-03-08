@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
 import "./MultiSelect.scss";
 
@@ -16,16 +17,21 @@ interface MultiSelectProps<T extends Option = Option> {
   placeholder?: string;
   label?: string;
   disabled?: boolean;
+  singleSelect?: boolean;
+  hideSearch?: boolean;
 }
 
 const MultiSelect = <T extends Option = Option>({
   options,
   selected,
   onChange,
-  placeholder = "Selecione...",
+  placeholder = "Select...",
   label,
   disabled = false,
+  singleSelect = false,
+  hideSearch = false,
 }: MultiSelectProps<T>) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,7 +39,7 @@ const MultiSelect = <T extends Option = Option>({
   const selectedIds = new Set(selected.map((s) => s.id));
 
   const filteredOptions = options.filter((option) => {
-    const isNotSelected = !selectedIds.has(option.id);
+    const isNotSelected = singleSelect || !selectedIds.has(option.id);
     const matchesSearch =
       option.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       option.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -41,7 +47,12 @@ const MultiSelect = <T extends Option = Option>({
   });
 
   const handleSelect = (option: T) => {
-    onChange([...selected, option]);
+    if (singleSelect) {
+      onChange([option]);
+      setIsOpen(false);
+    } else {
+      onChange([...selected, option]);
+    }
     setSearchTerm("");
   };
 
@@ -68,13 +79,13 @@ const MultiSelect = <T extends Option = Option>({
       {label && <label className="multi-select-label">{label}</label>}
       <div className="multi-select-container">
         <div 
-          className="multi-select-input" 
+          className={`multi-select-input ${singleSelect ? "single-select" : ""}`}
           onClick={() => !disabled && setIsOpen(!isOpen)}
         >
           <div className="selected-items">
             {selected.length > 0 ? (
               selected.map((item) => (
-                <div key={item.id} className="selected-item">
+                <div key={item.id} className={`selected-item ${singleSelect ? "single" : ""}`}>
                   {item.profile_image && (
                     <img
                       src={item.profile_image}
@@ -83,17 +94,19 @@ const MultiSelect = <T extends Option = Option>({
                     />
                   )}
                   <span>{item.name}</span>
-                  <button
-                    type="button"
-                    className="remove-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemove(item.id);
-                    }}
-                    disabled={disabled}
-                  >
-                    <FaTimes />
-                  </button>
+                  {!singleSelect && (
+                    <button
+                      type="button"
+                      className="remove-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemove(item.id);
+                      }}
+                      disabled={disabled}
+                    >
+                      <FaTimes />
+                    </button>
+                  )}
                 </div>
               ))
             ) : (
@@ -105,20 +118,22 @@ const MultiSelect = <T extends Option = Option>({
 
         {isOpen && !disabled && (
           <div className="multi-select-dropdown">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              autoFocus
-            />
+            {!hideSearch && (
+              <input
+                type="text"
+                className="search-input"
+                placeholder={t("Search...")}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                autoFocus
+              />
+            )}
             <div className="options-list">
               {filteredOptions.length > 0 ? (
                 filteredOptions.map((option) => (
                   <div
                     key={option.id}
-                    className="option-item"
+                    className={`option-item ${selectedIds.has(option.id) ? "selected" : ""}`}
                     onClick={() => handleSelect(option)}
                   >
                     {option.profile_image && (
@@ -139,8 +154,8 @@ const MultiSelect = <T extends Option = Option>({
               ) : (
                 <div className="no-options">
                   {searchTerm
-                    ? "Nenhum resultado encontrado"
-                    : "Todos os usuários já foram adicionados"}
+                    ? t("No results found")
+                    : t("All users have already been added")}
                 </div>
               )}
             </div>

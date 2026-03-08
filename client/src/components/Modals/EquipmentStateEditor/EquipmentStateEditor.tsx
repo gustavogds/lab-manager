@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { updateEquipmentState, deleteEquipmentState } from "helpers/api/content";
 import type { EquipmentState } from "helpers/api/content";
 
@@ -16,6 +17,7 @@ const EquipmentStateEditor: React.FC<EquipmentStateEditorProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: state.name,
   });
@@ -31,7 +33,7 @@ const EquipmentStateEditor: React.FC<EquipmentStateEditorProps> = ({
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
 
@@ -43,26 +45,26 @@ const EquipmentStateEditor: React.FC<EquipmentStateEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Estado atualizado com sucesso!",
+        title: t("Success"),
+        message: t("State updated successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao atualizar estado.",
+        title: t("Error"),
+        message: response.error || t("Failed to update state."),
         type: "error",
       });
-      setError(response.error || "Falha ao atualizar estado.");
+      setError(response.error || t("Failed to update state."));
     }
   };
 
   const handleDelete = async () => {
     if (
       !confirm(
-        `Tem certeza que deseja excluir o estado "${state.name}"? Os equipamentos com este estado ficarão sem estado definido.`
+        t(`Are you sure you want to delete the state "{{name}}"? Equipment with this state will have no state defined.`, { name: state.name })
       )
     )
       return;
@@ -74,19 +76,19 @@ const EquipmentStateEditor: React.FC<EquipmentStateEditorProps> = ({
 
     if (response.success) {
       ModalsHandler.createNotification({
-        title: "Sucesso",
-        message: "Estado excluído com sucesso!",
+        title: t("Success"),
+        message: t("State deleted successfully!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
-        title: "Erro",
-        message: response.error || "Falha ao excluir estado.",
+        title: t("Error"),
+        message: response.error || t("Failed to delete state."),
         type: "error",
       });
-      setError(response.error || "Falha ao excluir estado.");
+      setError(response.error || t("Failed to delete state."));
     }
   };
 
@@ -108,7 +110,7 @@ const EquipmentStateEditor: React.FC<EquipmentStateEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>Editar Estado do Equipamento</h2>
+          <h2>{t("Edit Equipment State")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -118,14 +120,14 @@ const EquipmentStateEditor: React.FC<EquipmentStateEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="state-name">Nome *</label>
+            <label htmlFor="state-name">{t("Name")} *</label>
             <input
               id="state-name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nome do estado"
+              placeholder={t("State name")}
               maxLength={255}
               required
               autoFocus
@@ -140,15 +142,15 @@ const EquipmentStateEditor: React.FC<EquipmentStateEditorProps> = ({
                 onClick={handleDelete}
                 disabled={isSaving}
               >
-                Excluir
+                {t("Delete")}
               </button>
             </div>
             <div className="right-actions">
               <button type="button" className="btn-cancel" onClick={handleCancel}>
-                Cancelar
+                {t("Cancel")}
               </button>
               <button type="submit" className="btn-confirm" disabled={isSaving}>
-                {isSaving ? "Salvando..." : "Salvar"}
+                {isSaving ? t("Saving...") : t("Save")}
               </button>
             </div>
           </div>

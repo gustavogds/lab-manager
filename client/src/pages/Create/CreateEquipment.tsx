@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { createEquipment, listRooms, listIdentificationCategories, listEquipmentStates } from "helpers/api/content";
 import type { Room, IdentificationCategory, EquipmentState } from "helpers/api/content";
 import { FaArrowLeft } from "react-icons/fa";
 import "./CreateEquipment.scss";
 
 const CreateEquipment = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -53,11 +55,11 @@ const CreateEquipment = () => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("O nome é obrigatório.");
+      setError(t("Name is required."));
       return;
     }
     if (!formData.custom_id.trim()) {
-      setError("O ID do equipamento é obrigatório.");
+      setError(t("Equipment ID is required."));
       return;
     }
 
@@ -86,14 +88,14 @@ const CreateEquipment = () => {
     setIsSubmitting(false);
 
     if (response.success) {
-      setMessage(response.message || "Equipamento criado com sucesso!");
+      setMessage(response.message || t("Equipment created successfully!"));
       setError("");
       setFormData({ name: "", custom_id: "", observation: "", identification_category_id: "", equipment_state_id: "", room_id: "" });
       setTimeout(() => {
         navigate(-1);
       }, 1500);
     } else {
-      setError(response.error || "Falha ao criar equipamento.");
+      setError(response.error || t("Failed to create equipment."));
       setMessage("");
     }
   };
@@ -102,51 +104,51 @@ const CreateEquipment = () => {
     <div className="page-layout">
       <div className="page-container">
         <button className="btn-back" onClick={() => navigate(-1)}>
-          <FaArrowLeft /> Voltar
+          <FaArrowLeft /> {t("Back")}
         </button>
         <header className="page-header">
-          <h1>Novo Equipamento</h1>
-          <p>Preencha os campos abaixo para registrar um novo material ou equipamento</p>
+          <h1>{t("New Equipment")}</h1>
+          <p>{t("Fill in the fields below to register new material or equipment")}</p>
         </header>
         {message && <div className="msg-success">{message}</div>}
         {error && <div className="msg-error">{error}</div>}
         <form onSubmit={handleSubmit} className="equipment-form">
           <div className="form-field">
-            <label htmlFor="name">Nome do Equipamento *</label>
+            <label htmlFor="name">{t("Equipment Name")} *</label>
             <input
               id="name"
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Ex: Monitor 27 polegadas"
+              placeholder={t("Ex: 27-inch Monitor")}
               maxLength={255}
               required
             />
           </div>
           <div className="form-field">
-            <label htmlFor="custom_id">ID do Equipamento *</label>
+            <label htmlFor="custom_id">{t("Equipment ID")} *</label>
             <input
               id="custom_id"
               type="text"
               name="custom_id"
               value={formData.custom_id}
               onChange={handleChange}
-              placeholder="Ex: mon_001"
+              placeholder={t("Ex: mon_001")}
               maxLength={100}
               required
             />
-            <small className="field-hint">Identificador único do equipamento no laboratório</small>
+            <small className="field-hint">{t("Unique equipment identifier in the laboratory")}</small>
           </div>
           <div className="form-field">
-            <label htmlFor="identification_category_id">Categoria de Identificação (opcional)</label>
+            <label htmlFor="identification_category_id">{t("Identification Category (optional)")}</label>
             <select
               id="identification_category_id"
               name="identification_category_id"
               value={formData.identification_category_id}
               onChange={handleChange}
             >
-              <option value="">Nenhuma</option>
+              <option value="">{t("None")}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -155,14 +157,14 @@ const CreateEquipment = () => {
             </select>
           </div>
           <div className="form-field">
-            <label htmlFor="room_id">Sala (opcional)</label>
+            <label htmlFor="room_id">{t("Room (optional)")}</label>
             <select
               id="room_id"
               name="room_id"
               value={formData.room_id}
               onChange={handleChange}
             >
-              <option value="">Nenhuma</option>
+              <option value="">{t("None")}</option>
               {rooms.map((room) => (
                 <option key={room.id} value={room.id}>
                   {room.name}
@@ -171,14 +173,14 @@ const CreateEquipment = () => {
             </select>
           </div>
           <div className="form-field">
-            <label htmlFor="equipment_state_id">Estado do Equipamento (opcional)</label>
+            <label htmlFor="equipment_state_id">{t("Equipment State (optional)")}</label>
             <select
               id="equipment_state_id"
               name="equipment_state_id"
               value={formData.equipment_state_id}
               onChange={handleChange}
             >
-              <option value="">Nenhum</option>
+              <option value="">{t("None")}</option>
               {states.map((state) => (
                 <option key={state.id} value={state.id}>
                   {state.name}
@@ -187,13 +189,13 @@ const CreateEquipment = () => {
             </select>
           </div>
           <div className="form-field">
-            <label htmlFor="observation">Observação (opcional)</label>
+            <label htmlFor="observation">{t("Observation (optional)")}</label>
             <textarea
               id="observation"
               name="observation"
               value={formData.observation}
               onChange={handleChange}
-              placeholder="Observações sobre o equipamento..."
+              placeholder={t("Observations about the equipment...")}
               rows={3}
             />
           </div>
@@ -204,14 +206,14 @@ const CreateEquipment = () => {
               onClick={() => navigate(-1)}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               className="btn-confirm"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Criando..." : "Criar Equipamento"}
+              {isSubmitting ? t("Creating...") : t("Create Equipment")}
             </button>
           </div>
         </form>

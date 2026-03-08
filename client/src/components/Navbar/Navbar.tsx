@@ -1,8 +1,10 @@
 import Medias from "../../components/Medias/Medias";
 import Icons from "../../components/Icons/Icons";
+import LanguageSelector from "../../components/LanguageSelector/LanguageSelector";
 import "./Navbar.scss";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useGlobalData } from "helpers/context/globalContext";
 import AuthHandler from "helpers/services/AuthHandler";
 import { isEmptyObject, canManageAll, canManageEquipment } from "helpers/utils";
@@ -10,6 +12,7 @@ import { getLabSettings } from "helpers/api/settings";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user }: any = useGlobalData();
   const [menuOpen, setMenuOpen] = useState(false);
   const [labLogo, setLabLogo] = useState("");
@@ -57,6 +60,7 @@ const Navbar = () => {
         </div>
 
         <div className="header-right">
+          <LanguageSelector />
           <div
             className="profile-wrapper"
             style={{ position: "relative" }}
@@ -69,7 +73,7 @@ const Navbar = () => {
               {!isEmptyObject(user.state) && user.state.profile_image ? (
                 <img
                   src={user.state.profile_image}
-                  alt="Perfil"
+                  alt={t("Profile")}
                   className="profile-image"
                 />
               ) : (
@@ -82,19 +86,19 @@ const Navbar = () => {
                 {!isEmptyObject(user.state) ? (
                   <>
                     <button onClick={() => navigate("/settings/profile")}>
-                      Configurações
+                      {t("Settings")}
                     </button>
                     {canManageAll(user.state) && (
                       <button onClick={() => navigate("/approval")}>
-                        Ativação de Contas
+                        {t("Account Activation")}
                       </button>
                     )}
-                    <button onClick={() => handleLogout()}>Sair</button>
+                    <button onClick={() => handleLogout()}>{t("Logout")}</button>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => navigate("/signin")}>Entrar</button>
-                    <button onClick={() => navigate("/signup")}>Cadastrar</button>
+                    <button onClick={() => navigate("/signin")}>{t("Sign In")}</button>
+                    <button onClick={() => navigate("/signup")}>{t("Sign Up")}</button>
                   </>
                 )}
               </div>

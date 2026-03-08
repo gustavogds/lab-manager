@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal } from "components/my-own-modal-handler";
 import { uploadAboutImage, deleteAboutImage } from "helpers/api/settings";
 import "./SectionEditor.scss";
@@ -52,6 +53,7 @@ const SectionEditorModal = ({
   disableConfirm,
   disableCancel,
 }: SectionEditorProps) => {
+  const { t } = useTranslation();
   const [values, setValues] = useState<Record<string, string>>(() =>
     buildInitialValues(fields, initialValues)
   );
@@ -90,9 +92,9 @@ const SectionEditorModal = ({
 
   return (
     <Modal
-      headerTitle={headerTitle || "Editar secao"}
-      confirmLabel={confirmLabel || "Salvar"}
-      cancelLabel={cancelLabel || "Cancelar"}
+      headerTitle={headerTitle || t("Edit section")}
+      confirmLabel={confirmLabel || t("Save")}
+      cancelLabel={cancelLabel || t("Cancel")}
       onConfirm={() => onConfirm?.(values)}
       onCancel={() => onCancel?.()}
       disableConfirm={disableConfirm || !hasFields}
@@ -120,7 +122,7 @@ const SectionEditorModal = ({
                         disabled={uploading}
                         className="image-upload-input"
                       />
-                      {uploading && <p className="upload-status">Enviando...</p>}
+                      {uploading && <p className="upload-status">{t("Sending...")}</p>}
                       
                       {localImages.length > 0 && (
                         <div className="uploaded-images">
@@ -175,7 +177,7 @@ const SectionEditorModal = ({
           </div>
         ) : (
           <div className="section-editor-empty">
-            Nenhum campo configurado.
+            {t("No fields configured.")}
           </div>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import "./ProjectDetails.scss";
 import Icons from "components/Icons/Icons";
 import type { Project } from "helpers/api/content";
@@ -8,6 +9,7 @@ interface ProjectDetailsProps {
 }
 
 const ProjectDetails = ({ project, onConfirm }: ProjectDetailsProps) => {
+  const { t } = useTranslation();
   return (
     <div className="project-details-modal" onClick={onConfirm}>
       <div className="project-details-content" onClick={(e) => e.stopPropagation()}>
@@ -20,12 +22,12 @@ const ProjectDetails = ({ project, onConfirm }: ProjectDetailsProps) => {
 
         <div className="project-details-body">
           <section className="project-description">
-            <h3>Descrição</h3>
+            <h3>{t("Description")}</h3>
             <p>{project.description}</p>
           </section>
 
           <section className="project-members">
-            <h3>Integrantes ({project.members.length})</h3>
+            <h3>{t("Members")} ({project.members.length})</h3>
             {project.members.length > 0 ? (
               <div className="members-list">
                 {project.members.map((member) => (
@@ -45,7 +47,7 @@ const ProjectDetails = ({ project, onConfirm }: ProjectDetailsProps) => {
                 ))}
               </div>
             ) : (
-              <p className="no-members">Nenhum integrante adicionado a este projeto.</p>
+              <p className="no-members">{t("No members added to this project.")}</p>
             )}
           </section>
         </div>

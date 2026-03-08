@@ -1,0 +1,99 @@
+.language-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  &__trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.6rem;
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  &__icon {
+    font-size: 1rem;
+    color: #666;
+  }
+
+  &__flag {
+    font-size: 1rem;
+  }
+
+  &__arrow {
+    font-size: 0.6rem;
+    color: #666;
+    transition: transform 0.2s ease;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    min-width: 140px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 0.35rem;
+    animation: fadeIn 0.15s ease;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+    font-size: 0.85rem;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    &.active {
+      background: rgba(29, 139, 131, 0.1);
+      color: #1d8b83;
+    }
+  }
+
+  &__option-flag {
+    font-size: 1.1rem;
+  }
+
+  &__option-name {
+    color: inherit;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

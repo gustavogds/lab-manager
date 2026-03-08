@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./ResearchersEditor.scss";
 import Icons from "components/Icons/Icons";
 import type { Researcher } from "helpers/api/content";
@@ -20,6 +21,7 @@ interface ResearchersEditorProps {
 }
 
 const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEditorProps) => {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<ResearcherConfig[]>(() =>
     researchers
       .map((r) => ({
@@ -76,7 +78,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
     <div className="researchers-editor-modal" onClick={onCancel}>
       <div className="researchers-editor-content" onClick={(e) => e.stopPropagation()}>
         <header className="modal-header-shared">
-          <h2>Editar Seção de Pesquisadores</h2>
+          <h2>{t("Edit Researchers Section")}</h2>
           <button className="btn-close-modal" onClick={onCancel}>
             ×
           </button>
@@ -84,7 +86,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
 
         <div className="editor-body">
           <p className="editor-description">
-            Arraste para reordenar e use o toggle para mostrar/ocultar pesquisadores na página.
+            {t("Drag to reorder and use the toggle to show/hide researchers on the page.")}
           </p>
 
           <div className="researchers-list">
@@ -98,7 +100,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
                     onClick={() => moveUp(index)}
                     disabled={index === 0}
                     className="order-btn"
-                    title="Mover para cima"
+                    title={t("Move up")}
                   >
                     ▲
                   </button>
@@ -106,7 +108,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
                     onClick={() => moveDown(index)}
                     disabled={index === config.length - 1}
                     className="order-btn"
-                    title="Mover para baixo"
+                    title={t("Move down")}
                   >
                     ▼
                   </button>
@@ -131,9 +133,9 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
                   type="button"
                   className={`former-member-btn ${researcher.is_former_member ? "active" : ""}`}
                   onClick={() => toggleFormerMember(researcher.id)}
-                  title={researcher.is_former_member ? "Marcar como membro ativo" : "Marcar como ex-membro"}
+                  title={researcher.is_former_member ? t("Mark as active member") : t("Mark as former member")}
                 >
-                  Ex-membro
+                  {t("Former member")}
                 </button>
 
                 <label className="visibility-toggle">
@@ -151,10 +153,10 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
 
         <footer className="editor-footer">
           <button className="btn-cancel" onClick={onCancel}>
-            Cancelar
+            {t("Cancel")}
           </button>
           <button className="btn-confirm" onClick={handleSave}>
-            Salvar
+            {t("Save")}
           </button>
         </footer>
       </div>
