@@ -29,7 +29,28 @@
           font-size: 1rem;
           color: $accent-teal-muted;
         }
+
+        &.room-header-title {
+          cursor: pointer;
+          user-select: none;
+          transition: $transition-normal;
+
+          &:hover {
+            opacity: 0.75;
+          }
+        }
       }
+    }
+  }
+
+  .collapse-chevron {
+    font-size: 0.75rem;
+    color: $neutral-gray;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+
+    &.collapsed {
+      transform: rotate(-90deg);
     }
   }
 
@@ -348,6 +369,17 @@
     gap: 0.5rem;
     padding: 0.5rem 1rem;
     background-color: $bg-surface-alt;
+    cursor: pointer;
+    user-select: none;
+    transition: $transition-normal;
+
+    &:hover {
+      background-color: darken($bg-surface-alt, 3%);
+    }
+
+    .collapse-chevron {
+      color: $accent-purple;
+    }
 
     .section-icon {
       font-size: 0.75rem;

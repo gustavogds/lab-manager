@@ -46,6 +46,27 @@ const ManageEquipment = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dragItems = useRef<number[]>([]);
   const [dragOverTarget, setDragOverTarget] = useState<{ roomId: number | null; sectionId: number | null } | null>(null);
+  const [collapsedRooms, setCollapsedRooms] = useState<Set<number | "unassigned">>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+
+  const toggleRoomCollapse = (roomId: number | "unassigned") => {
+    setCollapsedRooms((prev) => {
+      const next = new Set(prev);
+      if (next.has(roomId)) next.delete(roomId);
+      else next.add(roomId);
+      return next;
+    });
+  };
+
+  const toggleSectionCollapse = (roomId: number, sectionId: number | null) => {
+    const key = `${roomId}-${sectionId ?? "none"}`;
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -774,29 +795,49 @@ const ManageEquipment = () => {
               </div>
             )}
 
-            {unassignedEquipment.length > 0 && (
-              <div className="room-section">
-                <div className="room-header">
-                  <h2>{t("Unassigned")}</h2>
-                </div>
-                <div className="content-table-wrapper">
-                  {renderEquipmentTable(
-                    unassignedEquipment,
-                    null,
-                    null,
-                    t("No equipment without room.")
+            {unassignedEquipment.length > 0 && (() => {
+              const isCollapsed = collapsedRooms.has("unassigned");
+              return (
+                <div className="room-section">
+                  <div className="room-header">
+                    <h2
+                      className="room-header-title"
+                      onClick={() => toggleRoomCollapse("unassigned")}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <FaChevronDown className={`collapse-chevron ${isCollapsed ? "collapsed" : ""}`} />
+                      {t("Unassigned")}
+                    </h2>
+                  </div>
+                  {!isCollapsed && (
+                    <div className="content-table-wrapper">
+                      {renderEquipmentTable(
+                        unassignedEquipment,
+                        null,
+                        null,
+                        t("No equipment without room.")
+                      )}
+                    </div>
                   )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {sortedRooms.map((room) => {
               const roomEquipment = getEquipmentForRoom(room.id);
               const roomSections = getSectionsForRoom(room.id);
+              const isRoomCollapsed = collapsedRooms.has(room.id);
               return (
                 <div key={room.id} className="room-section">
                   <div className="room-header">
-                    <h2>
+                    <h2
+                      className="room-header-title"
+                      onClick={() => toggleRoomCollapse(room.id)}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <FaChevronDown className={`collapse-chevron ${isRoomCollapsed ? "collapsed" : ""}`} />
                       <FaDoorOpen className="room-icon" />
                       {room.name}
                     </h2>
@@ -819,7 +860,7 @@ const ManageEquipment = () => {
                     </div>
                   </div>
 
-                  {showNewSectionInput === room.id && (
+                  {!isRoomCollapsed && showNewSectionInput === room.id && (
                     <div className="new-input-bar">
                       <input
                         type="text"
@@ -855,45 +896,72 @@ const ManageEquipment = () => {
                     </div>
                   )}
 
-                  {roomSections.length > 0 ? (
+                  {!isRoomCollapsed && (roomSections.length > 0 ? (
                     <div className="room-sections-container">
-                      <div className="section-area">
-                        <div className="section-area-header">
-                          <span className="section-area-title">{t("No section")}</span>
-                        </div>
-                        <div className="content-table-wrapper">
-                          {renderEquipmentTable(
-                            getEquipmentForSection(room.id, null),
-                            room.id,
-                            null,
-                            t("Drag equipment to this area")
-                          )}
-                        </div>
-                      </div>
-
-                      {roomSections.map((section) => (
-                        <div key={section.id} className="section-area">
-                          <div className="section-area-header">
-                            <FaLayerGroup className="section-icon" />
-                            <span className="section-area-title">{section.name}</span>
-                            <button
-                              className="btn-icon btn-icon--primary btn-icon--sm"
-                              onClick={() => handleEditSection(section, room.name)}
-                              title={t("Edit section")}
+                      {(() => {
+                        const noSectionCollapsed = collapsedSections.has(`${room.id}-none`);
+                        return (
+                          <div className="section-area">
+                            <div
+                              className="section-area-header"
+                              onClick={() => toggleSectionCollapse(room.id, null)}
+                              role="button"
+                              tabIndex={0}
                             >
-                              <FaPen />
-                            </button>
-                          </div>
-                          <div className="content-table-wrapper">
-                            {renderEquipmentTable(
-                              getEquipmentForSection(room.id, section.id),
-                              room.id,
-                              section.id,
-                              t("Drag equipment to {{section}}", { section: section.name })
+                              <FaChevronDown className={`collapse-chevron ${noSectionCollapsed ? "collapsed" : ""}`} />
+                              <span className="section-area-title">{t("No section")}</span>
+                            </div>
+                            {!noSectionCollapsed && (
+                              <div className="content-table-wrapper">
+                                {renderEquipmentTable(
+                                  getEquipmentForSection(room.id, null),
+                                  room.id,
+                                  null,
+                                  t("Drag equipment to this area")
+                                )}
+                              </div>
                             )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })()}
+
+                      {roomSections.map((section) => {
+                        const sectionCollapsed = collapsedSections.has(`${room.id}-${section.id}`);
+                        return (
+                          <div key={section.id} className="section-area">
+                            <div
+                              className="section-area-header"
+                              onClick={() => toggleSectionCollapse(room.id, section.id)}
+                              role="button"
+                              tabIndex={0}
+                            >
+                              <FaChevronDown className={`collapse-chevron ${sectionCollapsed ? "collapsed" : ""}`} />
+                              <FaLayerGroup className="section-icon" />
+                              <span className="section-area-title">{section.name}</span>
+                              <button
+                                className="btn-icon btn-icon--primary btn-icon--sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditSection(section, room.name);
+                                }}
+                                title={t("Edit section")}
+                              >
+                                <FaPen />
+                              </button>
+                            </div>
+                            {!sectionCollapsed && (
+                              <div className="content-table-wrapper">
+                                {renderEquipmentTable(
+                                  getEquipmentForSection(room.id, section.id),
+                                  room.id,
+                                  section.id,
+                                  t("Drag equipment to {{section}}", { section: section.name })
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="content-table-wrapper">
@@ -904,7 +972,7 @@ const ManageEquipment = () => {
                         t("Drag equipment to this room")
                       )}
                     </div>
-                  )}
+                  ))}
                 </div>
               );
             })}
