@@ -190,6 +190,10 @@
     font-size: 0.85rem;
     border-radius: $radius-md;
   }
+
+  &.center {
+    align-self: center;
+  }
 }
 
 .btn-sm {

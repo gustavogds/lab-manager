@@ -107,7 +107,7 @@ const ManageResearchAreas = () => {
         ) : !hasAreas ? (
           <div className="empty-state">
             <p>{t("No research area registered.")}</p>
-            <button onClick={() => navigate("/create/research-area")}>
+            <button className="btn-confirm" onClick={() => navigate("/create/research-area")}>
               {t("Register first research area")}
             </button>
           </div>

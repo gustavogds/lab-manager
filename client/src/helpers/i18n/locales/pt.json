@@ -412,5 +412,15 @@
   "Room name": "Nome da sala",
   "Section name": "Nome da seção",
   "Write a brief description about yourself...": "Escreva uma breve descrição sobre você...",
-  "Select language...": "Selecione o idioma..."
+  "Select language...": "Selecione o idioma...",
+  "No project registered.": "Nenhum projeto cadastrado.",
+  "No research area registered.": "Nenhuma área de pesquisa cadastrada.",
+  "No partnership registered.": "Nenhuma parceria cadastrada.",
+  "No equipment or room registered.": "Nenhum equipamento ou sala cadastrada.",
+  "No researchers registered.": "Nenhum pesquisador cadastrado.",
+  "Register first project": "Registrar primeiro projeto",
+  "Register first research area": "Registrar primeira área de pesquisa",
+  "Register first partnership": "Registrar primeira parceria",
+  "Register first equipment": "Registrar primeiro equipamento",
+  "Register first researcher": "Registrar primeiro pesquisador"
 }

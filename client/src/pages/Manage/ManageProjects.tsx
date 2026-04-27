@@ -109,7 +109,7 @@ const ManageProjects = () => {
         ) : !hasProjects ? (
           <div className="empty-state">
             <p>{t("No project registered.")}</p>
-            <button onClick={() => navigate("/create/project")}>
+            <button className="btn-confirm" onClick={() => navigate("/create/project")}>
               {t("Register first project")}
             </button>
           </div>

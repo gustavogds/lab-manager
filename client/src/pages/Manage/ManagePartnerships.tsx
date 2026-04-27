@@ -107,7 +107,7 @@ const ManagePartnerships = () => {
         ) : !hasPartnerships ? (
           <div className="empty-state">
             <p>{t("No partnership registered.")}</p>
-            <button onClick={() => navigate("/create/partnership")}>
+            <button className="btn-confirm" onClick={() => navigate("/create/partnership")}>
               {t("Register first partnership")}
             </button>
           </div>
