@@ -218,8 +218,7 @@
 
           img {
             width: 100%;
-            height: auto;
-            max-height: 500px;
+            height: 450px;
             object-fit: contain;
             border-radius: 16px;
           }
@@ -310,7 +309,7 @@
           }
 
           .carousel-slide img {
-            max-height: 300px;
+            height: 280px;
             border-radius: 12px;
           }
         }

@@ -921,7 +921,7 @@ const Home = () => {
           autoplay: true,
           autoplaySpeed: 5000,
           arrows: true,
-          adaptiveHeight: true,
+          adaptiveHeight: false,
           nextArrow: <Arrow direction="next" />,
           prevArrow: <Arrow direction="prev" />,
         };
