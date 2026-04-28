@@ -46,4 +46,21 @@ export const getLabDefaultLanguage = (): string => {
   return localStorage.getItem("labDefaultLanguage") || "en";
 };
 
+export const getCurrentLang = (): "pt" | "en" => {
+  const lang = (i18n.language || getDefaultLanguage() || "en").toLowerCase();
+  return lang.startsWith("pt") ? "pt" : "en";
+};
+
+export const localized = <T extends Record<string, any>>(
+  obj: T | null | undefined,
+  fieldName: string
+): string => {
+  if (!obj) return "";
+  const lang = getCurrentLang();
+  const primary = obj[`${fieldName}_${lang}`];
+  if (primary) return primary;
+  const fallback = obj[`${fieldName}_${lang === "pt" ? "en" : "pt"}`];
+  return fallback || "";
+};
+
 export default i18n;

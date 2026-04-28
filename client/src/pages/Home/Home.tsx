@@ -44,13 +44,16 @@ import ResearcherCard from "components/ResearcherCard/ResearcherCard";
 import PartnershipBadge from "components/PartnershipBadge/PartnershipBadge";
 import { useGlobalData } from "helpers/context/globalContext";
 import { isEmptyObject, canManageAll } from "helpers/utils";
+import { localized } from "helpers/i18n";
 import { ModalsHandler } from "components/my-own-modal-handler";
 import type { SectionEditorField } from "components/Modals/SectionEditor/SectionEditor";
 
 type LabSettings = {
-  mission?: string;
+  mission_pt?: string;
+  mission_en?: string;
   address?: string;
-  address_details?: string;
+  address_details_pt?: string;
+  address_details_en?: string;
   maps_link?: string;
   areas?: string;
   highlights?: string;
@@ -115,8 +118,15 @@ const Home = () => {
       title: t("Edit about"),
       fields: [
         {
-          name: "mission",
-          label: t("Mission"),
+          name: "mission_pt",
+          label: `${t("Mission")} (PT)`,
+          type: "textarea",
+          placeholder: t("Describe the laboratory's mission"),
+          rows: 6,
+        },
+        {
+          name: "mission_en",
+          label: `${t("Mission")} (EN)`,
           type: "textarea",
           placeholder: t("Describe the laboratory's mission"),
           rows: 6,
@@ -128,14 +138,19 @@ const Home = () => {
         },
       ],
       getInitialValues: (settings) => ({
-        mission: settings?.mission || "",
+        mission_pt: settings?.mission_pt || "",
+        mission_en: settings?.mission_en || "",
       }),
       onSave: async (values) => {
-        const response = await saveLabSettings({ mission: values.mission });
+        const response = await saveLabSettings({
+          mission_pt: values.mission_pt,
+          mission_en: values.mission_en,
+        });
         if (response.success) {
           setLabSettings((prev) => ({
             ...(prev || {}),
-            mission: values.mission,
+            mission_pt: values.mission_pt,
+            mission_en: values.mission_en,
           }));
         }
         return response;
@@ -187,8 +202,14 @@ const Home = () => {
           rows: 3,
         },
         {
-          name: "address_details",
-          label: t("Other information"),
+          name: "address_details_pt",
+          label: `${t("Other information")} (PT)`,
+          type: "text",
+          placeholder: t("Ex: Fourth floor, rooms 403-406"),
+        },
+        {
+          name: "address_details_en",
+          label: `${t("Other information")} (EN)`,
           type: "text",
           placeholder: t("Ex: Fourth floor, rooms 403-406"),
         },
@@ -201,20 +222,23 @@ const Home = () => {
       ],
       getInitialValues: (settings) => ({
         address: settings?.address || "",
-        address_details: settings?.address_details || "",
+        address_details_pt: settings?.address_details_pt || "",
+        address_details_en: settings?.address_details_en || "",
         maps_link: settings?.maps_link || "",
       }),
       onSave: async (values) => {
         const response = await saveLabSettings({
           address: values.address,
-          address_details: values.address_details,
+          address_details_pt: values.address_details_pt,
+          address_details_en: values.address_details_en,
           maps_link: values.maps_link,
         });
         if (response.success) {
           setLabSettings((prev) => ({
             ...(prev || {}),
             address: values.address,
-            address_details: values.address_details,
+            address_details_pt: values.address_details_pt,
+            address_details_en: values.address_details_en,
             maps_link: values.maps_link,
           }));
         }
@@ -344,7 +368,7 @@ const Home = () => {
       if (result.success) {
         setLabSettings(result.data);
       } else {
-        setLabSettings({ mission: t("Mission not available.") });
+        setLabSettings({ mission_pt: t("Mission not available.") });
       }
     };
 
@@ -503,24 +527,37 @@ const Home = () => {
       headerTitle: t("Edit Research Area"),
       fields: [
         {
-          name: "title",
-          label: t("Title"),
+          name: "title_pt",
+          label: `${t("Title")} (PT)`,
           type: "text",
           placeholder: t("Ex: Artificial Intelligence"),
-          required: true,
         },
         {
-          name: "description",
-          label: t("Description"),
+          name: "title_en",
+          label: `${t("Title")} (EN)`,
+          type: "text",
+          placeholder: t("Ex: Artificial Intelligence"),
+        },
+        {
+          name: "description_pt",
+          label: `${t("Description")} (PT)`,
           type: "textarea",
           placeholder: t("Describe the research area..."),
           rows: 6,
-          required: true,
+        },
+        {
+          name: "description_en",
+          label: `${t("Description")} (EN)`,
+          type: "textarea",
+          placeholder: t("Describe the research area..."),
+          rows: 6,
         },
       ],
       initialValues: {
-        title: area.title,
-        description: area.description,
+        title_pt: area.title_pt,
+        title_en: area.title_en,
+        description_pt: area.description_pt,
+        description_en: area.description_en,
       },
       confirmLabel: t("Save"),
       cancelLabel: t("Cancel"),
@@ -533,15 +570,23 @@ const Home = () => {
 
     const values = result as Record<string, string>;
     const response = await updateResearchArea(area.id, {
-      title: values.title,
-      description: values.description,
+      title_pt: values.title_pt,
+      title_en: values.title_en,
+      description_pt: values.description_pt,
+      description_en: values.description_en,
     });
 
     if (response.success) {
       setResearchAreas((prev) =>
         prev.map((a) =>
           a.id === area.id
-            ? { ...a, title: values.title, description: values.description }
+            ? {
+                ...a,
+                title_pt: values.title_pt,
+                title_en: values.title_en,
+                description_pt: values.description_pt,
+                description_en: values.description_en,
+              }
             : a
         )
       );
@@ -563,7 +608,7 @@ const Home = () => {
   const handleDeleteResearchArea = async (area: ResearchArea) => {
     const { promise } = ModalsHandler.createModal("Notification", {
       title: t("Confirm deletion"),
-      message: `${t("Are you sure you want to delete the area")} "${area.title}"?`,
+      message: `${t("Are you sure you want to delete the area")} "${localized(area, "title")}"?`,
       type: "warning",
       confirmLabel: t("Delete"),
       cancelLabel: t("Cancel"),
@@ -633,13 +678,17 @@ const Home = () => {
     }
 
     const values = result as {
-      title: string;
-      description: string;
+      title_pt: string;
+      title_en: string;
+      description_pt: string;
+      description_en: string;
       members: any[];
     };
     const response = await updateProject(project.id, {
-      title: values.title,
-      description: values.description,
+      title_pt: values.title_pt,
+      title_en: values.title_en,
+      description_pt: values.description_pt,
+      description_en: values.description_en,
       members: values.members.map((m: any) => m.id),
     } as any);
 
@@ -649,8 +698,10 @@ const Home = () => {
           p.id === project.id
             ? {
                 ...p,
-                title: values.title,
-                description: values.description,
+                title_pt: values.title_pt,
+                title_en: values.title_en,
+                description_pt: values.description_pt,
+                description_en: values.description_en,
                 members: values.members,
               }
             : p
@@ -674,7 +725,7 @@ const Home = () => {
   const handleDeleteProject = async (project: Project) => {
     const { promise } = ModalsHandler.createModal("Notification", {
       title: t("Confirm deletion"),
-      message: `${t("Are you sure you want to delete the project")} "${project.title}"?`,
+      message: `${t("Are you sure you want to delete the project")} "${localized(project, "title")}"?`,
       type: "warning",
       confirmLabel: t("Delete"),
       cancelLabel: t("Cancel"),
@@ -877,7 +928,7 @@ const Home = () => {
 
         return (
           <>
-            <p>{labSettings?.mission || t("Loading mission...")}</p>
+            <p>{localized(labSettings, "mission") || t("Loading mission...")}</p>
             {labSettings?.about_images && labSettings.about_images.length > 0 && (
               <div className="about-carousel">
                 <Slider {...sliderSettings}>
@@ -899,8 +950,8 @@ const Home = () => {
                 {researchAreas.map((area) => (
                   <div key={area.id} className="content-card">
                     <div className="card-content">
-                      <h3>{area.title}</h3>
-                      <p>{area.description}</p>
+                      <h3>{localized(area, "title")}</h3>
+                      <p>{localized(area, "description")}</p>
                     </div>
                     {isProfessor && (
                       <div className="card-actions">
@@ -959,8 +1010,8 @@ const Home = () => {
                     onClick={() => openProjectDetails(project)}
                   >
                     <div className="card-content">
-                      <h3>{project.title}</h3>
-                      <p>{project.description}</p>
+                      <h3>{localized(project, "title")}</h3>
+                      <p>{localized(project, "description")}</p>
                     </div>
                     {isProfessor && (
                       <div className="card-actions">
@@ -1125,8 +1176,8 @@ const Home = () => {
                 {hasAddress ? (
                   <>
                     <p>{labSettings.address}</p>
-                    {labSettings?.address_details && (
-                      <p className="address-details">{labSettings.address_details}</p>
+                    {localized(labSettings, "address_details") && (
+                      <p className="address-details">{localized(labSettings, "address_details")}</p>
                     )}
                     {labSettings?.maps_link && (
                       <a

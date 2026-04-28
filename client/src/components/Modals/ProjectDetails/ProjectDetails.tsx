@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import "./ProjectDetails.scss";
 import Icons from "components/Icons/Icons";
 import type { Project } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 
 interface ProjectDetailsProps {
   project: Project;
@@ -14,7 +15,7 @@ const ProjectDetails = ({ project, onConfirm }: ProjectDetailsProps) => {
     <div className="project-details-modal" onClick={onConfirm}>
       <div className="project-details-content" onClick={(e) => e.stopPropagation()}>
         <header className="modal-header-shared project-header">
-          <h2>{project.title}</h2>
+          <h2>{localized(project, "title")}</h2>
           <button className="btn-close-modal" onClick={onConfirm}>
             ×
           </button>
@@ -23,7 +24,7 @@ const ProjectDetails = ({ project, onConfirm }: ProjectDetailsProps) => {
         <div className="project-details-body">
           <section className="project-description">
             <h3>{t("Description")}</h3>
-            <p>{project.description}</p>
+            <p>{localized(project, "description")}</p>
           </section>
 
           <section className="project-members">

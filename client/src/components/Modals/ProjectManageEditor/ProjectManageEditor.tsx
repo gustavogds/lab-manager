@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { listApprovedUsers, updateProject, deleteProject } from "helpers/api/content";
 import type { Project, User } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 
 import { ModalsHandler } from "components/my-own-modal-handler";
 import MultiSelect from "components/MultiSelect/MultiSelect";
@@ -20,8 +21,10 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
 }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
-    title: project.title,
-    description: project.description || "",
+    title_pt: project.title_pt || "",
+    title_en: project.title_en || "",
+    description_pt: project.description_pt || "",
+    description_en: project.description_en || "",
     members: project.members as User[],
   });
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
@@ -54,7 +57,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
+    if (!formData.title_pt.trim() && !formData.title_en.trim()) {
       setError(t("Title is required."));
       return;
     }
@@ -63,8 +66,10 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
     setError("");
 
     const payload: Record<string, any> = {
-      title: formData.title,
-      description: formData.description.trim() || "",
+      title_pt: formData.title_pt,
+      title_en: formData.title_en,
+      description_pt: formData.description_pt.trim() || "",
+      description_en: formData.description_en.trim() || "",
       members: formData.members.map((m) => m.id),
     };
 
@@ -113,7 +118,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!confirm(t(`Are you sure you want to delete "{{title}}"?`, { title: project.title }))) return;
+    if (!confirm(t(`Are you sure you want to delete "{{title}}"?`, { title: localized(project, "title") }))) return;
 
     setIsSaving(true);
     setError("");
@@ -166,25 +171,49 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="pj-title">{t("Title")} *</label>
+            <label htmlFor="pj-title-pt">{t("Title")} <span className="lang-badge">PT</span></label>
             <input
-              id="pj-title"
+              id="pj-title-pt"
               type="text"
-              name="title"
-              value={formData.title}
+              name="title_pt"
+              value={formData.title_pt}
               onChange={handleChange}
               placeholder={t("Project title")}
               maxLength={255}
-              required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="pj-description">{t("Description")}</label>
+            <label htmlFor="pj-title-en">{t("Title")} <span className="lang-badge">EN</span></label>
+            <input
+              id="pj-title-en"
+              type="text"
+              name="title_en"
+              value={formData.title_en}
+              onChange={handleChange}
+              placeholder={t("Project title")}
+              maxLength={255}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="pj-description-pt">{t("Description")} <span className="lang-badge">PT</span></label>
             <textarea
-              id="pj-description"
-              name="description"
-              value={formData.description}
+              id="pj-description-pt"
+              name="description_pt"
+              value={formData.description_pt}
+              onChange={handleChange}
+              placeholder={t("Project description")}
+              rows={4}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="pj-description-en">{t("Description")} <span className="lang-badge">EN</span></label>
+            <textarea
+              id="pj-description-en"
+              name="description_en"
+              value={formData.description_en}
               onChange={handleChange}
               placeholder={t("Project description")}
               rows={4}

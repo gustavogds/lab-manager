@@ -1,6 +1,7 @@
 import "./ResearcherCard.scss";
 import Icons from "components/Icons/Icons";
 import type { Researcher } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 
 interface ResearcherCardProps {
   researcher: Researcher;
@@ -10,11 +11,13 @@ interface ResearcherCardProps {
 const ResearcherCard = ({ researcher, onClick }: ResearcherCardProps) => {
   const visiblePositions = (researcher.positions || [])
     .filter((p) => p.is_visible)
-    .map((p) => p.name)
+    .map((p) => localized(p, "name"))
+    .filter(Boolean)
     .join(", ");
 
-  // Fallback to single position for backward compatibility
-  const positionDisplay = visiblePositions || (researcher.position?.is_visible !== false ? researcher.position?.name : null);
+  const positionDisplay =
+    visiblePositions ||
+    (researcher.position?.is_visible !== false ? localized(researcher.position, "name") : null);
 
   return (
     <div className="researcher-card" onClick={onClick}>

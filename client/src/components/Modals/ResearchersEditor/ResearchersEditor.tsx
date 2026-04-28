@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import "./ResearchersEditor.scss";
 import Icons from "components/Icons/Icons";
 import type { Researcher } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 
 interface ResearcherConfig {
   id: number;
@@ -28,7 +29,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
         id: r.id,
         name: r.name,
         profile_image: r.profile_image,
-        position: r.position?.name ?? null,
+        position: r.position ? localized(r.position, "name") || null : null,
         order: r.researcher_order ?? 0,
         show: r.show_in_researchers ?? true,
         is_former_member: r.is_former_member ?? false,

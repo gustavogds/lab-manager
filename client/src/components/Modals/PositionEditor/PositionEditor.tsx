@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { updatePosition, deletePosition } from "helpers/api/content";
 import type { Position } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 
 import { ModalsHandler } from "components/my-own-modal-handler";
 import "pages/Manage/ManageContent.scss";
@@ -19,7 +20,8 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
 }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
-    name: position.name,
+    name_pt: position.name_pt || "",
+    name_en: position.name_en || "",
     is_visible: position.is_visible,
     order: position.order,
   });
@@ -37,7 +39,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) {
+    if (!formData.name_pt.trim() && !formData.name_en.trim()) {
       setError(t("Name is required."));
       return;
     }
@@ -46,7 +48,8 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
     setError("");
 
     const response = await updatePosition(position.id, {
-      name: formData.name.trim(),
+      name_pt: formData.name_pt.trim(),
+      name_en: formData.name_en.trim(),
       order: formData.order,
       is_visible: formData.is_visible,
     });
@@ -73,7 +76,7 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
   const handleDelete = async () => {
     if (
       !confirm(
-        t(`Are you sure you want to delete the position "{{name}}"? It will be removed from associated users.`, { name: position.name })
+        t(`Are you sure you want to delete the position "{{name}}"? It will be removed from associated users.`, { name: localized(position, "name") })
       )
     )
       return;
@@ -126,17 +129,29 @@ const PositionEditor: React.FC<PositionEditorProps> = ({
           {error && <div className="msg-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="position-name">{t("Name")} *</label>
+            <label htmlFor="position-name-pt">{t("Name")} <span className="lang-badge">PT</span></label>
             <input
-              id="position-name"
+              id="position-name-pt"
               type="text"
-              name="name"
-              value={formData.name}
+              name="name_pt"
+              value={formData.name_pt}
               onChange={handleChange}
               placeholder={t("Position name")}
               maxLength={255}
-              required
               autoFocus
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="position-name-en">{t("Name")} <span className="lang-badge">EN</span></label>
+            <input
+              id="position-name-en"
+              type="text"
+              name="name_en"
+              value={formData.name_en}
+              onChange={handleChange}
+              placeholder={t("Position name")}
+              maxLength={255}
             />
           </div>
 

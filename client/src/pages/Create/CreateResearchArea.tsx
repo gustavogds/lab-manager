@@ -9,8 +9,10 @@ const CreateResearchArea = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
+    title_pt: "",
+    title_en: "",
+    description_pt: "",
+    description_en: "",
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -25,13 +27,13 @@ const CreateResearchArea = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.title.trim()) {
+
+    if (!formData.title_pt.trim() && !formData.title_en.trim()) {
       setError(t("Title is required."));
       return;
     }
 
-    if (!formData.description.trim()) {
+    if (!formData.description_pt.trim() && !formData.description_en.trim()) {
       setError(t("Description is required."));
       return;
     }
@@ -47,8 +49,8 @@ const CreateResearchArea = () => {
     if (response.success) {
       setMessage(response.message || t("Research area created successfully!"));
       setError("");
-      
-      setFormData({ title: "", description: "" });
+
+      setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "" });
       
       setTimeout(() => {
         navigate(-1);
@@ -76,29 +78,52 @@ const CreateResearchArea = () => {
 
         <form onSubmit={handleSubmit} className="research-area-form">
           <div className="form-field">
-            <label htmlFor="title">{t("Title")} *</label>
+            <label htmlFor="title_pt">{t("Title")} <span className="lang-badge">PT</span></label>
             <input
-              id="title"
+              id="title_pt"
               type="text"
-              name="title"
-              value={formData.title}
+              name="title_pt"
+              value={formData.title_pt}
               onChange={handleChange}
               placeholder={t("Ex: Artificial Intelligence")}
               maxLength={255}
-              required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="description">{t("Description")} *</label>
+            <label htmlFor="title_en">{t("Title")} <span className="lang-badge">EN</span></label>
+            <input
+              id="title_en"
+              type="text"
+              name="title_en"
+              value={formData.title_en}
+              onChange={handleChange}
+              placeholder={t("Ex: Artificial Intelligence")}
+              maxLength={255}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="description_pt">{t("Description")} <span className="lang-badge">PT</span></label>
             <textarea
-              id="description"
-              name="description"
-              value={formData.description}
+              id="description_pt"
+              name="description_pt"
+              value={formData.description_pt}
               onChange={handleChange}
               placeholder={t("Describe the research area, objectives and lines of investigation...")}
               rows={6}
-              required
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="description_en">{t("Description")} <span className="lang-badge">EN</span></label>
+            <textarea
+              id="description_en"
+              name="description_en"
+              value={formData.description_en}
+              onChange={handleChange}
+              placeholder={t("Describe the research area, objectives and lines of investigation...")}
+              rows={6}
             />
           </div>
 

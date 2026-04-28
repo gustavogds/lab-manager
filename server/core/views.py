@@ -23,9 +23,11 @@ def update_lab_settings(request):
     allowed_fields = [
         "lab_name",
         "address",
-        "address_details",
+        "address_details_pt",
+        "address_details_en",
         "maps_link",
-        "mission",
+        "mission_pt",
+        "mission_en",
         "areas",
         "highlights",
         "lead",
@@ -50,11 +52,15 @@ def update_lab_settings(request):
         "phone": "contact_phone",
     }
 
+    bilingual_fields = {"mission_pt", "mission_en", "address_details_pt", "address_details_en"}
+
     for field in allowed_fields:
         if field in data:
             value = data[field]
             if field == "home_use_gradient":
                 setattr(lab_settings, field, bool(value))
+            elif field in bilingual_fields:
+                setattr(lab_settings, field, value or "")
             else:
                 setattr(lab_settings, field, value or None)
             updated = True

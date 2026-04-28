@@ -9,6 +9,7 @@ import {
   createPosition,
 } from "helpers/api/content";
 import type { User, Room, Position } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 import { ModalsHandler } from "components/my-own-modal-handler";
 import { FaArrowLeft, FaPlus, FaChevronDown, FaSearch, FaPen, FaBriefcase, FaDoorOpen } from "react-icons/fa";
 import "./ManageContent.scss";
@@ -114,7 +115,7 @@ const ManageUsers = () => {
   const handleCreatePosition = async () => {
     if (!newPositionName.trim()) return;
     setIsCreatingPosition(true);
-    const response = await createPosition({ name: newPositionName.trim() });
+    const response = await createPosition({ name_pt: newPositionName.trim() });
     setIsCreatingPosition(false);
     if (response.success) {
       setNewPositionName("");
@@ -302,7 +303,7 @@ const ManageUsers = () => {
                   {positions.map((position) => (
                     <div key={position.id} className="category-item position-item">
                       <span className="category-name">
-                        {position.name} {!position.is_visible && t("(hidden)")}
+                        {localized(position, "name")} {!position.is_visible && t("(hidden)")}
                       </span>
                       <button
                         className="btn-icon btn-icon--primary btn-icon--sm"
@@ -382,7 +383,7 @@ const ManageUsers = () => {
                           <td className="cell-email">{user.email}</td>
                           <td className="cell-position">
                             {user.positions && user.positions.length > 0
-                              ? user.positions.map((position) => position.name).join(", ")
+                              ? user.positions.map((position) => localized(position, "name")).join(", ")
                               : "-"}
                           </td>
                           <td className="cell-room">

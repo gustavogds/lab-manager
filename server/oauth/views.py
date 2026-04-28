@@ -131,7 +131,7 @@ def sign_up(request):
         if invitation.lattes:
             user.lattes = invitation.lattes
         if invitation.bio:
-            user.bio = invitation.bio
+            user.bio_pt = invitation.bio
         
         # Apply positions from invitation
         if invitation.positions.exists():

@@ -4,7 +4,8 @@ from django.db import models
 class LabSettings(models.Model):
     lab_name = models.CharField(max_length=255, default="Lab Management System")
     logo = models.ImageField(upload_to="lab_logos/", blank=True, null=True)
-    mission = models.TextField(blank=True, null=True)
+    mission_pt = models.TextField(blank=True, default="")
+    mission_en = models.TextField(blank=True, default="")
     areas = models.TextField(blank=True, null=True)
     highlights = models.TextField(blank=True, null=True)
     lead = models.CharField(max_length=255, blank=True, null=True)
@@ -13,7 +14,8 @@ class LabSettings(models.Model):
     contact_email = models.EmailField(blank=True, null=True)
     contact_phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    address_details = models.TextField(blank=True, null=True)
+    address_details_pt = models.TextField(blank=True, default="")
+    address_details_en = models.TextField(blank=True, default="")
     maps_link = models.URLField(max_length=500, blank=True, null=True)
 
     home_use_gradient = models.BooleanField(default=True)
@@ -41,10 +43,12 @@ class LabSettings(models.Model):
             "id": self.id,
             "lab_name": self.lab_name,
             "address": self.address,
-            "address_details": self.address_details,
+            "address_details_pt": self.address_details_pt,
+            "address_details_en": self.address_details_en,
             "maps_link": self.maps_link,
             "logo": self.logo.url if self.logo else None,
-            "mission": self.mission,
+            "mission_pt": self.mission_pt,
+            "mission_en": self.mission_en,
             "about_images": about_images,
             "areas": self.areas,
             "highlights": self.highlights,

@@ -23,7 +23,8 @@ const ProfileSettings = () => {
     contact_email: "",
     social_media: "",
     lattes: "",
-    bio: "",
+    bio_pt: "",
+    bio_en: "",
     birthdate: "",
     is_public: true,
   });
@@ -47,7 +48,8 @@ const ProfileSettings = () => {
       contact_email: initialData.contact_email || "",
       social_media: initialData.social_media || "",
       lattes: initialData.lattes || "",
-      bio: initialData.bio || "",
+      bio_pt: initialData.bio_pt || "",
+      bio_en: initialData.bio_en || "",
       birthdate: initialData.birthdate || "",
       is_public: initialData.is_public ?? true,
     });
@@ -239,10 +241,20 @@ const ProfileSettings = () => {
           />
         </label>
         <label>
-          {t("Bio")}
+          {t("Bio")} <span className="lang-badge">PT</span>
           <textarea
-            name="bio"
-            value={formData.bio}
+            name="bio_pt"
+            value={formData.bio_pt}
+            onChange={handleChange}
+            placeholder={t("Write a brief description about yourself...")}
+            rows={4}
+          />
+        </label>
+        <label>
+          {t("Bio")} <span className="lang-badge">EN</span>
+          <textarea
+            name="bio_en"
+            value={formData.bio_en}
             onChange={handleChange}
             placeholder={t("Write a brief description about yourself...")}
             rows={4}

@@ -7,8 +7,10 @@ import MultiSelect from "components/MultiSelect/MultiSelect";
 interface ProjectEditorProps {
   project: Project;
   onConfirm: (data: {
-    title: string;
-    description: string;
+    title_pt: string;
+    title_en: string;
+    description_pt: string;
+    description_en: string;
     members: User[];
   }) => void;
   onCancel?: () => void;
@@ -21,8 +23,10 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
 }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
-    title: project.title,
-    description: project.description,
+    title_pt: project.title_pt || "",
+    title_en: project.title_en || "",
+    description_pt: project.description_pt || "",
+    description_en: project.description_en || "",
     members: project.members || [],
   });
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
@@ -52,11 +56,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim()) {
+    if (!formData.title_pt.trim() && !formData.title_en.trim()) {
       alert(t("Title is required"));
       return;
     }
-    if (!formData.description.trim()) {
+    if (!formData.description_pt.trim() && !formData.description_en.trim()) {
       alert(t("Description is required"));
       return;
     }
@@ -86,28 +90,50 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
 
         <form onSubmit={handleSubmit} className="modal-body-shared">
           <div className="form-field">
-            <label htmlFor="title">{t("Title")} *</label>
+            <label htmlFor="title_pt">{t("Title")} <span className="lang-badge">PT</span></label>
             <input
-              id="title"
+              id="title_pt"
               type="text"
-              name="title"
-              value={formData.title}
+              name="title_pt"
+              value={formData.title_pt}
               onChange={handleChange}
               placeholder="Project title"
-              required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="description">{t("Description")} *</label>
+            <label htmlFor="title_en">{t("Title")} <span className="lang-badge">EN</span></label>
+            <input
+              id="title_en"
+              type="text"
+              name="title_en"
+              value={formData.title_en}
+              onChange={handleChange}
+              placeholder="Project title"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="description_pt">{t("Description")} <span className="lang-badge">PT</span></label>
             <textarea
-              id="description"
-              name="description"
-              value={formData.description}
+              id="description_pt"
+              name="description_pt"
+              value={formData.description_pt}
               onChange={handleChange}
               placeholder="Project description"
               rows={5}
-              required
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="description_en">{t("Description")} <span className="lang-badge">EN</span></label>
+            <textarea
+              id="description_en"
+              name="description_en"
+              value={formData.description_en}
+              onChange={handleChange}
+              placeholder="Project description"
+              rows={5}
             />
           </div>
 

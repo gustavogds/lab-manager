@@ -11,8 +11,10 @@ const CreateProject = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
+    title_pt: "",
+    title_en: "",
+    description_pt: "",
+    description_en: "",
     members: [] as User[],
   });
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
@@ -44,12 +46,12 @@ const CreateProject = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim()) {
+    if (!formData.title_pt.trim() && !formData.title_en.trim()) {
       setError(t("Title is required."));
       return;
     }
 
-    if (!formData.description.trim()) {
+    if (!formData.description_pt.trim() && !formData.description_en.trim()) {
       setError(t("Description is required."));
       return;
     }
@@ -59,8 +61,10 @@ const CreateProject = () => {
     setMessage("");
 
     const projectData = {
-      title: formData.title,
-      description: formData.description,
+      title_pt: formData.title_pt,
+      title_en: formData.title_en,
+      description_pt: formData.description_pt,
+      description_en: formData.description_en,
       members: formData.members.map((m) => m.id),
     };
 
@@ -71,7 +75,7 @@ const CreateProject = () => {
     if (response.success) {
       setMessage(response.message || t("Project created successfully!"));
       setError("");
-      setFormData({ title: "", description: "", members: [] });
+      setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "", members: [] });
       
       setTimeout(() => {
         navigate(-1);
@@ -99,29 +103,52 @@ const CreateProject = () => {
 
         <form onSubmit={handleSubmit} className="project-form">
           <div className="form-field">
-            <label htmlFor="title">{t("Title")} *</label>
+            <label htmlFor="title_pt">{t("Title")} <span className="lang-badge">PT</span></label>
             <input
-              id="title"
+              id="title_pt"
               type="text"
-              name="title"
-              value={formData.title}
+              name="title_pt"
+              value={formData.title_pt}
               onChange={handleChange}
               placeholder={t("Ex: Laboratory Management System")}
               maxLength={255}
-              required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="description">{t("Description")} *</label>
+            <label htmlFor="title_en">{t("Title")} <span className="lang-badge">EN</span></label>
+            <input
+              id="title_en"
+              type="text"
+              name="title_en"
+              value={formData.title_en}
+              onChange={handleChange}
+              placeholder={t("Ex: Laboratory Management System")}
+              maxLength={255}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="description_pt">{t("Description")} <span className="lang-badge">PT</span></label>
             <textarea
-              id="description"
-              name="description"
-              value={formData.description}
+              id="description_pt"
+              name="description_pt"
+              value={formData.description_pt}
               onChange={handleChange}
               placeholder={t("Describe the project, objectives, methodology and expected results...")}
               rows={6}
-              required
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="description_en">{t("Description")} <span className="lang-badge">EN</span></label>
+            <textarea
+              id="description_en"
+              name="description_en"
+              value={formData.description_en}
+              onChange={handleChange}
+              placeholder={t("Describe the project, objectives, methodology and expected results...")}
+              rows={6}
             />
           </div>
 

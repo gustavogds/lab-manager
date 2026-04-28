@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import "./ResearcherDetails.scss";
 import Icons from "components/Icons/Icons";
 import type { Researcher, Project } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 
 interface ResearcherDetailsProps {
   researcher: Researcher;
@@ -13,11 +14,14 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
   const { t } = useTranslation();
   const visiblePositions = (researcher.positions || [])
     .filter((p) => p.is_visible)
-    .map((p) => p.name)
+    .map((p) => localized(p, "name"))
+    .filter(Boolean)
     .join(", ");
 
-  // Fallback to single position for backward compatibility
-  const positionDisplay = visiblePositions || (researcher.position?.is_visible !== false ? researcher.position?.name : null);
+  const positionDisplay =
+    visiblePositions ||
+    (researcher.position?.is_visible !== false ? localized(researcher.position, "name") : null);
+  const bioText = localized(researcher, "bio");
 
   return (
     <div className="researcher-details-modal" onClick={onConfirm}>
@@ -44,10 +48,10 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
         </header>
 
         <div className="researcher-details-body">
-          {researcher.bio && (
+          {bioText && (
             <section className="bio-section">
               <h3>{t("About")}</h3>
-              <p className="bio-text">{researcher.bio}</p>
+              <p className="bio-text">{bioText}</p>
             </section>
           )}
 
@@ -105,8 +109,8 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
               <div className="projects-list">
                 {projects.map((project) => (
                   <div key={project.id} className="project-item">
-                    <h4>{project.title}</h4>
-                    <p>{project.description}</p>
+                    <h4>{localized(project, "title")}</h4>
+                    <p>{localized(project, "description")}</p>
                   </div>
                 ))}
               </div>

@@ -1,14 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { FaTimes } from "react-icons/fa";
+import { localized } from "helpers/i18n";
 import "./MultiSelect.scss";
 
 export type Option = {
   id: number;
-  name: string;
+  name?: string;
+  name_pt?: string;
+  name_en?: string;
   email?: string;
   profile_image?: string | null;
 };
+
+const optionLabel = (option: Option): string =>
+  option.name || localized(option, "name") || "";
 
 interface MultiSelectProps<T extends Option = Option> {
   options: T[];
@@ -40,9 +46,10 @@ const MultiSelect = <T extends Option = Option>({
 
   const filteredOptions = options.filter((option) => {
     const isNotSelected = singleSelect || !selectedIds.has(option.id);
+    const term = searchTerm.toLowerCase();
     const matchesSearch =
-      option.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      option.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      optionLabel(option).toLowerCase().includes(term) ||
+      option.email?.toLowerCase().includes(term);
     return isNotSelected && matchesSearch;
   });
 
@@ -89,11 +96,11 @@ const MultiSelect = <T extends Option = Option>({
                   {item.profile_image && (
                     <img
                       src={item.profile_image}
-                      alt={item.name}
+                      alt={optionLabel(item)}
                       className="item-avatar"
                     />
                   )}
-                  <span>{item.name}</span>
+                  <span>{optionLabel(item)}</span>
                   {!singleSelect && (
                     <button
                       type="button"
@@ -144,7 +151,7 @@ const MultiSelect = <T extends Option = Option>({
                       />
                     )}
                     <div className="option-info">
-                      <div className="option-name">{option.name}</div>
+                      <div className="option-name">{optionLabel(option)}</div>
                       {option.email && (
                         <div className="option-email">{option.email}</div>
                       )}

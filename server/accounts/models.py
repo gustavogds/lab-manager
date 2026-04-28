@@ -11,22 +11,24 @@ from django.utils import timezone
 
 
 class Position(models.Model):
-    name = models.CharField(max_length=100)
+    name_pt = models.CharField(max_length=100, blank=True, default="")
+    name_en = models.CharField(max_length=100, blank=True, default="")
     is_visible = models.BooleanField(default=True)
     order = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["order", "name"]
+        ordering = ["order", "name_pt"]
 
     def __str__(self):
-        return self.name
+        return self.name_pt or self.name_en
 
     def export(self):
         return {
             "id": self.id,
-            "name": self.name,
+            "name_pt": self.name_pt,
+            "name_en": self.name_en,
             "is_visible": self.is_visible,
             "order": self.order,
         }
@@ -129,7 +131,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     contact_email = models.CharField(max_length=50, null=True, blank=True)
     social_media = models.CharField(max_length=50, null=True, blank=True)
     lattes = models.CharField(max_length=50, null=True, blank=True)
-    bio = models.TextField(null=True, blank=True)
+    bio_pt = models.TextField(blank=True, default="")
+    bio_en = models.TextField(blank=True, default="")
     is_public = models.BooleanField(default=True)
     is_approved = models.BooleanField(default=False)
     profile_image = models.ImageField(
@@ -190,7 +193,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             "contact_email": self.contact_email,
             "social_media": self.social_media,
             "lattes": self.lattes,
-            "bio": self.bio,
+            "bio_pt": self.bio_pt,
+            "bio_en": self.bio_en,
             "email_validated": self.email_validated,
             "profile_image": self.profile_image.url if self.profile_image else None,
         }

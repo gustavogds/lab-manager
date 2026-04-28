@@ -5,27 +5,31 @@ from django.utils import timezone
 
 
 class ResearchArea(models.Model):
-    title: str = models.CharField(max_length=255)
-    description: str = models.TextField()
+    title_pt: str = models.CharField(max_length=255, blank=True, default="")
+    title_en: str = models.CharField(max_length=255, blank=True, default="")
+    description_pt: str = models.TextField(blank=True, default="")
+    description_en: str = models.TextField(blank=True, default="")
     is_active: bool = models.BooleanField(default=True)
     order: int = models.IntegerField(default=0)
     created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
     updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["order", "title"]
+        ordering = ["order", "title_pt"]
 
     def __str__(self):
-        return self.title
+        return self.title_pt or self.title_en
 
     def __repr__(self):
-        return f"<ResearchArea pk={self.pk} title={self.title}>"
+        return f"<ResearchArea pk={self.pk} title_pt={self.title_pt}>"
 
     def export(self):
         return {
             "id": self.id,
-            "title": self.title,
-            "description": self.description,
+            "title_pt": self.title_pt,
+            "title_en": self.title_en,
+            "description_pt": self.description_pt,
+            "description_en": self.description_en,
             "is_active": self.is_active,
             "order": self.order,
             "created_at": self.created_at.isoformat(),
@@ -34,8 +38,10 @@ class ResearchArea(models.Model):
 
 
 class Project(models.Model):
-    title: str = models.CharField(max_length=255)
-    description: str = models.TextField()
+    title_pt: str = models.CharField(max_length=255, blank=True, default="")
+    title_en: str = models.CharField(max_length=255, blank=True, default="")
+    description_pt: str = models.TextField(blank=True, default="")
+    description_en: str = models.TextField(blank=True, default="")
     members = models.ManyToManyField("accounts.User", related_name="projects", blank=True)
     members_order = models.JSONField(default=list, blank=True)
     is_active: bool = models.BooleanField(default=True)
@@ -44,13 +50,13 @@ class Project(models.Model):
     updated_at: datetime.datetime = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["order", "title"]
+        ordering = ["order", "title_pt"]
 
     def __str__(self):
-        return self.title
+        return self.title_pt or self.title_en
 
     def __repr__(self):
-        return f"<Project pk={self.pk} title={self.title}>"
+        return f"<Project pk={self.pk} title_pt={self.title_pt}>"
 
     def export(self):
         members_list = list(self.members.filter(is_public=True))
@@ -65,8 +71,10 @@ class Project(models.Model):
 
         return {
             "id": self.id,
-            "title": self.title,
-            "description": self.description,
+            "title_pt": self.title_pt,
+            "title_en": self.title_en,
+            "description_pt": self.description_pt,
+            "description_en": self.description_en,
             "is_active": self.is_active,
             "order": self.order,
             "created_at": self.created_at.isoformat(),

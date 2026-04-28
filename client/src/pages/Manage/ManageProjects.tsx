@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { listProjects } from "helpers/api/content";
 import type { Project } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 import { ModalsHandler } from "components/my-own-modal-handler";
 import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import "./ManageContent.scss";
@@ -53,9 +54,9 @@ const ManageProjects = () => {
     const getValue = (item: Project) => {
       switch (sortKey) {
         case "title":
-          return item.title || "";
+          return localized(item, "title") || "";
         case "description":
-          return item.description || "";
+          return localized(item, "description") || "";
         case "members":
           return item.members.length.toString().padStart(10, "0");
         default:
@@ -74,8 +75,8 @@ const ManageProjects = () => {
       if (aValue < bValue) return -1 * direction;
       if (aValue > bValue) return 1 * direction;
 
-      const aTitle = (a.title || "").toLowerCase();
-      const bTitle = (b.title || "").toLowerCase();
+      const aTitle = localized(a, "title").toLowerCase();
+      const bTitle = localized(b, "title").toLowerCase();
       if (aTitle < bTitle) return -1 * direction;
       if (aTitle > bTitle) return 1 * direction;
       return 0;
@@ -155,9 +156,9 @@ const ManageProjects = () => {
                     className={!item.is_active ? "inactive" : ""}
                     onClick={() => handleEdit(item)}
                   >
-                    <td className="cell-name">{item.title}</td>
+                    <td className="cell-name">{localized(item, "title")}</td>
                     <td className="cell-description">
-                      {item.description || <span className="empty-value">—</span>}
+                      {localized(item, "description") || <span className="empty-value">—</span>}
                     </td>
                     <td className="cell-members">
                       {item.members.length > 0 ? (

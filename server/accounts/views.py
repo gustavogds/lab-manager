@@ -27,10 +27,13 @@ def update_user_settings(request):
         "contact_email",
         "social_media",
         "lattes",
-        "bio",
+        "bio_pt",
+        "bio_en",
         "birthdate",
         "is_public",
     ]
+
+    bilingual_fields = {"bio_pt", "bio_en"}
 
     for field in allowed_fields:
         if field in data:
@@ -38,6 +41,8 @@ def update_user_settings(request):
 
             if field == "birthdate" and new_value:
                 new_value = parse_date(new_value)
+            elif field in bilingual_fields:
+                new_value = new_value or ""
 
             current_value = getattr(user, field)
             if current_value != new_value:
@@ -255,11 +260,12 @@ def create_position(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON."}, status=400)
     
-    name = data.get("name", "").strip()
-    if not name:
+    name_pt = (data.get("name_pt") or "").strip()
+    name_en = (data.get("name_en") or "").strip()
+    if not name_pt and not name_en:
         return JsonResponse({"error": "Name is required."}, status=400)
-    
-    position = Position.objects.create(name=name)
+
+    position = Position.objects.create(name_pt=name_pt, name_en=name_en)
     return JsonResponse({
         "success": True,
         "message": "Position created.",
@@ -283,8 +289,10 @@ def update_position(request, position_id):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON."}, status=400)
     
-    if "name" in data:
-        position.name = data["name"].strip()
+    if "name_pt" in data:
+        position.name_pt = (data.get("name_pt") or "").strip()
+    if "name_en" in data:
+        position.name_en = (data.get("name_en") or "").strip()
     if "order" in data:
         position.order = data["order"]
     if "is_visible" in data:

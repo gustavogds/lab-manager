@@ -21,8 +21,10 @@ api.interceptors.request.use((config) => {
 
 export type ResearchArea = {
   id: number;
-  title: string;
-  description: string;
+  title_pt: string;
+  title_en: string;
+  description_pt: string;
+  description_en: string;
   is_active: boolean;
   order: number;
   created_at: string;
@@ -31,8 +33,10 @@ export type ResearchArea = {
 
 export type Project = {
   id: number;
-  title: string;
-  description: string;
+  title_pt: string;
+  title_en: string;
+  description_pt: string;
+  description_en: string;
   is_active: boolean;
   order: number;
   created_at: string;
@@ -46,8 +50,10 @@ export type Project = {
 };
 
 export const createResearchArea = async (data: {
-  title: string;
-  description: string;
+  title_pt: string;
+  title_en: string;
+  description_pt: string;
+  description_en: string;
 }) => {
   const response = await api
     .post("/content/research-areas/create/", data)
@@ -117,8 +123,10 @@ export const deleteResearchArea = async (areaId: number) => {
 };
 
 export const createProject = async (data: {
-  title: string;
-  description: string;
+  title_pt: string;
+  title_en: string;
+  description_pt: string;
+  description_en: string;
 }) => {
   const response = await api
     .post("/content/projects/create/", data)
@@ -204,7 +212,8 @@ export type User = {
   contact_email?: string;
   social_media?: string;
   lattes?: string;
-  bio?: string;
+  bio_pt?: string;
+  bio_en?: string;
   roles?: string[];
   is_active?: boolean;
   is_approved?: boolean;
@@ -385,7 +394,8 @@ export type RoomSection = {
 
 export type Position = {
   id: number;
-  name: string;
+  name_pt: string;
+  name_en: string;
   is_visible: boolean;
   order: number;
 };
@@ -763,7 +773,7 @@ export const listPositions = async () => {
   };
 };
 
-export const createPosition = async (data: { name: string }) => {
+export const createPosition = async (data: { name_pt?: string; name_en?: string }) => {
   const response = await api
     .post("/accounts/positions/create/", data)
     .catch((error) => {
@@ -778,7 +788,7 @@ export const createPosition = async (data: { name: string }) => {
 
 export const updatePosition = async (
   id: number,
-  data: { name?: string; order?: number; is_visible?: boolean }
+  data: { name_pt?: string; name_en?: string; order?: number; is_visible?: boolean }
 ) => {
   const response = await api
     .patch(`/accounts/positions/${id}/update/`, data)

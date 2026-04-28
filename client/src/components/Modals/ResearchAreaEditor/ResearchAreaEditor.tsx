@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { updateResearchArea, deleteResearchArea } from "helpers/api/content";
 import type { ResearchArea } from "helpers/api/content";
+import { localized } from "helpers/i18n";
 
 import { ModalsHandler } from "components/my-own-modal-handler";
 import "pages/Manage/ManageContent.scss";
@@ -19,8 +20,10 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
 }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
-    title: researchArea.title,
-    description: researchArea.description || "",
+    title_pt: researchArea.title_pt || "",
+    title_en: researchArea.title_en || "",
+    description_pt: researchArea.description_pt || "",
+    description_en: researchArea.description_en || "",
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
@@ -35,7 +38,7 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
+    if (!formData.title_pt.trim() && !formData.title_en.trim()) {
       setError(t("Title is required."));
       return;
     }
@@ -44,8 +47,10 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
     setError("");
 
     const payload: Record<string, any> = {
-      title: formData.title,
-      description: formData.description.trim() || "",
+      title_pt: formData.title_pt,
+      title_en: formData.title_en,
+      description_pt: formData.description_pt.trim() || "",
+      description_en: formData.description_en.trim() || "",
     };
 
     const response = await updateResearchArea(researchArea.id, payload);
@@ -93,7 +98,7 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!confirm(t(`Are you sure you want to delete "{{title}}"?`, { title: researchArea.title }))) return;
+    if (!confirm(t(`Are you sure you want to delete "{{title}}"?`, { title: localized(researchArea, "title") }))) return;
 
     setIsSaving(true);
     setError("");
@@ -146,25 +151,49 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="ra-title">{t("Title")} *</label>
+            <label htmlFor="ra-title-pt">{t("Title")} <span className="lang-badge">PT</span></label>
             <input
-              id="ra-title"
+              id="ra-title-pt"
               type="text"
-              name="title"
-              value={formData.title}
+              name="title_pt"
+              value={formData.title_pt}
               onChange={handleChange}
               placeholder={t("Research area title")}
               maxLength={255}
-              required
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="ra-description">{t("Description")}</label>
+            <label htmlFor="ra-title-en">{t("Title")} <span className="lang-badge">EN</span></label>
+            <input
+              id="ra-title-en"
+              type="text"
+              name="title_en"
+              value={formData.title_en}
+              onChange={handleChange}
+              placeholder={t("Research area title")}
+              maxLength={255}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="ra-description-pt">{t("Description")} <span className="lang-badge">PT</span></label>
             <textarea
-              id="ra-description"
-              name="description"
-              value={formData.description}
+              id="ra-description-pt"
+              name="description_pt"
+              value={formData.description_pt}
+              onChange={handleChange}
+              placeholder={t("Research area description")}
+              rows={4}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="ra-description-en">{t("Description")} <span className="lang-badge">EN</span></label>
+            <textarea
+              id="ra-description-en"
+              name="description_en"
+              value={formData.description_en}
               onChange={handleChange}
               placeholder={t("Research area description")}
               rows={4}
