@@ -24,10 +24,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "baseUrl": "./src",
     "paths": {
-      "components/*": ["components/*"],
-      "pages/*": ["pages/*"]
+      "assets/*": ["./src/assets/*"],
+      "components/*": ["./src/components/*"],
+      "helpers/*": ["./src/helpers/*"],
+      "pages/*": ["./src/pages/*"]
     }
   },
   "include": ["src"]
