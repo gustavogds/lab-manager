@@ -156,9 +156,7 @@ USE_TZ = True
 VITE_APP_DIR = BASE_DIR / "client"
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    VITE_APP_DIR / "dist",
-]
+STATICFILES_DIRS = [d for d in [VITE_APP_DIR / "dist"] if d.exists()]
 STATIC_ROOT = BASE_DIR / "server" / "staticfiles"
 STATIC_ROOT_CLIENT = BASE_DIR / "client" / "src"
 
