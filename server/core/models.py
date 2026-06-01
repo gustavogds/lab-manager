@@ -4,6 +4,7 @@ from django.db import models
 class LabSettings(models.Model):
     lab_name = models.CharField(max_length=255, default="Lab Management System")
     logo = models.ImageField(upload_to="lab_logos/", blank=True, null=True)
+    favicon = models.ImageField(upload_to="lab_favicons/", blank=True, null=True)
     mission_pt = models.TextField(blank=True, default="")
     mission_en = models.TextField(blank=True, default="")
     areas = models.TextField(blank=True, null=True)
@@ -47,6 +48,7 @@ class LabSettings(models.Model):
             "address_details_en": self.address_details_en,
             "maps_link": self.maps_link,
             "logo": self.logo.url if self.logo else None,
+            "favicon": self.favicon.url if self.favicon else None,
             "mission_pt": self.mission_pt,
             "mission_en": self.mission_en,
             "about_images": about_images,

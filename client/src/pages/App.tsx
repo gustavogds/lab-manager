@@ -27,6 +27,7 @@ import ManageUsers from "./Manage/ManageUsers";
 import { useEffect, useState } from "react";
 import AuthHandler from "../helpers/services/AuthHandler";
 import { useGlobalData } from "../helpers/context/globalContext";
+import { getLabSettings } from "../helpers/api/settings";
 import Notification from "../components/Modals/Notification/Notification";
 import SectionEditorModal from "../components/Modals/SectionEditor/SectionEditor";
 import ProjectDetails from "../components/Modals/ProjectDetails/ProjectDetails";
@@ -106,6 +107,24 @@ const App = () => {
     ModalsHandler.registerModal("EquipmentStateEditor", EquipmentStateEditor);
     ModalsHandler.registerModal("UserEditor", UserEditor);
     ModalsHandler.registerModal("PositionEditor", PositionEditor);
+
+    (async () => {
+      const response = await getLabSettings();
+      if (!response.success) return;
+      if (response.data.lab_name) {
+        document.title = response.data.lab_name;
+      }
+      if (response.data.favicon) {
+        let link = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+        if (!link) {
+          link = document.createElement("link");
+          link.rel = "icon";
+          document.head.appendChild(link);
+        }
+        link.removeAttribute("type");
+        link.href = response.data.favicon;
+      }
+    })();
   }, []);
 
   if (!readyToRender) {

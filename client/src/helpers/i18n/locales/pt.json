@@ -488,5 +488,12 @@
   "Team, profiles of researchers and students involved.": "Equipe, perfis de pesquisadores e estudantes envolvidos.",
   "partnership(s) will be permanently deleted upon saving.": "parceria(s) será(ão) excluída(s) permanentemente ao salvar.",
   "username": "nome de usuário",
-  "{{count}} equipment moved successfully!": "{{count}} equipamento(s) movido(s) com sucesso!"
+  "{{count}} equipment moved successfully!": "{{count}} equipamento(s) movido(s) com sucesso!",
+  "Browser Tab Icon (Favicon)": "Ícone da Aba do Navegador (Favicon)",
+  "Browser tab icon": "Ícone da aba do navegador",
+  "No icon": "Sem ícone",
+  "Recommended: square PNG, ICO or SVG. Maximum size:": "Recomendado: PNG, ICO ou SVG quadrado. Tamanho máximo:",
+  "The favicon must be at most": "O favicon deve ter no máximo",
+  "Failed to upload favicon.": "Falha ao enviar o favicon.",
+  "Favicon updated successfully.": "Favicon atualizado com sucesso."
 }

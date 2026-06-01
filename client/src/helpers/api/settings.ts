@@ -72,6 +72,26 @@ export const uploadLabLogo = async (file: File) => {
   };
 };
 
+export const uploadLabFavicon = async (file: File) => {
+  const formData = new FormData();
+  formData.append("favicon", file);
+
+  const response = await api
+    .post("/core/settings/upload-favicon/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
 export const getLabSettings = async () => {
   const response = await api.get("/core/settings/get/").catch((error) => {
     return error.response ? error.response : error;

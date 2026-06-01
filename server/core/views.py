@@ -136,6 +136,38 @@ def upload_lab_logo(request):
 @login_required
 @csrf_exempt
 @require_http_methods(["POST"])
+def upload_lab_favicon(request):
+    if "favicon" not in request.FILES:
+        return JsonResponse({"error": "No file uploaded."}, status=400)
+
+    favicon = request.FILES["favicon"]
+    max_size = 1 * 1024 * 1024  # 1MB
+
+    if favicon.size > max_size:
+        return JsonResponse(
+            {"error": "Favicon exceeds maximum size of 1MB."}, status=400
+        )
+
+    allowed_types = ("image/png", "image/x-icon", "image/vnd.microsoft.icon", "image/svg+xml")
+    if not (favicon.content_type in allowed_types or favicon.content_type.startswith("image/")):
+        return JsonResponse({"error": "Invalid file type."}, status=400)
+
+    lab_settings, _ = LabSettings.objects.get_or_create(pk=1)
+    lab_settings.favicon = favicon
+    lab_settings.save()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Favicon uploaded successfully.",
+            "favicon_url": lab_settings.favicon.url,
+        }
+    )
+
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
 def upload_about_image(request):
     if "image" not in request.FILES:
         return JsonResponse({"error": "No image uploaded."}, status=400)
