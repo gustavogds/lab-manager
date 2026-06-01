@@ -97,7 +97,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
               name="title_pt"
               value={formData.title_pt}
               onChange={handleChange}
-              placeholder="Project title"
+              placeholder={t("Project title")}
             />
           </div>
 
@@ -120,7 +120,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
               name="description_pt"
               value={formData.description_pt}
               onChange={handleChange}
-              placeholder="Project description"
+              placeholder={t("Project description")}
               rows={5}
             />
           </div>
@@ -146,7 +146,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
                 options={availableUsers}
                 selected={formData.members}
                 onChange={handleMembersChange}
-                placeholder="Select members (Order will define display order)..."
+                placeholder={t("Select members (Order will define display order)...")}
               />
             )}
           </div>

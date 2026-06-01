@@ -98,7 +98,7 @@ const CreateResearchArea = () => {
               name="title_en"
               value={formData.title_en}
               onChange={handleChange}
-              placeholder={t("Ex: Artificial Intelligence")}
+              placeholder={"Ex: Artificial Intelligence"}
               maxLength={255}
             />
           </div>
@@ -122,7 +122,7 @@ const CreateResearchArea = () => {
               name="description_en"
               value={formData.description_en}
               onChange={handleChange}
-              placeholder={t("Describe the research area, objectives and lines of investigation...")}
+              placeholder={"Describe the research area, objectives and lines of investigation..."}
               rows={6}
             />
           </div>

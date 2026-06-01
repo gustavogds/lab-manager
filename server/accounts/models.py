@@ -88,6 +88,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         user = self.create_user("admin", email, password, "admin", roles=["professor"], **extra_fields)
         user.email_validated = True
+        user.is_approved = True
         user.is_staff = True
         user.is_superuser = True
         user.save()

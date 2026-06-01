@@ -123,7 +123,7 @@ const CreateProject = () => {
               name="title_en"
               value={formData.title_en}
               onChange={handleChange}
-              placeholder={t("Ex: Laboratory Management System")}
+              placeholder={"Ex: Laboratory Management System"}
               maxLength={255}
             />
           </div>
@@ -147,7 +147,7 @@ const CreateProject = () => {
               name="description_en"
               value={formData.description_en}
               onChange={handleChange}
-              placeholder={t("Describe the project, objectives, methodology and expected results...")}
+              placeholder={"Describe the project, objectives, methodology and expected results..."}
               rows={6}
             />
           </div>

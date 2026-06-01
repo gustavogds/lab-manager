@@ -191,7 +191,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
               name="title_en"
               value={formData.title_en}
               onChange={handleChange}
-              placeholder={t("Project title")}
+              placeholder="Project title"
               maxLength={255}
             />
           </div>

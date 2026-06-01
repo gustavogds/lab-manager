@@ -422,5 +422,18 @@
   "Register first research area": "Registrar primeira área de pesquisa",
   "Register first partnership": "Registrar primeira parceria",
   "Register first equipment": "Registrar primeiro equipamento",
-  "Register first researcher": "Registrar primeiro pesquisador"
+  "Register first researcher": "Registrar primeiro pesquisador",
+  "Manage lab research areas": "Gerenciar as áreas de pesquisa do laboratório",
+  "Manage lab projects": "Gerenciar os projetos do laboratório",
+  "Manage lab partnerships": "Gerenciar as parcerias do laboratório",
+  "Manage lab materials and equipment": "Gerenciar materiais e equipamentos do laboratório",
+  "Loading users...": "Carregando usuários...",
+  "Loading equipment...": "Carregando equipamentos...",
+  "Loading partnerships...": "Carregando parcerias...",
+  "Loading projects...": "Carregando projetos...",
+  "Loading research areas...": "Carregando áreas de pesquisa...",
+  "Invitee's name": "Nome do convidado",
+  "Position/Role": "Cargo/Função",
+  "Biography": "Biografia",
+  "Select members (Order will define display order)...": "Selecione os integrantes (A ordem definirá a ordem de exibição)..."
 }
