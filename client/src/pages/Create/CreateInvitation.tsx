@@ -204,7 +204,7 @@ const CreateInvitation = () => {
             <div className="form-field">
               <label htmlFor="lattes">
                 <FaGraduationCap className="label-icon" />
-                Lattes
+                {t("Lattes")}
               </label>
               <input
                 id="lattes"

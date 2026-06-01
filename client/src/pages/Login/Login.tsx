@@ -241,28 +241,28 @@ const SignUp = ({
   );
 };
 
-const VERIFIED_MESSAGES: Record<string, { title: string; message: string; type: "success" | "info" | "error" }> = {
+const getVerifiedMessages = (t: (key: string) => string): Record<string, { title: string; message: string; type: "success" | "info" | "error" }> => ({
   success: {
-    title: "Email Verified",
-    message: "Your email has been verified successfully! Wait for an administrator to approve your account.",
+    title: t("Email Verified"),
+    message: t("Your email has been verified successfully! Wait for an administrator to approve your account."),
     type: "success",
   },
   expired: {
-    title: "Expired Link",
-    message: "The verification link has expired or is invalid. Create a new account to receive a new link.",
+    title: t("Link Expired"),
+    message: t("The verification link has expired or is invalid. Create a new account to receive a new link."),
     type: "error",
   },
   invalid: {
-    title: "Invalid Link",
-    message: "The verification link is invalid.",
+    title: t("Invalid Link"),
+    message: t("The verification link is invalid."),
     type: "error",
   },
   already: {
-    title: "Email Already Verified",
-    message: "Your email has already been verified.",
+    title: t("Email Already Verified"),
+    message: t("Your email has already been verified."),
     type: "info",
   },
-};
+});
 
 const SignIn = ({
   onSubmit,
@@ -280,8 +280,9 @@ const SignIn = ({
 
   useEffect(() => {
     const verified = searchParams.get("verified");
-    if (verified && VERIFIED_MESSAGES[verified]) {
-      ModalsHandler.createNotification(VERIFIED_MESSAGES[verified]);
+    const verifiedMessages = getVerifiedMessages(t);
+    if (verified && verifiedMessages[verified]) {
+      ModalsHandler.createNotification(verifiedMessages[verified]);
       setSearchParams({}, { replace: true });
     }
   }, []);

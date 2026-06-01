@@ -57,11 +57,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title_pt.trim() && !formData.title_en.trim()) {
-      alert(t("Title is required"));
+      alert(t("Title is required."));
       return;
     }
     if (!formData.description_pt.trim() && !formData.description_en.trim()) {
-      alert(t("Description is required"));
+      alert(t("Description is required."));
       return;
     }
     onConfirm(formData);
