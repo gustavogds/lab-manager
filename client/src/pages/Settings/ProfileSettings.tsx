@@ -233,7 +233,7 @@ const ProfileSettings = () => {
           />
         </label>
         <label>
-          Lattes
+          {t("Lattes")}
           <input
             name="lattes"
             value={formData.lattes}

@@ -536,7 +536,7 @@ const Home = () => {
           name: "title_en",
           label: `${t("Title")} (EN)`,
           type: "text",
-          placeholder: t("Ex: Artificial Intelligence"),
+          placeholder: "Ex: Artificial Intelligence",
         },
         {
           name: "description_pt",
@@ -549,7 +549,7 @@ const Home = () => {
           name: "description_en",
           label: `${t("Description")} (EN)`,
           type: "textarea",
-          placeholder: t("Describe the research area..."),
+          placeholder: "Describe the research area...",
           rows: 6,
         },
       ],

@@ -15,7 +15,9 @@ const Navbar = () => {
   const { t } = useTranslation();
   const { user }: any = useGlobalData();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [labLogo, setLabLogo] = useState("");
+  const [labLogo, setLabLogo] = useState(
+    () => localStorage.getItem("labLogo") || ""
+  );
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
@@ -25,8 +27,13 @@ const Navbar = () => {
   useEffect(() => {
     const fetchLabSettings = async () => {
       const response = await getLabSettings();
-      if (response.success && response.data.logo) {
-        setLabLogo(response.data.logo);
+      if (!response.success) return;
+      const logo = response.data.logo || "";
+      setLabLogo(logo);
+      if (logo) {
+        localStorage.setItem("labLogo", logo);
+      } else {
+        localStorage.removeItem("labLogo");
       }
     };
     fetchLabSettings();

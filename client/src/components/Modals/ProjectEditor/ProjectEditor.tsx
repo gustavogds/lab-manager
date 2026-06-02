@@ -57,11 +57,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title_pt.trim() && !formData.title_en.trim()) {
-      alert(t("Title is required"));
+      alert(t("Title is required."));
       return;
     }
     if (!formData.description_pt.trim() && !formData.description_en.trim()) {
-      alert(t("Description is required"));
+      alert(t("Description is required."));
       return;
     }
     onConfirm(formData);
@@ -97,7 +97,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
               name="title_pt"
               value={formData.title_pt}
               onChange={handleChange}
-              placeholder="Project title"
+              placeholder={t("Project title")}
             />
           </div>
 
@@ -120,7 +120,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
               name="description_pt"
               value={formData.description_pt}
               onChange={handleChange}
-              placeholder="Project description"
+              placeholder={t("Project description")}
               rows={5}
             />
           </div>
@@ -146,7 +146,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
                 options={availableUsers}
                 selected={formData.members}
                 onChange={handleMembersChange}
-                placeholder="Select members (Order will define display order)..."
+                placeholder={t("Select members (Order will define display order)...")}
               />
             )}
           </div>

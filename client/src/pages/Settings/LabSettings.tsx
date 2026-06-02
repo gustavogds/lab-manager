@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import "./Settings.scss";
 
 import MultiSelect from "components/MultiSelect/MultiSelect";
-import { saveLabSettings, getLabSettings, uploadLabLogo } from "helpers/api/settings";
+import { saveLabSettings, getLabSettings, uploadLabLogo, uploadLabFavicon } from "helpers/api/settings";
 import { setLabDefaultLanguage, getLabDefaultLanguage } from "helpers/i18n";
 
 const DEFAULT_COLORS = {
@@ -55,9 +55,12 @@ const LabSettings = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const [faviconUrl, setFaviconUrl] = useState("");
 
   const MAX_LOGO_SIZE_MB = 2;
   const MAX_LOGO_SIZE_BYTES = MAX_LOGO_SIZE_MB * 1024 * 1024;
+  const MAX_FAVICON_SIZE_MB = 1;
+  const MAX_FAVICON_SIZE_BYTES = MAX_FAVICON_SIZE_MB * 1024 * 1024;
 
   useEffect(() => {
     const fetchLabSettings = async () => {
@@ -78,6 +81,7 @@ const LabSettings = () => {
           default_language: response.data.default_language || getLabDefaultLanguage(),
         });
         setLogoUrl(response.data.logo || "");
+        setFaviconUrl(response.data.favicon || "");
       }
     };
     fetchLabSettings();
@@ -129,6 +133,44 @@ const LabSettings = () => {
       setError("");
     } else {
       setError(response.error || response.message || t("Failed to upload logo."));
+      setMessage("");
+    }
+
+    e.target.value = "";
+  };
+
+  const handleFaviconChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FAVICON_SIZE_BYTES) {
+      setError(
+        `${t("The favicon must be at most")} ${MAX_FAVICON_SIZE_MB}MB.`
+      );
+      setMessage("");
+      return;
+    }
+
+    const response = await uploadLabFavicon(file);
+
+    if (response.success) {
+      setFaviconUrl(response.favicon_url || "");
+      if (response.favicon_url) {
+        let link = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+        if (!link) {
+          link = document.createElement("link");
+          link.rel = "icon";
+          document.head.appendChild(link);
+        }
+        link.removeAttribute("type");
+        link.href = response.favicon_url;
+      }
+      setMessage(response.message || t("Favicon updated successfully."));
+      setError("");
+    } else {
+      setError(response.error || response.message || t("Failed to upload favicon."));
       setMessage("");
     }
 
@@ -202,6 +244,29 @@ const LabSettings = () => {
               />
               <small>
                 {t("Maximum size:")} {MAX_LOGO_SIZE_MB}MB
+              </small>
+            </div>
+          </div>
+        </label>
+
+        <label>
+          {t("Browser Tab Icon (Favicon)")}:
+          <div className="profile-image-field">
+            <div className="profile-image-preview logo-preview">
+              {faviconUrl ? (
+                <img src={faviconUrl} alt={t("Browser tab icon")} />
+              ) : (
+                <span>{t("No icon")}</span>
+              )}
+            </div>
+            <div className="profile-image-actions">
+              <input
+                type="file"
+                accept="image/png,image/x-icon,image/vnd.microsoft.icon,image/svg+xml"
+                onChange={handleFaviconChange}
+              />
+              <small>
+                {t("Recommended: square PNG, ICO or SVG. Maximum size:")} {MAX_FAVICON_SIZE_MB}MB
               </small>
             </div>
           </div>
