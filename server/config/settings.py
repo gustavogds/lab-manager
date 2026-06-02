@@ -160,12 +160,17 @@ STATICFILES_DIRS = [d for d in [VITE_APP_DIR / "dist"] if d.exists()]
 STATIC_ROOT = BASE_DIR / "server" / "staticfiles"
 STATIC_ROOT_CLIENT = BASE_DIR / "client" / "src"
 
-CONTENT_ROOT = root("storage/private/objects")
-FILE_UPLOAD_TEMP_ROOT = root("storage/upload-tmp")
-THUMB_ROOT = root("storage/private/thumbs")
+# Storage lives under server/storage/ (matches the nginx aliases and DEPLOY.md).
+# Note: root() anchors to this file's dir (server/config/), so we use BASE_DIR here
+# to avoid resolving to server/config/storage/ — which nginx does NOT serve.
+STORAGE_ROOT = BASE_DIR / "server" / "storage"
+
+CONTENT_ROOT = str(STORAGE_ROOT / "private" / "objects")
+FILE_UPLOAD_TEMP_ROOT = str(STORAGE_ROOT / "upload-tmp")
+THUMB_ROOT = str(STORAGE_ROOT / "private" / "thumbs")
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = root("storage/files")
+MEDIA_ROOT = str(STORAGE_ROOT / "files")
 
 if not exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)
