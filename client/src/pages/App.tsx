@@ -78,7 +78,12 @@ const ProtectedRoute = ({
 
 const App = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/signin", "/signup", "/password/reset"];
+  const hideNavbarRoutes = [
+    "/signin",
+    "/signup",
+    "/password/reset",
+    "/password/reset/confirm",
+  ];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   const [readyToRender, setReadyToRender] = useState(false);
   const { user }: any = useGlobalData();
@@ -159,6 +164,14 @@ const App = () => {
             element={
               <ProtectedRoute user={user.state}>
                 <Login isPasswordReset={true} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/password/reset/confirm"
+            element={
+              <ProtectedRoute user={user.state}>
+                <Login isPasswordResetConfirm={true} />
               </ProtectedRoute>
             }
           />

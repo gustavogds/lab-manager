@@ -1,3 +1,4 @@
+import hashlib
 import logging
 
 from django.conf import settings
@@ -13,6 +14,9 @@ logger = logging.getLogger(__name__)
 VERIFICATION_SALT = "email-verification"
 VERIFICATION_MAX_AGE = 60 * 60 * 24  # 24 hours
 
+PASSWORD_RESET_SALT = "password-reset"
+PASSWORD_RESET_MAX_AGE = 60 * 60  # 1 hour
+
 
 def generate_verification_token(email: str) -> str:
     return signing.dumps({"email": email}, salt=VERIFICATION_SALT)
@@ -21,6 +25,28 @@ def generate_verification_token(email: str) -> str:
 def verify_token(token: str) -> dict | None:
     try:
         return signing.loads(token, salt=VERIFICATION_SALT, max_age=VERIFICATION_MAX_AGE)
+    except (signing.BadSignature, signing.SignatureExpired):
+        return None
+
+
+def _password_fingerprint(user) -> str:
+    """Short digest of the current password hash so a reset token becomes
+    invalid as soon as the password is changed (single use)."""
+    return hashlib.sha256(user.password.encode()).hexdigest()[:16]
+
+
+def generate_password_reset_token(user) -> str:
+    return signing.dumps(
+        {"email": user.email, "fp": _password_fingerprint(user)},
+        salt=PASSWORD_RESET_SALT,
+    )
+
+
+def verify_password_reset_token(token: str) -> dict | None:
+    try:
+        return signing.loads(
+            token, salt=PASSWORD_RESET_SALT, max_age=PASSWORD_RESET_MAX_AGE
+        )
     except (signing.BadSignature, signing.SignatureExpired):
         return None
 
@@ -52,6 +78,42 @@ def send_verification_email(user) -> None:
 
     send_mail(
         subject="Verifique seu e-mail",
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+
+def send_password_reset_email(user) -> None:
+    token = generate_password_reset_token(user)
+    reset_url = f"{settings.SITE_URL}/password/reset/confirm?token={token}"
+
+    logger.info("=" * 60)
+    logger.info("PASSWORD RESET LINK for %s:", user.email)
+    logger.info(reset_url)
+    logger.info("=" * 60)
+
+    html_message = render_to_string(
+        "accounts/password_reset_email.html",
+        {
+            "user_name": user.name,
+            "reset_url": reset_url,
+        },
+    )
+
+    plain_message = (
+        f"Olá, {user.name}!\n\n"
+        f"Recebemos uma solicitação para redefinir a senha da sua conta. "
+        f"Para escolher uma nova senha, acesse o link abaixo:\n\n"
+        f"{reset_url}\n\n"
+        f"Este link expira em 1 hora. Caso não tenha solicitado a redefinição, "
+        f"ignore este e-mail — sua senha permanecerá a mesma.\n"
+    )
+
+    send_mail(
+        subject="Redefinição de senha",
         message=plain_message,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],

@@ -65,6 +65,40 @@ export const register = async (
   };
 };
 
+export const requestPasswordReset = async (email: string) => {
+  const response = await api
+    .post("/auth/password-reset/", { email })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const confirmPasswordReset = async (
+  token: string,
+  password: string,
+  confirmPassword: string
+) => {
+  const response = await api
+    .post("/auth/password-reset/confirm/", {
+      token,
+      password,
+      confirmPassword,
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
 export const logout = async () => {
   const response = await api.post("/auth/sign-out/").catch((error) => {
     return error.response ? error.response : error;
