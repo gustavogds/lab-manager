@@ -6,7 +6,12 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import redirect
 
 from accounts.models import User
-from accounts.verification import send_verification_email, verify_token
+from accounts.verification import (
+    send_password_reset_email,
+    send_verification_email,
+    verify_password_reset_token,
+    verify_token,
+)
 from config.utils import JsonResponse
 from sitewide.decorators import methods_allowed, user_access_required
 
@@ -159,6 +164,60 @@ def sign_up(request):
             "success": True,
         }
     )
+
+
+@methods_allowed(["POST"])
+def request_password_reset(request):
+    data = json.loads(request.body)
+    email = (data.get("email") or "").strip()
+
+    if not email:
+        raise ValidationError("Email is required")
+
+    # Only send the email if the account exists, but always respond the same way
+    # so the endpoint can't be used to probe which emails are registered.
+    user = User.objects.filter(email__iexact=email).first()
+    if user is not None:
+        send_password_reset_email(user)
+
+    return JsonResponse(content={"success": True})
+
+
+@methods_allowed(["POST"])
+def confirm_password_reset(request):
+    data = json.loads(request.body)
+    token = data.get("token")
+    password = data.get("password")
+    confirm_password = data.get("confirmPassword")
+
+    if not token:
+        raise ValidationError("Token is required")
+
+    if not password:
+        raise ValidationError("Password is required")
+
+    if password != confirm_password:
+        raise ValidationError("Passwords do not match")
+
+    payload = verify_password_reset_token(token)
+    if payload is None:
+        raise ValidationError("O link de redefinição é inválido ou expirou.")
+
+    user = User.objects.filter(email=payload.get("email")).first()
+    if user is None:
+        raise ValidationError("O link de redefinição é inválido ou expirou.")
+
+    # Re-validate the fingerprint so a token can only be used once: changing the
+    # password rotates the hash and invalidates any previously issued token.
+    from accounts.verification import _password_fingerprint
+
+    if payload.get("fp") != _password_fingerprint(user):
+        raise ValidationError("O link de redefinição é inválido ou expirou.")
+
+    user.set_password(password)
+    user.save()
+
+    return JsonResponse(content={"success": True})
 
 
 @ensure_csrf_cookie

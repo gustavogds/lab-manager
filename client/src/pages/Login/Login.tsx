@@ -7,6 +7,7 @@ import "./Login.scss";
 import Medias from "components/Medias/Medias";
 import AuthHandler from "helpers/services/AuthHandler";
 import { getLabSettings } from "helpers/api/settings";
+import { requestPasswordReset, confirmPasswordReset } from "helpers/api/auth";
 import { validateInvitation } from "helpers/api/invitations";
 import { ModalsHandler } from "components/my-own-modal-handler";
 
@@ -383,11 +384,23 @@ const ForgotPassword = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
+    if (!email.trim()) {
+      setError(t("Email is required."));
+      return;
+    }
+    setError("");
+    setIsLoading(true);
+    const response = await requestPasswordReset(email.trim());
+    setIsLoading(false);
+    if (response.success) {
       setSent(true);
+    } else {
+      setError(response.error || t("Something went wrong!"));
     }
   };
 
@@ -404,7 +417,7 @@ const ForgotPassword = () => {
         </div>
       ) : (
         <>
-          <div className="form-field">
+          <div className={`form-field ${error ? "has-error" : ""}`}>
             <label htmlFor="reset-email">{t("Email")}</label>
             <div className="input-wrapper">
               <FaEnvelope className="input-icon" />
@@ -412,14 +425,176 @@ const ForgotPassword = () => {
                 id="reset-email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError("");
+                }}
                 placeholder="seu@email.com"
               />
             </div>
+            {error && <span className="field-error">{error}</span>}
           </div>
 
-          <button type="submit" className="submit-btn">
-            {t("Send Link")}
+          <button type="submit" className="submit-btn" disabled={isLoading}>
+            {isLoading ? t("Sending...") : t("Send Link")}
+          </button>
+        </>
+      )}
+    </form>
+  );
+};
+
+const ResetPasswordConfirm = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token") || "";
+
+  const [formData, setFormData] = useState({ password: "", confirmPassword: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.password) newErrors.password = t("Password is required.");
+    else if (formData.password.length < 6)
+      newErrors.password = t("Password must be at least 6 characters.");
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = t("Passwords do not match.");
+    return newErrors;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setIsLoading(true);
+    const response = await confirmPasswordReset(
+      token,
+      formData.password,
+      formData.confirmPassword
+    );
+    setIsLoading(false);
+    if (response.success) {
+      setDone(true);
+      ModalsHandler.createNotification({
+        title: t("Password Updated"),
+        message: t("Your password has been updated successfully! You can now sign in."),
+        type: "success",
+      });
+      setTimeout(() => {
+        navigate("/signin");
+      }, 2000);
+    } else {
+      ModalsHandler.createNotification({
+        title: t("Reset Error"),
+        message: response.error || t("Something went wrong!"),
+        type: "error",
+      });
+    }
+  };
+
+  if (!token) {
+    return (
+      <div>
+        <h2>{t("Reset Password")}</h2>
+        <div className="success-banner">
+          {t("The reset link is invalid or has expired. Request a new link.")}
+        </div>
+        <button
+          type="button"
+          className="submit-btn"
+          onClick={() => navigate("/password/reset")}
+        >
+          {t("Recover Password")}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} noValidate>
+      <h2>{t("Reset Password")}</h2>
+      <p className="form-subtitle">{t("Choose a new password for your account")}</p>
+
+      {done ? (
+        <div className="success-banner">
+          {t("Your password has been updated successfully! You can now sign in.")}
+        </div>
+      ) : (
+        <>
+          <div className={`form-field ${errors.password ? "has-error" : ""}`}>
+            <label htmlFor="new-password">{t("Password")}</label>
+            <div className="input-wrapper">
+              <FaLock className="input-icon" />
+              <input
+                id="new-password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={handleChange}
+                placeholder={t("Minimum 6 characters")}
+              />
+              <button
+                type="button"
+                className="toggle-password"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            {errors.password && (
+              <span className="field-error">{errors.password}</span>
+            )}
+          </div>
+
+          <div className={`form-field ${errors.confirmPassword ? "has-error" : ""}`}>
+            <label htmlFor="new-confirm-password">{t("Confirm Password")}</label>
+            <div className="input-wrapper">
+              <FaLock className="input-icon" />
+              <input
+                id="new-confirm-password"
+                name="confirmPassword"
+                type={showConfirm ? "text" : "password"}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder={t("Repeat the password")}
+              />
+              <button
+                type="button"
+                className="toggle-password"
+                onClick={() => setShowConfirm((v) => !v)}
+                tabIndex={-1}
+              >
+                {showConfirm ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <span className="field-error">{errors.confirmPassword}</span>
+            )}
+          </div>
+
+          <button type="submit" className="submit-btn" disabled={isLoading}>
+            {isLoading ? t("Updating...") : t("Reset Password")}
           </button>
         </>
       )}
@@ -430,9 +605,11 @@ const ForgotPassword = () => {
 const Login = ({
   isSignUp,
   isPasswordReset,
+  isPasswordResetConfirm,
 }: {
   isSignUp?: boolean;
   isPasswordReset?: boolean;
+  isPasswordResetConfirm?: boolean;
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -539,7 +716,7 @@ const Login = ({
   let switchLabel: string;
   let switchPath: string;
 
-  if (isPasswordReset) {
+  if (isPasswordReset || isPasswordResetConfirm) {
     switchText = t("Remembered your password?");
     switchLabel = t("Sign In");
     switchPath = "/signin";
@@ -588,7 +765,9 @@ const Login = ({
         </div>
 
         <div className="login-form-area">
-          {isPasswordReset ? (
+          {isPasswordResetConfirm ? (
+            <ResetPasswordConfirm />
+          ) : isPasswordReset ? (
             <ForgotPassword />
           ) : isSignUpPage ? (
             <SignUp onSubmit={onSubmit} isLoading={isLoading} invitationData={invitationData} />
