@@ -6,12 +6,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="shortcut icon"
-      type="image/png"
-      href="{% static 'favicon.ico' %}"
-    />
-    <title>Lab Manager</title>
+    {% if lab_favicon_url %}
+    <link rel="icon" href="{{ lab_favicon_url }}" />
+    {% else %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}" />
+    {% endif %}
+    <title>{{ lab_name|default:"Lab Manager" }}</title>
     {% if debug %}
     <script type="module" src="http://localhost:5175/@vite/client"></script>
     <script type="module">
