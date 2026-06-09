@@ -13,6 +13,7 @@ urlpatterns = [
         views.confirm_password_reset,
         name="password-reset-confirm",
     ),
+    path("change-password/", views.change_password, name="change-password"),
     path("sync/", views.sync, name="sync"),
     path("session/", views.session, name="session"),
     path("whoami/", views.whoami, name="whoami"),
