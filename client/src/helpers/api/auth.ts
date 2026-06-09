@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from "universal-cookie";
+import { getCurrentLang } from "helpers/i18n";
 
 const cookies = new Cookies();
 
@@ -54,6 +55,7 @@ export const register = async (
       confirmPassword,
       role,
       invitation_token: invitationToken,
+      language: getCurrentLang(),
     })
     .catch((error) => {
       return error.response ? error.response : error;
@@ -67,7 +69,7 @@ export const register = async (
 
 export const requestPasswordReset = async (email: string) => {
   const response = await api
-    .post("/auth/password-reset/", { email })
+    .post("/auth/password-reset/", { email, language: getCurrentLang() })
     .catch((error) => {
       return error.response ? error.response : error;
     });

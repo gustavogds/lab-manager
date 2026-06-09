@@ -188,6 +188,8 @@
   "Role(s)": "Função(ões)",
   "Select roles...": "Selecione as funções...",
   "Select one or more roles for the new member": "Selecione uma ou mais funções para o novo membro",
+  "Invitation Language": "Idioma do Convite",
+  "The invitation email will be sent in this language.": "O e-mail de convite será enviado neste idioma.",
   "Optional Information (Pre-fill)": "Informações Opcionais (Pré-preenchimento)",
   "New Report": "Novo Relatório",
   "Configure and generate a report with lab data": "Configure e gere um relatório com os dados do laboratório",

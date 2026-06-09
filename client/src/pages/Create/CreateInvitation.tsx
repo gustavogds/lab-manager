@@ -3,7 +3,8 @@ import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { createInvitation } from "helpers/api/invitations";
 import { listPositions, type Position } from "helpers/api/content";
-import { FaArrowLeft, FaEnvelope, FaUser, FaPhone, FaGraduationCap } from "react-icons/fa";
+import { getCurrentLang } from "helpers/i18n";
+import { FaArrowLeft, FaEnvelope, FaUser, FaPhone, FaGraduationCap, FaGlobe } from "react-icons/fa";
 import MultiSelect from "components/MultiSelect/MultiSelect";
 import "./CreateInvitation.scss";
 
@@ -30,6 +31,7 @@ const CreateInvitation = () => {
     phone: "",
     lattes: "",
     bio: "",
+    language: getCurrentLang() as string,
   });
   const [selectedRoles, setSelectedRoles] = useState<RoleOption[]>([]);
   const [selectedPositions, setSelectedPositions] = useState<Position[]>([]);
@@ -48,7 +50,9 @@ const CreateInvitation = () => {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -81,6 +85,7 @@ const CreateInvitation = () => {
     const response = await createInvitation({
       email: formData.email,
       roles: selectedRoles.map((r) => r.value),
+      language: formData.language,
       name: formData.name || undefined,
       phone: formData.phone || undefined,
       lattes: formData.lattes || undefined,
@@ -101,6 +106,7 @@ const CreateInvitation = () => {
         phone: "",
         lattes: "",
         bio: "",
+        language: formData.language,
       });
       setSelectedRoles([]);
       setSelectedPositions([]);
@@ -161,6 +167,25 @@ const CreateInvitation = () => {
               />
               <span className="field-hint">
                 {t("Select one or more roles for the new member")}
+              </span>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="language">
+                <FaGlobe className="label-icon" />
+                {t("Invitation Language")}
+              </label>
+              <select
+                id="language"
+                name="language"
+                value={formData.language}
+                onChange={handleChange}
+              >
+                <option value="pt">{t("Portuguese")}</option>
+                <option value="en">{t("English")}</option>
+              </select>
+              <span className="field-hint">
+                {t("The invitation email will be sent in this language.")}
               </span>
             </div>
           </div>

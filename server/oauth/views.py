@@ -162,7 +162,7 @@ def sign_up(request):
             }
         )
 
-    send_verification_email(user)
+    send_verification_email(user, lang=data.get("language"))
 
     return JsonResponse(
         content={
@@ -183,7 +183,7 @@ def request_password_reset(request):
     # so the endpoint can't be used to probe which emails are registered.
     user = User.objects.filter(email__iexact=email).first()
     if user is not None:
-        send_password_reset_email(user)
+        send_password_reset_email(user, lang=data.get("language"))
 
     return JsonResponse(content={"success": True})
 

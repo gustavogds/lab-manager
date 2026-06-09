@@ -22,6 +22,7 @@ api.interceptors.request.use((config) => {
 export type InvitationData = {
   email: string;
   roles: string[];
+  language?: string;
   name?: string;
   phone?: string;
   lattes?: string;
