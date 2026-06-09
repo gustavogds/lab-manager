@@ -7,6 +7,7 @@ import { useGlobalData } from "helpers/context/globalContext";
 import { saveProfile, uploadProfileImage } from "helpers/api/settings";
 import { listPositions, type Position } from "helpers/api/content";
 import MultiSelect from "components/MultiSelect/MultiSelect";
+import { ModalsHandler } from "components/my-own-modal-handler";
 import "./Settings.scss";
 
 registerLocale("pt-BR", ptBR);
@@ -172,6 +173,18 @@ const ProfileSettings = () => {
     }));
   };
 
+  const handleOpenChangePassword = async () => {
+    const { promise } = ModalsHandler.createModal("ChangePassword");
+    const result = await promise;
+    if (result === "cancel") {
+      return;
+    }
+
+    setMessage(t("Password changed successfully."));
+    setError("");
+    setTimeout(() => setMessage(""), 4000);
+  };
+
   return (
     <div className="profile-settings">
       <h1>{t("Profile Settings")}</h1>
@@ -284,6 +297,16 @@ const ProfileSettings = () => {
           />
           {t("Public Profile")}
         </label>
+        <div className="password-field">
+          <span className="password-field__label">{t("Password")}</span>
+          <button
+            type="button"
+            className="change-password-btn"
+            onClick={handleOpenChangePassword}
+          >
+            {t("Change Password")}
+          </button>
+        </div>
         <button type="submit" className="btn-confirm">
           {t("Save Changes")}
         </button>

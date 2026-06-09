@@ -99,6 +99,27 @@ export const confirmPasswordReset = async (
   };
 };
 
+export const changePassword = async (
+  currentPassword: string,
+  password: string,
+  confirmPassword: string
+) => {
+  const response = await api
+    .post("/auth/change-password/", {
+      currentPassword,
+      password,
+      confirmPassword,
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
 export const logout = async () => {
   const response = await api.post("/auth/sign-out/").catch((error) => {
     return error.response ? error.response : error;

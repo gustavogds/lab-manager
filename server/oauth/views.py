@@ -1,7 +1,12 @@
 import ujson as json
 
 from django.core.exceptions import ValidationError
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import (
+    authenticate,
+    login,
+    logout,
+    update_session_auth_hash,
+)
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import redirect
 
@@ -216,6 +221,45 @@ def confirm_password_reset(request):
 
     user.set_password(password)
     user.save()
+
+    return JsonResponse(content={"success": True})
+
+
+@user_access_required(methods=["POST"])
+def change_password(request):
+    data = json.loads(request.body)
+    current_password = data.get("currentPassword")
+    new_password = data.get("password")
+    confirm_password = data.get("confirmPassword")
+
+    # Return a stable error `code` (not a localized message) so the client can
+    # translate it through i18n; the `error` text is just a fallback.
+    def error(code, message):
+        return JsonResponse({"error": message, "code": code}, status=400)
+
+    if not current_password:
+        return error("current_password_required", "Current password is required.")
+
+    if not new_password:
+        return error("new_password_required", "New password is required.")
+
+    if len(new_password) < 6:
+        return error(
+            "password_too_short", "The new password must be at least 6 characters."
+        )
+
+    if new_password != confirm_password:
+        return error("passwords_do_not_match", "Passwords do not match.")
+
+    user = request.user
+    if not user.check_password(current_password):
+        return error("current_password_incorrect", "Current password is incorrect.")
+
+    user.set_password(new_password)
+    user.save()
+    # Setting a new password rotates the session hash, which would otherwise log
+    # the user out; keep the current session authenticated.
+    update_session_auth_hash(request, user)
 
     return JsonResponse(content={"success": True})
 

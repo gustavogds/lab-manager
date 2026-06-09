@@ -27,7 +27,15 @@
   }
 
   &__flag {
-    font-size: 1rem;
+    display: inline-flex;
+  }
+
+  .flag-svg {
+    width: 20px;
+    height: 15px;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+    display: block;
   }
 
   &__arrow {
@@ -79,7 +87,7 @@
   }
 
   &__option-flag {
-    font-size: 1.1rem;
+    display: inline-flex;
   }
 
   &__option-name {

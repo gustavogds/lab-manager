@@ -43,6 +43,7 @@ import {
 import ResearcherCard from "components/ResearcherCard/ResearcherCard";
 import PartnershipBadge from "components/PartnershipBadge/PartnershipBadge";
 import { useGlobalData } from "helpers/context/globalContext";
+import { readCache, writeCache } from "helpers/cache";
 import { isEmptyObject, canManageAll } from "helpers/utils";
 import { localized } from "helpers/i18n";
 import { ModalsHandler } from "components/my-own-modal-handler";
@@ -95,12 +96,25 @@ const Home = () => {
     "contact-location": t("Contact information and laboratory location."),
   }), [t]);
   const [isNavVisible, setIsNavVisible] = useState(true);
-  const [labSettings, setLabSettings] = useState<LabSettings | null>(null);
-  const [researchAreas, setResearchAreas] = useState<ResearchArea[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [researchers, setResearchers] = useState<Researcher[]>([]);
+  // Hydrate synchronously from the last successful load so a reload renders the
+  // previously fetched content immediately instead of flashing the loading
+  // placeholders; the fetches below silently revalidate in the background.
+  const [labSettings, setLabSettings] = useState<LabSettings | null>(
+    () => readCache<LabSettings>("home:labSettings")
+  );
+  const [researchAreas, setResearchAreas] = useState<ResearchArea[]>(
+    () => readCache<ResearchArea[]>("home:researchAreas") ?? []
+  );
+  const [projects, setProjects] = useState<Project[]>(
+    () => readCache<Project[]>("home:projects") ?? []
+  );
+  const [researchers, setResearchers] = useState<Researcher[]>(
+    () => readCache<Researcher[]>("home:researchers") ?? []
+  );
   const [allResearchers, setAllResearchers] = useState<Researcher[]>([]);
-  const [partnerships, setPartnerships] = useState<Partnership[]>([]);
+  const [partnerships, setPartnerships] = useState<Partnership[]>(
+    () => readCache<Partnership[]>("home:partnerships") ?? []
+  );
   const [allPartnerships, setAllPartnerships] = useState<Partnership[]>([]);
   const hashNavTimeout = useRef<number | null>(null);
   const { user }: any = useGlobalData();
@@ -424,6 +438,24 @@ const Home = () => {
       fetchAllPartnerships();
     }
   }, []);
+
+  // Persist the loaded sections so the next reload can hydrate from cache. These
+  // run on every change, so edits made on this page keep the cache in sync too.
+  useEffect(() => {
+    if (labSettings) writeCache("home:labSettings", labSettings);
+  }, [labSettings]);
+  useEffect(() => {
+    writeCache("home:researchAreas", researchAreas);
+  }, [researchAreas]);
+  useEffect(() => {
+    writeCache("home:projects", projects);
+  }, [projects]);
+  useEffect(() => {
+    writeCache("home:researchers", researchers);
+  }, [researchers]);
+  useEffect(() => {
+    writeCache("home:partnerships", partnerships);
+  }, [partnerships]);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -792,6 +824,14 @@ const Home = () => {
     await promise;
   };
 
+  const openResearchAreaDetails = async (area: ResearchArea) => {
+    const { promise } = ModalsHandler.createModal("ResearchAreaDetails", {
+      area,
+    });
+
+    await promise;
+  };
+
   const openResearcherDetails = async (researcher: Researcher) => {
     const researcherProjects = projects.filter((project) =>
       project.members.some((member) => member.id === researcher.id)
@@ -948,7 +988,11 @@ const Home = () => {
             {researchAreas.length > 0 ? (
               <div className="research-areas-list">
                 {researchAreas.map((area) => (
-                  <div key={area.id} className="content-card">
+                  <div
+                    key={area.id}
+                    className="content-card clickable"
+                    onClick={() => openResearchAreaDetails(area)}
+                  >
                     <div className="card-content">
                       <h3>{localized(area, "title")}</h3>
                       <p>{localized(area, "description")}</p>
@@ -957,21 +1001,30 @@ const Home = () => {
                       <div className="card-actions">
                         <button
                           className="btn-icon btn-icon--primary"
-                          onClick={() => handleToggleResearchAreaVisibility(area)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleResearchAreaVisibility(area);
+                          }}
                           title={area.is_active ? t("Hide") : t("Show")}
                         >
                           {area.is_active ? <FaEye /> : <FaEyeSlash />}
                         </button>
                         <button
                           className="btn-icon btn-icon--primary"
-                          onClick={() => openResearchAreaEditor(area)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openResearchAreaEditor(area);
+                          }}
                           title={t("Edit")}
                         >
                           <FaEdit />
                         </button>
                         <button
                           className="btn-icon btn-icon--danger"
-                          onClick={() => handleDeleteResearchArea(area)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteResearchArea(area);
+                          }}
                           title={t("Delete")}
                         >
                           <FaTrash />
