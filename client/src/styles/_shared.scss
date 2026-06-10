@@ -28,6 +28,27 @@
   }
 }
 
+.btn-confirm-outline {
+  padding: 0.75rem 1.5rem;
+  border-radius: $radius-md;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-fast;
+  background: $neutral-white;
+  border: 1px solid $primary-color;
+  color: $primary-color;
+
+  &:hover:not(:disabled) {
+    background: rgba($primary-color, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 .btn-cancel {
   padding: 0.75rem 1.5rem;
   border-radius: $radius-md;
@@ -733,6 +754,7 @@
     flex-direction: column-reverse;
 
     .btn-confirm,
+    .btn-confirm-outline,
     .btn-cancel {
       width: 100%;
     }

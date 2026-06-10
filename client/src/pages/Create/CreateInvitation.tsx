@@ -58,9 +58,7 @@ const CreateInvitation = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submitForm = async (createAnother: boolean) => {
     if (!formData.email.trim()) {
       setError(t("Email is required."));
       return;
@@ -111,13 +109,32 @@ const CreateInvitation = () => {
       setSelectedRoles([]);
       setSelectedPositions([]);
 
-      setTimeout(() => {
-        navigate(-1);
-      }, 2000);
+      if (createAnother) {
+        setTimeout(() => {
+          setMessage("");
+        }, 3000);
+      } else {
+        setTimeout(() => {
+          navigate(-1);
+        }, 2000);
+      }
     } else {
       setError(response.error || t("Failed to send invitation."));
       setMessage("");
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitForm(false);
+  };
+
+  const handleCreateAnother = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const form = e.currentTarget.form;
+    if (form && !form.reportValidity()) {
+      return;
+    }
+    submitForm(true);
   };
 
   return (
@@ -272,6 +289,14 @@ const CreateInvitation = () => {
               disabled={isSubmitting}
             >
               {t("Cancel")}
+            </button>
+            <button
+              type="button"
+              className="btn-confirm-outline"
+              onClick={handleCreateAnother}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? t("Sending...") : t("Send & Invite Another")}
             </button>
             <button
               type="submit"
