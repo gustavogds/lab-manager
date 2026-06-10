@@ -45,9 +45,7 @@ const CreatePartnership = () => {
     setError("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submitForm = async (createAnother: boolean) => {
     if (!formData.name.trim()) {
       setError(t("Name is required."));
       return;
@@ -80,13 +78,32 @@ const CreatePartnership = () => {
       setLogoFile(null);
       setLogoPreview(null);
 
-      setTimeout(() => {
-        navigate(-1);
-      }, 1500);
+      if (createAnother) {
+        setTimeout(() => {
+          setMessage("");
+        }, 3000);
+      } else {
+        setTimeout(() => {
+          navigate(-1);
+        }, 1500);
+      }
     } else {
       setError(response.error || t("Failed to create partnership."));
       setMessage("");
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitForm(false);
+  };
+
+  const handleCreateAnother = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const form = e.currentTarget.form;
+    if (form && !form.reportValidity()) {
+      return;
+    }
+    submitForm(true);
   };
 
   return (
@@ -172,6 +189,14 @@ const CreatePartnership = () => {
               disabled={isSubmitting}
             >
               {t("Cancel")}
+            </button>
+            <button
+              type="button"
+              className="btn-confirm-outline"
+              onClick={handleCreateAnother}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? t("Creating...") : t("Create & Add Another")}
             </button>
             <button
               type="submit"

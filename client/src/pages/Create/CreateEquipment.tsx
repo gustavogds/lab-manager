@@ -51,9 +51,7 @@ const CreateEquipment = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submitForm = async (createAnother: boolean) => {
     if (!formData.name.trim()) {
       setError(t("Name is required."));
       return;
@@ -90,14 +88,34 @@ const CreateEquipment = () => {
     if (response.success) {
       setMessage(response.message || t("Equipment created successfully!"));
       setError("");
-      setFormData({ name: "", custom_id: "", observation: "", identification_category_id: "", equipment_state_id: "", room_id: "" });
-      setTimeout(() => {
-        navigate(-1);
-      }, 1500);
+      if (createAnother) {
+        setFormData((prev) => ({ ...prev, name: "", custom_id: "", observation: "" }));
+        setTimeout(() => {
+          setMessage("");
+        }, 3000);
+      } else {
+        setFormData({ name: "", custom_id: "", observation: "", identification_category_id: "", equipment_state_id: "", room_id: "" });
+        setTimeout(() => {
+          navigate(-1);
+        }, 1500);
+      }
     } else {
       setError(response.error || t("Failed to create equipment."));
       setMessage("");
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitForm(false);
+  };
+
+  const handleCreateAnother = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const form = e.currentTarget.form;
+    if (form && !form.reportValidity()) {
+      return;
+    }
+    submitForm(true);
   };
 
   return (
@@ -207,6 +225,14 @@ const CreateEquipment = () => {
               disabled={isSubmitting}
             >
               {t("Cancel")}
+            </button>
+            <button
+              type="button"
+              className="btn-confirm-outline"
+              onClick={handleCreateAnother}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? t("Creating...") : t("Create & Add Another")}
             </button>
             <button
               type="submit"

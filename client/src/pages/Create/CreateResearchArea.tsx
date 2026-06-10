@@ -26,9 +26,7 @@ const CreateResearchArea = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submitForm = async (createAnother: boolean) => {
     if (!formData.title_pt.trim() && !formData.title_en.trim()) {
       setError(t("Title is required."));
       return;
@@ -52,14 +50,33 @@ const CreateResearchArea = () => {
       setError("");
 
       setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "", link: "" });
-      
-      setTimeout(() => {
-        navigate(-1);
-      }, 1500);
+
+      if (createAnother) {
+        setTimeout(() => {
+          setMessage("");
+        }, 3000);
+      } else {
+        setTimeout(() => {
+          navigate(-1);
+        }, 1500);
+      }
     } else {
       setError(response.error || t("Failed to create research area."));
       setMessage("");
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitForm(false);
+  };
+
+  const handleCreateAnother = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const form = e.currentTarget.form;
+    if (form && !form.reportValidity()) {
+      return;
+    }
+    submitForm(true);
   };
 
   return (
@@ -148,6 +165,14 @@ const CreateResearchArea = () => {
               disabled={isSubmitting}
             >
               {t("Cancel")}
+            </button>
+            <button
+              type="button"
+              className="btn-confirm-outline"
+              onClick={handleCreateAnother}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? t("Creating...") : t("Create & Add Another")}
             </button>
             <button
               type="submit"
