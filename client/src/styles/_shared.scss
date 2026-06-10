@@ -636,6 +636,7 @@
       margin-bottom: 0.75rem;
       font-weight: 600;
       transition: color $transition-fast;
+      overflow-wrap: break-word;
     }
 
     p {
@@ -647,6 +648,7 @@
       -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      overflow-wrap: break-word;
     }
   }
 
@@ -656,6 +658,10 @@
     justify-content: flex-end;
     opacity: 0;
     transition: opacity $transition-fast;
+
+    @media (hover: none) {
+      opacity: 1;
+    }
   }
 
   &.clickable {
@@ -783,11 +789,6 @@
     }
   }
 }
-
-// ==========================================================
-// MANAGE PAGE SHARED STYLES
-// Common styles for management pages (equipment, users, etc.)
-// ==========================================================
 
 .header-actions {
   display: flex;
