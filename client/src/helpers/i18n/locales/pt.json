@@ -426,7 +426,6 @@
   "Drag equipment to this area": "Arraste o equipamento para esta área",
   "Drag equipment to this room": "Arraste o equipamento para esta sala",
   "Drag to move to another room": "Arraste para mover para outra sala",
-  "Drag to reorder and use the toggle to show/hide researchers on the page.": "Arraste para reordenar e use o botão para mostrar/ocultar pesquisadores na página.",
   "Edit Partnership": "Editar Parceria",
   "Edit Partnerships": "Editar Parcerias",
   "Edit Project": "Editar Projeto",
@@ -515,5 +514,6 @@
   "Current password is required.": "Informe sua senha atual.",
   "New password is required.": "Informe a nova senha.",
   "The new password must be at least 6 characters.": "A nova senha deve ter pelo menos 6 caracteres.",
-  "Current password is incorrect.": "Senha atual incorreta."
+  "Current password is incorrect.": "Senha atual incorreta.",
+  "Use the arrows on the left to reorder and the eye icon to show/hide researchers on the page.": "Use as setas à esquerda para reordenar e o ícone de olho para mostrar/ocultar pesquisadores na página."
 }

@@ -166,48 +166,38 @@
   }
 }
 
-.visibility-toggle {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 26px;
+.visibility-btn {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: transparent;
+  transition: all 0.2s ease;
 
-  input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 
-    &:checked + .toggle-slider {
-      background-color: $primary-color;
-    }
+  &.visible {
+    color: $primary-color;
 
-    &:checked + .toggle-slider::before {
-      transform: translateX(22px);
+    &:hover {
+      background-color: rgba($primary-color, 0.12);
     }
   }
 
-  .toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    border-radius: 26px;
-    transition: 0.3s;
+  &.hidden {
+    color: #999;
 
-    &::before {
-      content: "";
-      position: absolute;
-      height: 20px;
-      width: 20px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      border-radius: 50%;
-      transition: 0.3s;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.06);
+      color: #666;
     }
   }
 }
