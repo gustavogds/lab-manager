@@ -39,17 +39,30 @@ const ManageUsers = () => {
   const [isCreatingPosition, setIsCreatingPosition] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    const [usersResponse, roomsResponse, positionsResponse] = await Promise.all([
-      listAllUsers(),
-      listRooms(),
-      listPositions(),
-    ]);
-    if (usersResponse.success) setUsers(usersResponse.data);
-    if (roomsResponse.success) setRooms(roomsResponse.data);
-    if (positionsResponse.success) setPositions(positionsResponse.data);
-    setIsLoading(false);
+  const fetchData = async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setIsLoading(true);
+    try {
+      const [usersResponse, roomsResponse, positionsResponse] = await Promise.all([
+        listAllUsers(),
+        listRooms(),
+        listPositions(),
+      ]);
+      if (usersResponse.success) setUsers(usersResponse.data);
+      if (roomsResponse.success) setRooms(roomsResponse.data);
+      if (positionsResponse.success) setPositions(positionsResponse.data);
+    } finally {
+      if (!options?.silent) setIsLoading(false);
+    }
+  };
+
+  const refreshRooms = async () => {
+    const response = await listRooms();
+    if (response.success) setRooms(response.data);
+  };
+
+  const refreshPositions = async () => {
+    const response = await listPositions();
+    if (response.success) setPositions(response.data);
   };
 
   useEffect(() => {
@@ -71,21 +84,25 @@ const ManageUsers = () => {
       user,
       rooms,
       positions,
-      onConfirm: () => fetchData(),
+      onConfirm: (updatedUser: User) =>
+        setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))),
+      onDelete: () => setUsers((prev) => prev.filter((u) => u.id !== user.id)),
     });
   };
 
+  // Room/position edits are refetched in full (silently) because their
+  // names are embedded in each user's exported data.
   const handleEditRoom = (room: Room) => {
     ModalsHandler.createModal("RoomEditor", {
       room,
-      onConfirm: () => fetchData(),
+      onConfirm: () => fetchData({ silent: true }),
     });
   };
 
   const handleEditPosition = (position: Position) => {
     ModalsHandler.createModal("PositionEditor", {
       position,
-      onConfirm: () => fetchData(),
+      onConfirm: () => fetchData({ silent: true }),
     });
   };
 
@@ -102,7 +119,7 @@ const ManageUsers = () => {
         message: t("Room created successfully!"),
         type: "success",
       });
-      fetchData();
+      refreshRooms();
     } else {
       ModalsHandler.createNotification({
         title: t("Error"),
@@ -125,7 +142,7 @@ const ManageUsers = () => {
         message: t("Position created successfully!"),
         type: "success",
       });
-      fetchData();
+      refreshPositions();
     } else {
       ModalsHandler.createNotification({
         title: t("Error"),
@@ -375,6 +392,7 @@ const ManageUsers = () => {
                                   src={user.profile_image}
                                   alt=""
                                   className="user-avatar"
+                                  loading="lazy"
                                 />
                               )}
                               <span>{user.name || "-"}</span>
