@@ -495,7 +495,13 @@ export const updateEquipment = async (
 };
 
 export const updateEquipmentConfig = async (
-  equipment: Array<{ id: number; order: number; is_active: boolean }>
+  equipment: Array<{
+    id: number;
+    order?: number;
+    is_active?: boolean;
+    room_id?: number | null;
+    section_id?: number | null;
+  }>
 ) => {
   const response = await api
     .patch("/content/equipment/config/", { equipment })
