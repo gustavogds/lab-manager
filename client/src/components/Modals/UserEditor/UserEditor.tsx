@@ -11,7 +11,8 @@ interface UserEditorProps {
   user: User;
   rooms: Room[];
   positions: Position[];
-  onConfirm: () => void;
+  onConfirm: (updatedUser: User) => void;
+  onDelete?: () => void;
   onCancel?: () => void;
 }
 
@@ -29,6 +30,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
   rooms,
   positions,
   onConfirm,
+  onDelete,
   onCancel,
 }) => {
   const { t } = useTranslation();
@@ -89,7 +91,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
         message: t("User updated successfully!"),
         type: "success",
       });
-      onConfirm();
+      onConfirm(response.data);
       onCancel?.();
     } else {
       ModalsHandler.createNotification({
@@ -115,7 +117,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
         message: user.is_active ? t("User deactivated!") : t("User activated!"),
         type: "success",
       });
-      onConfirm();
+      onConfirm(response.data);
       onCancel?.();
     } else {
       setError(response.error || t("Failed to update user."));
@@ -136,7 +138,7 @@ const UserEditor: React.FC<UserEditorProps> = ({
         message: t("User deleted successfully!"),
         type: "success",
       });
-      onConfirm();
+      onDelete?.();
       onCancel?.();
     } else {
       ModalsHandler.createNotification({

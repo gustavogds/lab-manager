@@ -60,7 +60,7 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
               <h3>{t("Contact")}</h3>
             ) : null}
             <div className="contact-list">
-              {researcher.contact_email && researcher.contact_email !== researcher.email && (
+              {researcher.contact_email && (
                 <div className="contact-item">
                   <span className="label">{t("Contact Email")}:</span>
                   <a href={`mailto:${researcher.contact_email}`}>{researcher.contact_email}</a>

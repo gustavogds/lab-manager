@@ -191,7 +191,7 @@ const ProfileSettings = () => {
       {message && <div className="msg-success">{message}</div>}
       {error && <div className="msg-error">{error}</div>}
       <form onSubmit={handleSubmit} className="profile-settings__form">
-        <label>
+        <div className="file-field">
           {t("Profile Image:")}
           <div className="profile-image-field">
             <div className="profile-image-preview">
@@ -212,7 +212,7 @@ const ProfileSettings = () => {
               </small>
             </div>
           </div>
-        </label>
+        </div>
         <label>
           {t("Name")}
           <input name="name" value={formData.name} onChange={handleChange} />

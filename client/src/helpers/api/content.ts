@@ -80,7 +80,7 @@ export const listResearchAreas = async () => {
 
   return {
     success: response.status === 200,
-    data: response.data.data || [],
+    data: response.data?.data || [],
   };
 };
 
@@ -93,7 +93,7 @@ export const getResearchArea = async (areaId: number) => {
 
   return {
     success: response.status === 200,
-    data: response.data.data,
+    data: response.data?.data,
   };
 };
 
@@ -154,7 +154,7 @@ export const listProjects = async () => {
 
   return {
     success: response.status === 200,
-    data: response.data.data || [],
+    data: response.data?.data || [],
   };
 };
 
@@ -167,7 +167,7 @@ export const getProject = async (projectId: number) => {
 
   return {
     success: response.status === 200,
-    data: response.data.data,
+    data: response.data?.data,
   };
 };
 
@@ -319,7 +319,7 @@ export const listPartnerships = async () => {
 
   return {
     success: response.status === 200,
-    data: response.data.data || [],
+    data: response.data?.data || [],
   };
 };
 
@@ -332,7 +332,7 @@ export const listAllPartnerships = async () => {
 
   return {
     success: response.status === 200,
-    data: response.data.data || [],
+    data: response.data?.data || [],
   };
 };
 
@@ -470,7 +470,7 @@ export const listEquipment = async () => {
     .catch((error) => {
       return error.response ? error.response : error;
     });
-  return { success: response.status === 200, data: response.data.data || [] };
+  return { success: response.status === 200, data: response.data?.data || [] };
 };
 
 export const listAllEquipment = async () => {
@@ -479,7 +479,7 @@ export const listAllEquipment = async () => {
     .catch((error) => {
       return error.response ? error.response : error;
     });
-  return { success: response.status === 200, data: response.data.data || [] };
+  return { success: response.status === 200, data: response.data?.data || [] };
 };
 
 export const updateEquipment = async (
@@ -535,7 +535,7 @@ export const listRooms = async () => {
     .catch((error) => {
       return error.response ? error.response : error;
     });
-  return { success: response.status === 200, data: response.data.data || [] };
+  return { success: response.status === 200, data: response.data?.data || [] };
 };
 
 export const updateRoom = async (roomId: number, data: Partial<Room>) => {
@@ -573,7 +573,7 @@ export const listRoomSections = async (roomId: number) => {
     .catch((error) => {
       return error.response ? error.response : error;
     });
-  return { success: response.status === 200, data: response.data.data || [] };
+  return { success: response.status === 200, data: response.data?.data || [] };
 };
 
 export const listAllSections = async () => {
@@ -582,7 +582,7 @@ export const listAllSections = async () => {
     .catch((error) => {
       return error.response ? error.response : error;
     });
-  return { success: response.status === 200, data: response.data.data || [] };
+  return { success: response.status === 200, data: response.data?.data || [] };
 };
 
 export const updateRoomSection = async (
@@ -623,7 +623,7 @@ export const listIdentificationCategories = async () => {
     .catch((error) => {
       return error.response ? error.response : error;
     });
-  return { success: response.status === 200, data: response.data.data || [] };
+  return { success: response.status === 200, data: response.data?.data || [] };
 };
 
 export const updateIdentificationCategory = async (
@@ -664,7 +664,7 @@ export const listEquipmentStates = async () => {
     .catch((error) => {
       return error.response ? error.response : error;
     });
-  return { success: response.status === 200, data: response.data.data || [] };
+  return { success: response.status === 200, data: response.data?.data || [] };
 };
 
 export const updateEquipmentState = async (
@@ -725,7 +725,7 @@ export const getReportConfig = async () => {
 
   return {
     success: response.status === 200,
-    data: response.data.data as ReportConfig,
+    data: response.data?.data as ReportConfig,
   };
 };
 

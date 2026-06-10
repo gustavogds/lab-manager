@@ -113,7 +113,8 @@
     display: flex;
     flex-direction: column;
 
-    label {
+    label,
+    .file-field {
       margin-bottom: 1rem;
       font-weight: 500;
       display: flex;

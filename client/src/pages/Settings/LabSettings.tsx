@@ -226,7 +226,7 @@ const LabSettings = () => {
           />
         </label>
 
-        <label>
+        <div className="file-field">
           {t("Logo")}:
           <div className="profile-image-field">
             <div className="profile-image-preview logo-preview">
@@ -247,9 +247,9 @@ const LabSettings = () => {
               </small>
             </div>
           </div>
-        </label>
+        </div>
 
-        <label>
+        <div className="file-field">
           {t("Browser Tab Icon (Favicon)")}:
           <div className="profile-image-field">
             <div className="profile-image-preview logo-preview">
@@ -270,7 +270,7 @@ const LabSettings = () => {
               </small>
             </div>
           </div>
-        </label>
+        </div>
 
         <label>
           {t("Contact Email")}:

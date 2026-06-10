@@ -1,5 +1,9 @@
 import json
+from io import BytesIO
+from pathlib import Path
 
+from PIL import Image, ImageOps, UnidentifiedImageError
+from django.core.files.base import ContentFile
 from django.utils.dateparse import parse_date
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -98,6 +102,30 @@ def update_user_settings(request):
     return JsonResponse({"success": False, "message": "No changes made."})
 
 
+# Profile images are only ever displayed as avatars, so anything beyond
+# 512px is wasted bandwidth on user listings.
+PROFILE_IMAGE_MAX_DIM = 512
+
+
+def process_profile_image(image):
+    img = Image.open(image)
+    img = ImageOps.exif_transpose(img)
+    img.thumbnail((PROFILE_IMAGE_MAX_DIM, PROFILE_IMAGE_MAX_DIM), Image.Resampling.LANCZOS)
+
+    if img.mode != "RGB":
+        if img.mode in ("RGBA", "LA", "P"):
+            img = img.convert("RGBA")
+            background = Image.new("RGB", img.size, (255, 255, 255))
+            background.paste(img, mask=img.split()[-1])
+            img = background
+        else:
+            img = img.convert("RGB")
+
+    buffer = BytesIO()
+    img.save(buffer, format="JPEG", quality=85, optimize=True)
+    return ContentFile(buffer.getvalue())
+
+
 @login_required
 @require_http_methods(["POST"])
 def upload_profile_image(request):
@@ -117,7 +145,13 @@ def upload_profile_image(request):
     if not image.content_type.startswith("image/"):
         return JsonResponse({"error": "Invalid file type."}, status=400)
 
-    user.profile_image = image
+    try:
+        processed = process_profile_image(image)
+    except (UnidentifiedImageError, OSError):
+        return JsonResponse({"error": "Invalid file type."}, status=400)
+
+    filename = f"{(Path(image.name).stem or 'profile')[:50]}.jpg"
+    user.profile_image.save(filename, processed, save=False)
     user.save()
 
     return JsonResponse(
