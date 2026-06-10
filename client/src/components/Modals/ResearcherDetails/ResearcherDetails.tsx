@@ -86,6 +86,7 @@ const ResearcherDetails = ({ researcher, projects, onConfirm }: ResearcherDetail
                     rel="noopener noreferrer"
                     className="link-item"
                   >
+                    <Icons.Lattes className="link-icon" />
                     {t("Lattes CV")}
                   </a>
                 )}

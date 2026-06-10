@@ -15,6 +15,7 @@ const CreateProject = () => {
     title_en: "",
     description_pt: "",
     description_en: "",
+    link: "",
     members: [] as User[],
   });
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
@@ -65,6 +66,7 @@ const CreateProject = () => {
       title_en: formData.title_en,
       description_pt: formData.description_pt,
       description_en: formData.description_en,
+      link: formData.link,
       members: formData.members.map((m) => m.id),
     };
 
@@ -75,7 +77,7 @@ const CreateProject = () => {
     if (response.success) {
       setMessage(response.message || t("Project created successfully!"));
       setError("");
-      setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "", members: [] });
+      setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "", link: "", members: [] });
       
       setTimeout(() => {
         navigate(-1);
@@ -149,6 +151,18 @@ const CreateProject = () => {
               onChange={handleChange}
               placeholder={"Describe the project, objectives, methodology and expected results..."}
               rows={6}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="link">{t("More info link")} <span className="optional-badge">{t("optional")}</span></label>
+            <input
+              id="link"
+              type="url"
+              name="link"
+              value={formData.link}
+              onChange={handleChange}
+              placeholder="https://..."
             />
           </div>
 

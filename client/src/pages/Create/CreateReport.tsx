@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { localized } from "helpers/i18n";
 import { generateReport, getReportConfig } from "helpers/api/content";
 import type { ReportConfig, ReportSections } from "helpers/api/content";
 import { FaArrowLeft, FaChevronDown, FaChevronRight } from "react-icons/fa";
@@ -279,7 +280,7 @@ const CreateReport = () => {
                         <span className="checkmark" />
                       </label>
                       <div className="section-title-row">
-                        <span className="section-label">{config.label}</span>
+                        <span className="section-label">{localized(config, "label")}</span>
                         {state.selected && (
                           <span className="columns-count">
                             {state.columns.length} {t("of")} {config.columns.length} {t("columns")}
@@ -327,7 +328,7 @@ const CreateReport = () => {
                                 checked={state.columns.includes(col.key)}
                                 onChange={() => toggleColumn(sectionKey, col.key)}
                               />
-                              <span className="column-label">{col.label}</span>
+                              <span className="column-label">{localized(col, "label")}</span>
                             </label>
                           ))}
                         </div>

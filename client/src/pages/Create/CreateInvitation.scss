@@ -46,7 +46,8 @@
     }
 
     input,
-    textarea {
+    textarea,
+    select {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid #ddd;
@@ -63,6 +64,11 @@
       &::placeholder {
         color: #999;
       }
+    }
+
+    select {
+      background-color: #fff;
+      cursor: pointer;
     }
 
     textarea {

@@ -452,7 +452,7 @@
 
   .research-areas-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
     gap: 1.25rem;
   }
 
@@ -465,7 +465,7 @@
 
   .projects-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
     gap: 1.25rem;
   }
 
@@ -647,11 +647,22 @@
       transform: translateX(-50%);
       padding: 0.6rem 0.75rem;
       gap: 0.6rem;
+
+      a .tooltip {
+        left: 50%;
+        right: auto;
+        bottom: calc(100% + 0.55rem);
+        transform: translateX(-50%) translateY(4px);
+      }
+
+      a:hover .tooltip {
+        transform: translateX(-50%) translateY(0);
+      }
     }
 
     .toggle-nav {
-      left: auto;
-      right: 1.25rem;
+      left: 1.25rem;
+      right: auto;
     }
 
     .content {

@@ -460,9 +460,14 @@ def create_invitation(request):
             "error": "A valid invitation already exists for this email."
         }, status=400)
     
+    language = data.get("language") or "pt"
+    if language not in ("pt", "en"):
+        language = "pt"
+
     invitation = Invitation.objects.create(
         email=email,
         roles=roles,
+        language=language,
         name=data.get("name", ""),
         phone=data.get("phone", ""),
         lattes=data.get("lattes", ""),

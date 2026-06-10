@@ -222,7 +222,12 @@ class Invitation(models.Model):
     email = models.EmailField()
     token = models.CharField(max_length=64, unique=True, editable=False)
     roles = models.JSONField(default=list)
-    
+
+    # Language used to render the invitation email (the invitee may speak a
+    # different language than the inviter, so it is chosen per invitation).
+    LANGUAGE_CHOICES = [("pt", "Português"), ("en", "English")]
+    language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES, default="pt")
+
     # Optional pre-filled fields
     name = models.CharField(max_length=100, blank=True, default="")
     phone = models.CharField(max_length=50, blank=True, default="")
@@ -285,6 +290,7 @@ class Invitation(models.Model):
             "id": self.id,
             "email": self.email,
             "roles": self.roles,
+            "language": self.language,
             "name": self.name,
             "phone": self.phone,
             "lattes": self.lattes,

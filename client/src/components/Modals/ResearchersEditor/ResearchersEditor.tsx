@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "./ResearchersEditor.scss";
 import Icons from "components/Icons/Icons";
 import type { Researcher } from "helpers/api/content";
@@ -87,7 +88,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
 
         <div className="editor-body">
           <p className="editor-description">
-            {t("Drag to reorder and use the toggle to show/hide researchers on the page.")}
+            {t("Use the arrows on the left to reorder and the eye icon to show/hide researchers on the page.")}
           </p>
 
           <div className="researchers-list">
@@ -139,14 +140,16 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
                   {t("Former member")}
                 </button>
 
-                <label className="visibility-toggle">
-                  <input
-                    type="checkbox"
-                    checked={researcher.show}
-                    onChange={() => toggleVisibility(researcher.id)}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
+                <button
+                  type="button"
+                  className={`visibility-btn ${researcher.show ? "visible" : "hidden"}`}
+                  onClick={() => toggleVisibility(researcher.id)}
+                  title={researcher.show ? t("Hide") : t("Show")}
+                  aria-label={researcher.show ? t("Hide") : t("Show")}
+                  aria-pressed={!researcher.show}
+                >
+                  {researcher.show ? <FaEye /> : <FaEyeSlash />}
+                </button>
               </div>
             ))}
           </div>

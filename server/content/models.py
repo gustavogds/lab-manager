@@ -9,6 +9,7 @@ class ResearchArea(models.Model):
     title_en: str = models.CharField(max_length=255, blank=True, default="")
     description_pt: str = models.TextField(blank=True, default="")
     description_en: str = models.TextField(blank=True, default="")
+    link: str = models.URLField(max_length=500, blank=True, default="")
     is_active: bool = models.BooleanField(default=True)
     order: int = models.IntegerField(default=0)
     created_at: datetime.datetime = models.DateTimeField(default=timezone.now)
@@ -30,6 +31,7 @@ class ResearchArea(models.Model):
             "title_en": self.title_en,
             "description_pt": self.description_pt,
             "description_en": self.description_en,
+            "link": self.link,
             "is_active": self.is_active,
             "order": self.order,
             "created_at": self.created_at.isoformat(),
@@ -42,6 +44,7 @@ class Project(models.Model):
     title_en: str = models.CharField(max_length=255, blank=True, default="")
     description_pt: str = models.TextField(blank=True, default="")
     description_en: str = models.TextField(blank=True, default="")
+    link: str = models.URLField(max_length=500, blank=True, default="")
     members = models.ManyToManyField("accounts.User", related_name="projects", blank=True)
     members_order = models.JSONField(default=list, blank=True)
     is_active: bool = models.BooleanField(default=True)
@@ -75,6 +78,7 @@ class Project(models.Model):
             "title_en": self.title_en,
             "description_pt": self.description_pt,
             "description_en": self.description_en,
+            "link": self.link,
             "is_active": self.is_active,
             "order": self.order,
             "created_at": self.created_at.isoformat(),

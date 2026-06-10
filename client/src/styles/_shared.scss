@@ -308,6 +308,19 @@
     text-transform: uppercase;
   }
 
+  .optional-badge {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    background: $neutral-surface;
+    color: $neutral-muted;
+    border-radius: $radius-xs;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: lowercase;
+  }
+
   input[type="text"],
   input[type="number"],
   input[type="url"],
@@ -623,6 +636,7 @@
       margin-bottom: 0.75rem;
       font-weight: 600;
       transition: color $transition-fast;
+      overflow-wrap: break-word;
     }
 
     p {
@@ -634,6 +648,7 @@
       -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      overflow-wrap: break-word;
     }
   }
 
@@ -643,6 +658,10 @@
     justify-content: flex-end;
     opacity: 0;
     transition: opacity $transition-fast;
+
+    @media (hover: none) {
+      opacity: 1;
+    }
   }
 
   &.clickable {
@@ -770,11 +789,6 @@
     }
   }
 }
-
-// ==========================================================
-// MANAGE PAGE SHARED STYLES
-// Common styles for management pages (equipment, users, etc.)
-// ==========================================================
 
 .header-actions {
   display: flex;

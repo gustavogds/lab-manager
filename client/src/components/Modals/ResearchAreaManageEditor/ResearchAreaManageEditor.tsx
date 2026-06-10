@@ -1,58 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { listApprovedUsers, updateProject, deleteProject } from "helpers/api/content";
-import type { Project, User } from "helpers/api/content";
+import { updateResearchArea, deleteResearchArea } from "helpers/api/content";
+import type { ResearchArea } from "helpers/api/content";
 import { localized } from "helpers/i18n";
 
 import { ModalsHandler } from "components/my-own-modal-handler";
-import MultiSelect from "components/MultiSelect/MultiSelect";
 import "pages/Manage/ManageContent.scss";
 
-interface ProjectManageEditorProps {
-  project: Project;
+interface ResearchAreaManageEditorProps {
+  researchArea: ResearchArea;
   onConfirm: () => void;
   onCancel?: () => void;
 }
 
-const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
-  project,
+const ResearchAreaManageEditor: React.FC<ResearchAreaManageEditorProps> = ({
+  researchArea,
   onConfirm,
   onCancel,
 }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
-    title_pt: project.title_pt || "",
-    title_en: project.title_en || "",
-    description_pt: project.description_pt || "",
-    description_en: project.description_en || "",
-    link: project.link || "",
-    members: project.members as User[],
+    title_pt: researchArea.title_pt || "",
+    title_en: researchArea.title_en || "",
+    description_pt: researchArea.description_pt || "",
+    description_en: researchArea.description_en || "",
+    link: researchArea.link || "",
   });
-  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const response = await listApprovedUsers();
-      if (response.success) {
-        setAvailableUsers(response.data);
-      }
-      setIsLoadingUsers(false);
-    };
-    fetchUsers();
-  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleMembersChange = (members: User[]) => {
-    setFormData((prev) => ({ ...prev, members }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,16 +53,15 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
       description_pt: formData.description_pt.trim() || "",
       description_en: formData.description_en.trim() || "",
       link: formData.link.trim(),
-      members: formData.members.map((m) => m.id),
     };
 
-    const response = await updateProject(project.id, payload);
+    const response = await updateResearchArea(researchArea.id, payload);
     setIsSaving(false);
 
     if (response.success) {
       ModalsHandler.createNotification({
         title: t("Success"),
-        message: t("Project updated!"),
+        message: t("Research area updated!"),
         type: "success",
       });
       onConfirm();
@@ -89,48 +69,48 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
     } else {
       ModalsHandler.createNotification({
         title: t("Error"),
-        message: response.error || t("Failed to update project."),
+        message: response.error || t("Failed to update research area."),
         type: "error",
       });
-      setError(response.error || t("Failed to update project."));
+      setError(response.error || t("Failed to update research area."));
     }
   };
 
   const handleToggleActive = async () => {
     setIsSaving(true);
     setError("");
-    const response = await updateProject(project.id, {
-      is_active: !project.is_active,
+    const response = await updateResearchArea(researchArea.id, {
+      is_active: !researchArea.is_active,
     });
     setIsSaving(false);
 
     if (response.success) {
       ModalsHandler.createNotification({
         title: t("Success"),
-        message: project.is_active
-          ? t("Project deactivated!")
-          : t("Project activated!"),
+        message: researchArea.is_active
+          ? t("Research area deactivated!")
+          : t("Research area activated!"),
         type: "success",
       });
       onConfirm();
       onCancel?.();
     } else {
-      setError(response.error || t("Failed to update project."));
+      setError(response.error || t("Failed to update research area."));
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm(t(`Are you sure you want to delete "{{title}}"?`, { title: localized(project, "title") }))) return;
+    if (!confirm(t(`Are you sure you want to delete "{{title}}"?`, { title: localized(researchArea, "title") }))) return;
 
     setIsSaving(true);
     setError("");
-    const response = await deleteProject(project.id);
+    const response = await deleteResearchArea(researchArea.id);
     setIsSaving(false);
 
     if (response.success) {
       ModalsHandler.createNotification({
         title: t("Success"),
-        message: t("Project deleted successfully!"),
+        message: t("Research area deleted successfully!"),
         type: "success",
       });
       onConfirm();
@@ -138,10 +118,10 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
     } else {
       ModalsHandler.createNotification({
         title: t("Error"),
-        message: response.error || t("Failed to delete project."),
+        message: response.error || t("Failed to delete research area."),
         type: "error",
       });
-      setError(response.error || t("Failed to delete project."));
+      setError(response.error || t("Failed to delete research area."));
     }
   };
 
@@ -163,7 +143,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-shared">
-          <h2>{t("Edit Project")}</h2>
+          <h2>{t("Edit Research Area")}</h2>
           <button className="btn-close-modal" onClick={handleCancel}>
             ×
           </button>
@@ -173,79 +153,65 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
           {error && <div className="editor-error">{error}</div>}
 
           <div className="form-field">
-            <label htmlFor="pj-title-pt">{t("Title")} <span className="lang-badge">PT</span></label>
+            <label htmlFor="ra-title-pt">{t("Title")} <span className="lang-badge">PT</span></label>
             <input
-              id="pj-title-pt"
+              id="ra-title-pt"
               type="text"
               name="title_pt"
               value={formData.title_pt}
               onChange={handleChange}
-              placeholder={t("Project title")}
+              placeholder={t("Research area title")}
               maxLength={255}
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="pj-title-en">{t("Title")} <span className="lang-badge">EN</span></label>
+            <label htmlFor="ra-title-en">{t("Title")} <span className="lang-badge">EN</span></label>
             <input
-              id="pj-title-en"
+              id="ra-title-en"
               type="text"
               name="title_en"
               value={formData.title_en}
               onChange={handleChange}
-              placeholder="Project title"
+              placeholder={t("Research area title")}
               maxLength={255}
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="pj-description-pt">{t("Description")} <span className="lang-badge">PT</span></label>
+            <label htmlFor="ra-description-pt">{t("Description")} <span className="lang-badge">PT</span></label>
             <textarea
-              id="pj-description-pt"
+              id="ra-description-pt"
               name="description_pt"
               value={formData.description_pt}
               onChange={handleChange}
-              placeholder={t("Project description")}
+              placeholder={t("Research area description")}
               rows={4}
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="pj-description-en">{t("Description")} <span className="lang-badge">EN</span></label>
+            <label htmlFor="ra-description-en">{t("Description")} <span className="lang-badge">EN</span></label>
             <textarea
-              id="pj-description-en"
+              id="ra-description-en"
               name="description_en"
               value={formData.description_en}
               onChange={handleChange}
-              placeholder={t("Project description")}
+              placeholder={t("Research area description")}
               rows={4}
             />
           </div>
 
           <div className="form-field">
-            <label htmlFor="pj-link">{t("More info link")} <span className="optional-badge">{t("optional")}</span></label>
+            <label htmlFor="ra-link">{t("More info link")} <span className="optional-badge">{t("optional")}</span></label>
             <input
-              id="pj-link"
+              id="ra-link"
               type="url"
               name="link"
               value={formData.link}
               onChange={handleChange}
               placeholder="https://..."
             />
-          </div>
-
-          <div className="form-field">
-            {isLoadingUsers ? (
-              <p>{t("Loading users...")}</p>
-            ) : (
-              <MultiSelect
-                label={t("Members")}
-                options={availableUsers}
-                selected={formData.members}
-                onChange={handleMembersChange}
-                placeholder={t("Select members...")}
-              />
-            )}
           </div>
 
           <div className="modal-actions">
@@ -264,7 +230,7 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
                 onClick={handleToggleActive}
                 disabled={isSaving}
               >
-                {project.is_active ? t("Deactivate") : t("Activate")}
+                {researchArea.is_active ? t("Deactivate") : t("Activate")}
               </button>
             </div>
             <div className="right-actions">
@@ -282,4 +248,4 @@ const ProjectManageEditor: React.FC<ProjectManageEditorProps> = ({
   );
 };
 
-export default ProjectManageEditor;
+export default ResearchAreaManageEditor;

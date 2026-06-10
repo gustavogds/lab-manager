@@ -270,7 +270,30 @@
   }
 
   .content-table {
-    min-width: 900px;
+    // Fixed layout + shared colgroup so every room/section table renders with
+    // identical column widths. Without this, each table sizes its columns from
+    // its own content (a long Equipment ID widens that table's ID column),
+    // leaving tables misaligned relative to one another.
+    min-width: 1024px;
+    table-layout: fixed;
+
+    col {
+      &.col-checkbox { width: 40px; }
+      &.col-drag { width: 34px; }
+      &.col-id { width: 120px; }
+      &.col-category { width: 100px; }
+      &.col-name { width: auto; }
+      &.col-observation { width: 130px; }
+      &.col-assigned { width: 140px; }
+      &.col-users { width: 130px; }
+      &.col-state { width: 100px; }
+      &.col-status { width: 100px; }
+    }
+
+    .cell-id {
+      // Long IDs no longer push the column wider; wrap within the fixed width.
+      overflow-wrap: anywhere;
+    }
   }
 }
 
@@ -333,7 +356,8 @@
     }
 
     .new-input-bar {
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: stretch;
 
       input {
         width: 100%;

@@ -64,6 +64,31 @@
   }
 }
 
+.btn-more-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.1rem;
+  background: $primary-color;
+  color: $neutral-white;
+  border: none;
+  border-radius: $radius-md;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $primary-color-strong;
+  }
+
+  svg {
+    width: 0.85em;
+    height: 0.85em;
+  }
+}
+
 @media (max-width: 768px) {
   .research-area-details-content {
     max-height: 95vh;

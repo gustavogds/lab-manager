@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from "universal-cookie";
+import { getCurrentLang } from "helpers/i18n";
 
 const cookies = new Cookies();
 
@@ -25,6 +26,7 @@ export type ResearchArea = {
   title_en: string;
   description_pt: string;
   description_en: string;
+  link: string;
   is_active: boolean;
   order: number;
   created_at: string;
@@ -37,6 +39,7 @@ export type Project = {
   title_en: string;
   description_pt: string;
   description_en: string;
+  link: string;
   is_active: boolean;
   order: number;
   created_at: string;
@@ -54,6 +57,7 @@ export const createResearchArea = async (data: {
   title_en: string;
   description_pt: string;
   description_en: string;
+  link?: string;
 }) => {
   const response = await api
     .post("/content/research-areas/create/", data)
@@ -127,6 +131,7 @@ export const createProject = async (data: {
   title_en: string;
   description_pt: string;
   description_en: string;
+  link?: string;
 }) => {
   const response = await api
     .post("/content/projects/create/", data)
@@ -679,11 +684,13 @@ export const deleteEquipmentState = async (stateId: number) => {
 
 export type ReportColumnConfig = {
   key: string;
-  label: string;
+  label_pt: string;
+  label_en: string;
 };
 
 export type ReportSectionConfig = {
-  label: string;
+  label_pt: string;
+  label_en: string;
   columns: ReportColumnConfig[];
   supports_room_grouping: boolean;
   supports_section_grouping: boolean;
@@ -722,9 +729,15 @@ export const generateReport = async (data: {
   sections: ReportSections;
 }) => {
   try {
-    const response = await api.post("/content/reports/generate/", data, {
-      responseType: "blob",
-    });
+    const response = await api.post(
+      "/content/reports/generate/",
+      {
+        ...data,
+        language: getCurrentLang(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
+      { responseType: "blob" }
+    );
 
     const contentType = String(response.headers["content-type"] || "");
     if (contentType.includes("application/json")) {

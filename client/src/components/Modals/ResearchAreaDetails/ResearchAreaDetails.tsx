@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import "./ResearchAreaDetails.scss";
 import type { ResearchArea } from "helpers/api/content";
 import { localized } from "helpers/i18n";
@@ -25,6 +26,17 @@ const ResearchAreaDetails = ({ area, onConfirm }: ResearchAreaDetailsProps) => {
             <h3>{t("Description")}</h3>
             <p>{localized(area, "description")}</p>
           </section>
+
+          {area.link && (
+            <a
+              className="btn-more-info"
+              href={area.link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaExternalLinkAlt /> {t("More information")}
+            </a>
+          )}
         </div>
       </div>
     </div>
