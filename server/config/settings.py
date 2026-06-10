@@ -24,8 +24,7 @@ DEBUG = False
 
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
-# ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-ALLOWED_HOSTS = ["lab-manager.duckdns.org", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
