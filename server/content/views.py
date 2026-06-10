@@ -509,10 +509,11 @@ def create_equipment(request):
 
 @require_http_methods(["GET"])
 def list_equipment(request):
+    related = ("room", "assigned_to", "identification_category", "equipment_state", "section")
     if request.user.is_authenticated and hasattr(request.user, "can_manage_equipment") and request.user.can_manage_equipment():
-        items = Equipment.objects.select_related("room", "assigned_to").prefetch_related("users").all()
+        items = Equipment.objects.select_related(*related).prefetch_related("users").all()
     else:
-        items = Equipment.objects.select_related("room", "assigned_to").prefetch_related("users").filter(is_active=True)
+        items = Equipment.objects.select_related(*related).prefetch_related("users").filter(is_active=True)
 
     return JsonResponse(
         {
@@ -525,7 +526,11 @@ def list_equipment(request):
 @login_required
 @require_http_methods(["GET"])
 def list_all_equipment(request):
-    items = Equipment.objects.select_related("room", "assigned_to").prefetch_related("users").all()
+    items = (
+        Equipment.objects.select_related("room", "assigned_to", "identification_category", "equipment_state", "section")
+        .prefetch_related("users")
+        .all()
+    )
     return JsonResponse(
         {
             "success": True,
@@ -689,6 +694,7 @@ def update_equipment_config(request):
         order = config.get("order")
         is_active = config.get("is_active")
         room_id = config.get("room_id")
+        section_id = config.get("section_id")
 
         try:
             equipment = Equipment.objects.get(id=equipment_id)
@@ -699,11 +705,24 @@ def update_equipment_config(request):
             if room_id is not None:
                 try:
                     room = Room.objects.get(id=room_id)
-                    equipment.room = room
+                    if equipment.room_id != room.id:
+                        equipment.room = room
+                        equipment.section = None  # Clear section when room changes
                 except Room.DoesNotExist:
                     pass
             elif "room_id" in config:
                 equipment.room = None
+                equipment.section = None  # Clear section when room is cleared
+            if section_id is not None:
+                try:
+                    section = RoomSection.objects.get(id=section_id)
+                    # Validate that section belongs to equipment's room
+                    if equipment.room_id == section.room_id:
+                        equipment.section = section
+                except RoomSection.DoesNotExist:
+                    pass
+            elif "section_id" in config:
+                equipment.section = None
             equipment.save()
         except Equipment.DoesNotExist:
             continue

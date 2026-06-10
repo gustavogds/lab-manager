@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import {
   listAllEquipment,
   listRooms,
   createRoom,
-  updateEquipment,
+  updateEquipmentConfig,
   listIdentificationCategories,
   createIdentificationCategory,
   listEquipmentStates,
@@ -18,6 +18,108 @@ import { ModalsHandler } from "components/my-own-modal-handler";
 import { FaArrowLeft, FaPlus, FaDoorOpen, FaPen, FaGripVertical, FaChevronDown, FaTag, FaSearch, FaTimes, FaClipboard, FaLayerGroup } from "react-icons/fa";
 import "./ManageContent.scss";
 import "./ManageEquipment.scss";
+
+type EquipmentRowProps = {
+  item: Equipment;
+  isSelected: boolean;
+  onEdit: (item: Equipment) => void;
+  onToggleSelect: (id: number) => void;
+  onDragStart: (id: number) => void;
+};
+
+const EquipmentRow = memo(({ item, isSelected, onEdit, onToggleSelect, onDragStart }: EquipmentRowProps) => {
+  const { t } = useTranslation();
+  return (
+    <tr
+      className={`${!item.is_active ? "inactive" : ""} ${isSelected ? "selected" : ""}`}
+      draggable
+      onDragStart={() => onDragStart(item.id)}
+    >
+      <td className="cell-checkbox" onClick={(e) => e.stopPropagation()}>
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => onToggleSelect(item.id)}
+        />
+      </td>
+      <td className="cell-drag">
+        <FaGripVertical className="drag-handle" />
+      </td>
+      <td className="cell-id" onClick={() => onEdit(item)}>
+        {item.custom_id}
+      </td>
+      <td className="cell-category" onClick={() => onEdit(item)}>
+        {item.identification_category ? (
+          <span className="category-tag">{item.identification_category.name}</span>
+        ) : (
+          <span className="empty-value">—</span>
+        )}
+      </td>
+      <td className="cell-name" onClick={() => onEdit(item)}>
+        {item.name}
+      </td>
+      <td className="cell-observation" onClick={() => onEdit(item)}>
+        {item.observation ? (
+          <span className="observation-text" title={item.observation}>
+            {item.observation.length > 30
+              ? `${item.observation.substring(0, 30)}...`
+              : item.observation}
+          </span>
+        ) : (
+          <span className="empty-value">—</span>
+        )}
+      </td>
+      <td className="cell-assigned" onClick={() => onEdit(item)}>
+        {item.assigned_to ? (
+          <div className="assigned-user">
+            {item.assigned_to.profile_image && (
+              <img
+                src={item.assigned_to.profile_image}
+                alt={item.assigned_to.name}
+                className="user-avatar"
+              />
+            )}
+            <span>{item.assigned_to.name}</span>
+          </div>
+        ) : (
+          <span className="empty-value">—</span>
+        )}
+      </td>
+      <td className="cell-users" onClick={() => onEdit(item)}>
+        {item.users && item.users.length > 0 ? (
+          <div className="users-list">
+            {item.users.slice(0, 3).map((u) => (
+              <span key={u.id} className="user-tag">
+                {u.name.split(" ")[0]}
+              </span>
+            ))}
+            {item.users.length > 3 && (
+              <span className="user-tag more">
+                +{item.users.length - 3}
+              </span>
+            )}
+          </div>
+        ) : (
+          <span className="empty-value">—</span>
+        )}
+      </td>
+      <td className="cell-state" onClick={() => onEdit(item)}>
+        {item.equipment_state ? (
+          <span className="state-tag">{item.equipment_state.name}</span>
+        ) : (
+          <span className="empty-value">—</span>
+        )}
+      </td>
+      <td className="cell-status" onClick={() => onEdit(item)}>
+        <span
+          className={`status-badge ${item.is_active ? "active" : "inactive"}`}
+        >
+          {item.is_active ? t("Active") : t("Inactive")}
+        </span>
+      </td>
+    </tr>
+  );
+});
 
 const ManageEquipment = () => {
   const { t } = useTranslation();
@@ -42,6 +144,7 @@ const ManageEquipment = () => {
   const [isCreatingSection, setIsCreatingSection] = useState(false);
   const [showCreateDropdown, setShowCreateDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedEquipment, setSelectedEquipment] = useState<Set<number>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dragItems = useRef<number[]>([]);
@@ -90,6 +193,11 @@ const ManageEquipment = () => {
   }, []);
 
   useEffect(() => {
+    const handle = setTimeout(() => setDebouncedSearchTerm(searchTerm), 200);
+    return () => clearTimeout(handle);
+  }, [searchTerm]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowCreateDropdown(false);
@@ -99,17 +207,20 @@ const ManageEquipment = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleEdit = (item: Equipment) => {
-    const roomSections = sections.filter((s) => s.room_id === item.room?.id);
-    ModalsHandler.createModal("EquipmentEditor", {
-      equipment: item,
-      rooms,
-      categories,
-      states,
-      sections: roomSections,
-      onConfirm: () => fetchData(),
-    });
-  };
+  const handleEdit = useCallback(
+    (item: Equipment) => {
+      const roomSections = sections.filter((s) => s.room_id === item.room?.id);
+      ModalsHandler.createModal("EquipmentEditor", {
+        equipment: item,
+        rooms,
+        categories,
+        states,
+        sections: roomSections,
+        onConfirm: () => fetchData(),
+      });
+    },
+    [sections, rooms, categories, states]
+  );
 
   const handleEditRoom = (room: Room) => {
     ModalsHandler.createModal("RoomEditor", {
@@ -236,15 +347,21 @@ const ManageEquipment = () => {
     return sections.filter((s) => s.room_id === roomId);
   };
 
-  const handleDragStart = (equipmentId: number) => {
-    if (selectedEquipment.has(equipmentId)) {
-      dragItems.current = Array.from(selectedEquipment);
+  const selectedEquipmentRef = useRef(selectedEquipment);
+  useEffect(() => {
+    selectedEquipmentRef.current = selectedEquipment;
+  }, [selectedEquipment]);
+
+  const handleDragStart = useCallback((equipmentId: number) => {
+    const selected = selectedEquipmentRef.current;
+    if (selected.has(equipmentId)) {
+      dragItems.current = Array.from(selected);
     } else {
       dragItems.current = [equipmentId];
     }
-  };
+  }, []);
 
-  const toggleEquipmentSelection = (equipmentId: number) => {
+  const toggleEquipmentSelection = useCallback((equipmentId: number) => {
     setSelectedEquipment((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(equipmentId)) {
@@ -254,7 +371,7 @@ const ManageEquipment = () => {
       }
       return newSet;
     });
-  };
+  }, []);
 
   const toggleSelectAll = (items: Equipment[]) => {
     const itemIds = items.map((eq) => eq.id);
@@ -324,17 +441,18 @@ const ManageEquipment = () => {
 
     setSelectedEquipment(new Set());
 
-    const results = await Promise.all(
-      itemsToMove.map((id) =>
-        updateEquipment(id, { room_id: targetRoomId, section_id: targetSectionId } as any)
-      )
+    const response = await updateEquipmentConfig(
+      itemsToMove.map((id) => ({
+        id,
+        room_id: targetRoomId,
+        section_id: targetSectionId,
+      }))
     );
 
-    const failures = results.filter((r) => !r.success).length;
-    if (failures > 0) {
+    if (!response.success) {
       ModalsHandler.createNotification({
         title: t("Error"),
-        message: t("Failed to move {{count}} equipment(s).", { count: failures }),
+        message: t("Failed to move {{count}} equipment(s).", { count: itemsToMove.length }),
         type: "error",
       });
       fetchData();
@@ -353,10 +471,10 @@ const ManageEquipment = () => {
       return 0;
     });
 
-  const filterEquipment = (items: Equipment[]) => {
-    if (!searchTerm.trim()) return items;
-    const term = searchTerm.toLowerCase();
-    return items.filter(
+  const filteredEquipment = useMemo(() => {
+    if (!debouncedSearchTerm.trim()) return equipment;
+    const term = debouncedSearchTerm.toLowerCase();
+    return equipment.filter(
       (eq) =>
         eq.name.toLowerCase().includes(term) ||
         eq.custom_id.toLowerCase().includes(term) ||
@@ -364,12 +482,7 @@ const ManageEquipment = () => {
         (eq.assigned_to?.name.toLowerCase().includes(term) ?? false) ||
         (eq.users?.some((u) => u.name.toLowerCase().includes(term)) ?? false)
     );
-  };
-
-  const filteredEquipment = useMemo(
-    () => filterEquipment(equipment),
-    [equipment, searchTerm]
-  );
+  }, [equipment, debouncedSearchTerm]);
 
   const unassignedEquipment = useMemo(
     () => sortActiveFirst(filteredEquipment.filter((eq) => !eq.room)),
@@ -449,100 +562,16 @@ const ManageEquipment = () => {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => {
-                const isSelected = selectedEquipment.has(item.id);
-                return (
-                  <tr
-                    key={item.id}
-                    className={`${!item.is_active ? "inactive" : ""} ${isSelected ? "selected" : ""}`}
-                    draggable
-                    onDragStart={() => handleDragStart(item.id)}
-                  >
-                    <td className="cell-checkbox" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleEquipmentSelection(item.id)}
-                      />
-                    </td>
-                    <td className="cell-drag">
-                      <FaGripVertical className="drag-handle" />
-                    </td>
-                    <td className="cell-id" onClick={() => handleEdit(item)}>
-                      {item.custom_id}
-                    </td>
-                    <td className="cell-category" onClick={() => handleEdit(item)}>
-                      {item.identification_category ? (
-                        <span className="category-tag">{item.identification_category.name}</span>
-                      ) : (
-                        <span className="empty-value">—</span>
-                      )}
-                    </td>
-                    <td className="cell-name" onClick={() => handleEdit(item)}>
-                      {item.name}
-                    </td>
-                    <td className="cell-observation" onClick={() => handleEdit(item)}>
-                      {item.observation ? (
-                        <span className="observation-text" title={item.observation}>
-                          {item.observation.length > 30
-                            ? `${item.observation.substring(0, 30)}...`
-                            : item.observation}
-                        </span>
-                      ) : (
-                        <span className="empty-value">—</span>
-                      )}
-                    </td>
-                    <td className="cell-assigned" onClick={() => handleEdit(item)}>
-                      {item.assigned_to ? (
-                        <div className="assigned-user">
-                          {item.assigned_to.profile_image && (
-                            <img
-                              src={item.assigned_to.profile_image}
-                              alt={item.assigned_to.name}
-                              className="user-avatar"
-                            />
-                          )}
-                          <span>{item.assigned_to.name}</span>
-                        </div>
-                      ) : (
-                        <span className="empty-value">—</span>
-                      )}
-                    </td>
-                    <td className="cell-users" onClick={() => handleEdit(item)}>
-                      {item.users && item.users.length > 0 ? (
-                        <div className="users-list">
-                          {item.users.slice(0, 3).map((u) => (
-                            <span key={u.id} className="user-tag">
-                              {u.name.split(" ")[0]}
-                            </span>
-                          ))}
-                          {item.users.length > 3 && (
-                            <span className="user-tag more">
-                              +{item.users.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="empty-value">—</span>
-                      )}
-                    </td>
-                    <td className="cell-state" onClick={() => handleEdit(item)}>
-                      {item.equipment_state ? (
-                        <span className="state-tag">{item.equipment_state.name}</span>
-                      ) : (
-                        <span className="empty-value">—</span>
-                      )}
-                    </td>
-                    <td className="cell-status" onClick={() => handleEdit(item)}>
-                      <span
-                        className={`status-badge ${item.is_active ? "active" : "inactive"}`}
-                      >
-                        {item.is_active ? t("Active") : t("Inactive")}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+              {items.map((item) => (
+                <EquipmentRow
+                  key={item.id}
+                  item={item}
+                  isSelected={selectedEquipment.has(item.id)}
+                  onEdit={handleEdit}
+                  onToggleSelect={toggleEquipmentSelection}
+                  onDragStart={handleDragStart}
+                />
+              ))}
             </tbody>
           </table>
         )}
