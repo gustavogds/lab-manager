@@ -555,44 +555,8 @@ const Home = () => {
   };
 
   const openResearchAreaEditor = async (area: ResearchArea) => {
-    const { promise } = ModalsHandler.createModal("SectionEditor", {
-      headerTitle: t("Edit Research Area"),
-      fields: [
-        {
-          name: "title_pt",
-          label: `${t("Title")} (PT)`,
-          type: "text",
-          placeholder: t("Ex: Artificial Intelligence"),
-        },
-        {
-          name: "title_en",
-          label: `${t("Title")} (EN)`,
-          type: "text",
-          placeholder: "Ex: Artificial Intelligence",
-        },
-        {
-          name: "description_pt",
-          label: `${t("Description")} (PT)`,
-          type: "textarea",
-          placeholder: t("Describe the research area..."),
-          rows: 6,
-        },
-        {
-          name: "description_en",
-          label: `${t("Description")} (EN)`,
-          type: "textarea",
-          placeholder: "Describe the research area...",
-          rows: 6,
-        },
-      ],
-      initialValues: {
-        title_pt: area.title_pt,
-        title_en: area.title_en,
-        description_pt: area.description_pt,
-        description_en: area.description_en,
-      },
-      confirmLabel: t("Save"),
-      cancelLabel: t("Cancel"),
+    const { promise } = ModalsHandler.createModal("ResearchAreaEditor", {
+      researchArea: area,
     });
 
     const result = await promise;
@@ -600,12 +564,19 @@ const Home = () => {
       return;
     }
 
-    const values = result as Record<string, string>;
+    const values = result as {
+      title_pt: string;
+      title_en: string;
+      description_pt: string;
+      description_en: string;
+      link: string;
+    };
     const response = await updateResearchArea(area.id, {
       title_pt: values.title_pt,
       title_en: values.title_en,
       description_pt: values.description_pt,
       description_en: values.description_en,
+      link: values.link,
     });
 
     if (response.success) {
@@ -618,6 +589,7 @@ const Home = () => {
                 title_en: values.title_en,
                 description_pt: values.description_pt,
                 description_en: values.description_en,
+                link: values.link,
               }
             : a
         )
@@ -714,6 +686,7 @@ const Home = () => {
       title_en: string;
       description_pt: string;
       description_en: string;
+      link: string;
       members: any[];
     };
     const response = await updateProject(project.id, {
@@ -721,6 +694,7 @@ const Home = () => {
       title_en: values.title_en,
       description_pt: values.description_pt,
       description_en: values.description_en,
+      link: values.link,
       members: values.members.map((m: any) => m.id),
     } as any);
 
@@ -734,6 +708,7 @@ const Home = () => {
                 title_en: values.title_en,
                 description_pt: values.description_pt,
                 description_en: values.description_en,
+                link: values.link,
                 members: values.members,
               }
             : p

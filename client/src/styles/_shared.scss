@@ -308,6 +308,19 @@
     text-transform: uppercase;
   }
 
+  .optional-badge {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    background: $neutral-surface;
+    color: $neutral-muted;
+    border-radius: $radius-xs;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: lowercase;
+  }
+
   input[type="text"],
   input[type="number"],
   input[type="url"],

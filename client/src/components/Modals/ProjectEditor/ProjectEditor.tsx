@@ -11,6 +11,7 @@ interface ProjectEditorProps {
     title_en: string;
     description_pt: string;
     description_en: string;
+    link: string;
     members: User[];
   }) => void;
   onCancel?: () => void;
@@ -27,6 +28,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     title_en: project.title_en || "",
     description_pt: project.description_pt || "",
     description_en: project.description_en || "",
+    link: project.link || "",
     members: project.members || [],
   });
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
@@ -134,6 +136,18 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
               onChange={handleChange}
               placeholder="Project description"
               rows={5}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="link">{t("More info link")} <span className="optional-badge">{t("optional")}</span></label>
+            <input
+              id="link"
+              type="url"
+              name="link"
+              value={formData.link}
+              onChange={handleChange}
+              placeholder="https://..."
             />
           </div>
 

@@ -39,6 +39,7 @@ import ResearchersEditor from "../components/Modals/ResearchersEditor/Researcher
 import PartnershipsEditor from "../components/Modals/PartnershipsEditor/PartnershipsEditor";
 import EquipmentEditor from "../components/Modals/EquipmentEditor/EquipmentEditor";
 import ResearchAreaEditor from "../components/Modals/ResearchAreaEditor/ResearchAreaEditor";
+import ResearchAreaManageEditor from "../components/Modals/ResearchAreaManageEditor/ResearchAreaManageEditor";
 import ProjectManageEditor from "../components/Modals/ProjectManageEditor/ProjectManageEditor";
 import PartnershipManageEditor from "../components/Modals/PartnershipManageEditor/PartnershipManageEditor";
 import RoomEditor from "../components/Modals/RoomEditor/RoomEditor";
@@ -108,6 +109,7 @@ const App = () => {
     ModalsHandler.registerModal("PartnershipsEditor", PartnershipsEditor);
     ModalsHandler.registerModal("EquipmentEditor", EquipmentEditor);
     ModalsHandler.registerModal("ResearchAreaEditor", ResearchAreaEditor);
+    ModalsHandler.registerModal("ResearchAreaManageEditor", ResearchAreaManageEditor);
     ModalsHandler.registerModal("ProjectManageEditor", ProjectManageEditor);
     ModalsHandler.registerModal("PartnershipManageEditor", PartnershipManageEditor);
     ModalsHandler.registerModal("RoomEditor", RoomEditor);

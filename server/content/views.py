@@ -21,6 +21,7 @@ def create_research_area(request):
     title_en = (data.get("title_en") or "").strip()
     description_pt = (data.get("description_pt") or "").strip()
     description_en = (data.get("description_en") or "").strip()
+    link = (data.get("link") or "").strip()
 
     if not title_pt and not title_en:
         return JsonResponse({"error": "Title is required."}, status=400)
@@ -35,6 +36,7 @@ def create_research_area(request):
         title_en=title_en,
         description_pt=description_pt,
         description_en=description_en,
+        link=link,
         order=max_order + 1,
     )
 
@@ -90,7 +92,7 @@ def update_research_area(request, area_id):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON."}, status=400)
 
-    allowed_fields = ["title_pt", "title_en", "description_pt", "description_en", "is_active", "order"]
+    allowed_fields = ["title_pt", "title_en", "description_pt", "description_en", "link", "is_active", "order"]
     updated = False
 
     for field in allowed_fields:
@@ -144,6 +146,7 @@ def create_project(request):
     title_en = (data.get("title_en") or "").strip()
     description_pt = (data.get("description_pt") or "").strip()
     description_en = (data.get("description_en") or "").strip()
+    link = (data.get("link") or "").strip()
     members = data.get("members", [])
 
     if not title_pt and not title_en:
@@ -159,6 +162,7 @@ def create_project(request):
         title_en=title_en,
         description_pt=description_pt,
         description_en=description_en,
+        link=link,
         order=max_order + 1,
     )
 
@@ -231,7 +235,7 @@ def update_project(request, project_id):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON."}, status=400)
 
-    allowed_fields = ["title_pt", "title_en", "description_pt", "description_en", "is_active", "order", "members"]
+    allowed_fields = ["title_pt", "title_en", "description_pt", "description_en", "link", "is_active", "order", "members"]
     updated = False
 
     for field in allowed_fields:

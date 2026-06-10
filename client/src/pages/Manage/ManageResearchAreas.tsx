@@ -30,7 +30,7 @@ const ManageResearchAreas = () => {
   }, []);
 
   const handleEdit = (item: ResearchArea) => {
-    ModalsHandler.createModal("ResearchAreaEditor", {
+    ModalsHandler.createModal("ResearchAreaManageEditor", {
       researchArea: item,
       onConfirm: () => {
         fetchAreas();

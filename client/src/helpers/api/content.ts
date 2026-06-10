@@ -25,6 +25,7 @@ export type ResearchArea = {
   title_en: string;
   description_pt: string;
   description_en: string;
+  link: string;
   is_active: boolean;
   order: number;
   created_at: string;
@@ -37,6 +38,7 @@ export type Project = {
   title_en: string;
   description_pt: string;
   description_en: string;
+  link: string;
   is_active: boolean;
   order: number;
   created_at: string;
@@ -54,6 +56,7 @@ export const createResearchArea = async (data: {
   title_en: string;
   description_pt: string;
   description_en: string;
+  link?: string;
 }) => {
   const response = await api
     .post("/content/research-areas/create/", data)
@@ -127,6 +130,7 @@ export const createProject = async (data: {
   title_en: string;
   description_pt: string;
   description_en: string;
+  link?: string;
 }) => {
   const response = await api
     .post("/content/projects/create/", data)

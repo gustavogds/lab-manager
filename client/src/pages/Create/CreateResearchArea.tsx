@@ -13,6 +13,7 @@ const CreateResearchArea = () => {
     title_en: "",
     description_pt: "",
     description_en: "",
+    link: "",
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -50,7 +51,7 @@ const CreateResearchArea = () => {
       setMessage(response.message || t("Research area created successfully!"));
       setError("");
 
-      setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "" });
+      setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "", link: "" });
       
       setTimeout(() => {
         navigate(-1);
@@ -124,6 +125,18 @@ const CreateResearchArea = () => {
               onChange={handleChange}
               placeholder={"Describe the research area, objectives and lines of investigation..."}
               rows={6}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="link">{t("More info link")} <span className="optional-badge">{t("optional")}</span></label>
+            <input
+              id="link"
+              type="url"
+              name="link"
+              value={formData.link}
+              onChange={handleChange}
+              placeholder="https://..."
             />
           </div>
 

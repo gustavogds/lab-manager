@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import "./ProjectDetails.scss";
 import Icons from "components/Icons/Icons";
 import type { Project } from "helpers/api/content";
@@ -26,6 +27,17 @@ const ProjectDetails = ({ project, onConfirm }: ProjectDetailsProps) => {
             <h3>{t("Description")}</h3>
             <p>{localized(project, "description")}</p>
           </section>
+
+          {project.link && (
+            <a
+              className="btn-more-info"
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaExternalLinkAlt /> {t("More information")}
+            </a>
+          )}
 
           <section className="project-members">
             <h3>{t("Members")} ({project.members.length})</h3>

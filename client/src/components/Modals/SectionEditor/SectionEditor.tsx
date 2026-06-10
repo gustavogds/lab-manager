@@ -7,7 +7,7 @@ import "./SectionEditor.scss";
 export type SectionEditorField = {
   name: string;
   label: string;
-  type?: "text" | "textarea" | "email" | "tel" | "image-upload";
+  type?: "text" | "textarea" | "email" | "tel" | "url" | "image-upload";
   placeholder?: string;
   rows?: number;
   required?: boolean;
