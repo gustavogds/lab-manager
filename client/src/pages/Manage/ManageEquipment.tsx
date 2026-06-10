@@ -426,14 +426,14 @@ const ManageEquipment = () => {
                   />
                 </th>
                 <th style={{ width: 40 }} />
-                <th>ID</th>
-                <th>Categoria</th>
-                <th>Nome</th>
-                <th>Obs.</th>
-                <th>Responsável</th>
-                <th>Usuários</th>
-                <th>Estado</th>
-                <th>Status</th>
+                <th>{t("ID")}</th>
+                <th>{t("Category")}</th>
+                <th>{t("Name")}</th>
+                <th>{t("Obs.")}</th>
+                <th>{t("Responsible")}</th>
+                <th>{t("Users")}</th>
+                <th>{t("State")}</th>
+                <th>{t("Status")}</th>
               </tr>
             </thead>
             <tbody>

@@ -1,79 +1,134 @@
 import io
 import json
-from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
 from content.models import ResearchArea, Project, Partnership, Equipment, Room, RoomSection
 from accounts.models import User
 
 
+UI_STRINGS = {
+    "pt": {
+        "active": "Ativo",
+        "inactive": "Inativo",
+        "generated_at": "Gerado em",
+        "datetime_format": "%d/%m/%Y às %H:%M",
+        "no_records": "Nenhum registro encontrado.",
+        "no_room": "Sem Sala",
+    },
+    "en": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "generated_at": "Generated on",
+        "datetime_format": "%m/%d/%Y at %H:%M",
+        "no_records": "No records found.",
+        "no_room": "No Room",
+    },
+}
+
+
+def _normalize_lang(value):
+    return "pt" if str(value or "").lower().startswith("pt") else "en"
+
+
+def _resolve_timezone(value):
+    """Resolve an IANA timezone name (e.g. from the browser), falling back to UTC."""
+    if value:
+        try:
+            return ZoneInfo(str(value))
+        except Exception:
+            pass
+    return ZoneInfo("UTC")
+
+
+def _localized(obj, field, lang):
+    """Return obj.<field>_<lang>, falling back to the other language when empty."""
+    if obj is None:
+        return ""
+    primary = getattr(obj, f"{field}_{lang}", "") or ""
+    if primary:
+        return primary
+    other = "en" if lang == "pt" else "pt"
+    return getattr(obj, f"{field}_{other}", "") or ""
+
+
+def _status_label(is_active, lang):
+    return UI_STRINGS[lang]["active"] if is_active else UI_STRINGS[lang]["inactive"]
+
+
 COLUMN_CONFIG = {
     "research_areas": {
-        "label": "Áreas de Pesquisa",
+        "label_pt": "Áreas de Pesquisa",
+        "label_en": "Research Areas",
         "columns": [
-            {"key": "id", "label": "ID", "getter": lambda item: item.id},
-            {"key": "title", "label": "Título", "getter": lambda item: item.title_pt or item.title_en},
-            {"key": "description", "label": "Descrição", "getter": lambda item: item.description_pt or item.description_en},
-            {"key": "status", "label": "Status", "getter": lambda item: "Ativo" if item.is_active else "Inativo"},
+            {"key": "id", "label_pt": "ID", "label_en": "ID", "getter": lambda item, lang: item.id},
+            {"key": "title", "label_pt": "Título", "label_en": "Title", "getter": lambda item, lang: _localized(item, "title", lang)},
+            {"key": "description", "label_pt": "Descrição", "label_en": "Description", "getter": lambda item, lang: _localized(item, "description", lang)},
+            {"key": "status", "label_pt": "Status", "label_en": "Status", "getter": lambda item, lang: _status_label(item.is_active, lang)},
         ],
         "get_data": lambda: ResearchArea.objects.all().order_by("order", "title_pt"),
         "supports_room_grouping": False,
         "supports_section_grouping": False,
     },
     "projects": {
-        "label": "Projetos",
+        "label_pt": "Projetos",
+        "label_en": "Projects",
         "columns": [
-            {"key": "id", "label": "ID", "getter": lambda item: item.id},
-            {"key": "title", "label": "Título", "getter": lambda item: item.title_pt or item.title_en},
-            {"key": "description", "label": "Descrição", "getter": lambda item: item.description_pt or item.description_en},
-            {"key": "members", "label": "Integrantes", "getter": lambda item: ", ".join(m.name for m in item.members.filter(is_public=True))},
-            {"key": "status", "label": "Status", "getter": lambda item: "Ativo" if item.is_active else "Inativo"},
+            {"key": "id", "label_pt": "ID", "label_en": "ID", "getter": lambda item, lang: item.id},
+            {"key": "title", "label_pt": "Título", "label_en": "Title", "getter": lambda item, lang: _localized(item, "title", lang)},
+            {"key": "description", "label_pt": "Descrição", "label_en": "Description", "getter": lambda item, lang: _localized(item, "description", lang)},
+            {"key": "members", "label_pt": "Integrantes", "label_en": "Members", "getter": lambda item, lang: ", ".join(m.name for m in item.members.filter(is_public=True))},
+            {"key": "status", "label_pt": "Status", "label_en": "Status", "getter": lambda item, lang: _status_label(item.is_active, lang)},
         ],
         "get_data": lambda: Project.objects.prefetch_related("members").all().order_by("order", "title_pt"),
         "supports_room_grouping": False,
         "supports_section_grouping": False,
     },
     "users": {
-        "label": "Usuários",
+        "label_pt": "Usuários",
+        "label_en": "Users",
         "columns": [
-            {"key": "id", "label": "ID", "getter": lambda item: item.id},
-            {"key": "name", "label": "Nome", "getter": lambda item: item.name or ""},
-            {"key": "email", "label": "E-mail", "getter": lambda item: item.email},
-            {"key": "position", "label": "Cargo", "getter": lambda item: ((item.positions.first().name_pt or item.positions.first().name_en) if item.positions.exists() else "")},
-            {"key": "roles", "label": "Funções", "getter": lambda item: ", ".join(item.roles) if item.roles else ""},
-            {"key": "room", "label": "Sala", "getter": lambda item: item.room.name if item.room else ""},
+            {"key": "id", "label_pt": "ID", "label_en": "ID", "getter": lambda item, lang: item.id},
+            {"key": "name", "label_pt": "Nome", "label_en": "Name", "getter": lambda item, lang: item.name or ""},
+            {"key": "email", "label_pt": "E-mail", "label_en": "Email", "getter": lambda item, lang: item.email},
+            {"key": "position", "label_pt": "Cargo", "label_en": "Position", "getter": lambda item, lang: _localized(item.positions.first(), "name", lang) if item.positions.exists() else ""},
+            {"key": "roles", "label_pt": "Funções", "label_en": "Roles", "getter": lambda item, lang: ", ".join(item.roles) if item.roles else ""},
+            {"key": "room", "label_pt": "Sala", "label_en": "Room", "getter": lambda item, lang: item.room.name if item.room else ""},
         ],
         "get_data": lambda: User.objects.filter(is_approved=True).select_related("room").prefetch_related("positions").order_by("name"),
         "supports_room_grouping": True,
         "supports_section_grouping": False,
     },
     "equipment": {
-        "label": "Equipamentos",
+        "label_pt": "Equipamentos",
+        "label_en": "Equipment",
         "columns": [
-            {"key": "custom_id", "label": "ID Interno", "getter": lambda item: item.custom_id},
-            {"key": "name", "label": "Nome", "getter": lambda item: item.name},
-            {"key": "observation", "label": "Observação", "getter": lambda item: item.observation or ""},
-            {"key": "category", "label": "Categoria", "getter": lambda item: item.identification_category.name if item.identification_category else ""},
-            {"key": "state", "label": "Estado", "getter": lambda item: item.equipment_state.name if item.equipment_state else ""},
-            {"key": "room", "label": "Sala", "getter": lambda item: item.room.name if item.room else ""},
-            {"key": "section", "label": "Seção", "getter": lambda item: item.section.name if item.section else ""},
-            {"key": "assigned_to", "label": "Responsável", "getter": lambda item: item.assigned_to.name if item.assigned_to else ""},
-            {"key": "status", "label": "Status", "getter": lambda item: "Ativo" if item.is_active else "Inativo"},
+            {"key": "custom_id", "label_pt": "ID Interno", "label_en": "Internal ID", "getter": lambda item, lang: item.custom_id},
+            {"key": "name", "label_pt": "Nome", "label_en": "Name", "getter": lambda item, lang: item.name},
+            {"key": "observation", "label_pt": "Observação", "label_en": "Observation", "getter": lambda item, lang: item.observation or ""},
+            {"key": "category", "label_pt": "Categoria", "label_en": "Category", "getter": lambda item, lang: item.identification_category.name if item.identification_category else ""},
+            {"key": "state", "label_pt": "Estado", "label_en": "State", "getter": lambda item, lang: item.equipment_state.name if item.equipment_state else ""},
+            {"key": "room", "label_pt": "Sala", "label_en": "Room", "getter": lambda item, lang: item.room.name if item.room else ""},
+            {"key": "section", "label_pt": "Seção", "label_en": "Section", "getter": lambda item, lang: item.section.name if item.section else ""},
+            {"key": "assigned_to", "label_pt": "Responsável", "label_en": "Responsible", "getter": lambda item, lang: item.assigned_to.name if item.assigned_to else ""},
+            {"key": "status", "label_pt": "Status", "label_en": "Status", "getter": lambda item, lang: _status_label(item.is_active, lang)},
         ],
         "get_data": lambda: Equipment.objects.select_related("assigned_to", "room", "section", "identification_category", "equipment_state").all().order_by("order", "name"),
         "supports_room_grouping": True,
         "supports_section_grouping": True,
     },
     "partnerships": {
-        "label": "Parcerias",
+        "label_pt": "Parcerias",
+        "label_en": "Partnerships",
         "columns": [
-            {"key": "id", "label": "ID", "getter": lambda item: item.id},
-            {"key": "name", "label": "Nome", "getter": lambda item: item.name},
-            {"key": "link", "label": "Link", "getter": lambda item: item.link or ""},
-            {"key": "status", "label": "Status", "getter": lambda item: "Ativo" if item.is_active else "Inativo"},
+            {"key": "id", "label_pt": "ID", "label_en": "ID", "getter": lambda item, lang: item.id},
+            {"key": "name", "label_pt": "Nome", "label_en": "Name", "getter": lambda item, lang: item.name},
+            {"key": "link", "label_pt": "Link", "label_en": "Link", "getter": lambda item, lang: item.link or ""},
+            {"key": "status", "label_pt": "Status", "label_en": "Status", "getter": lambda item, lang: _status_label(item.is_active, lang)},
         ],
         "get_data": lambda: Partnership.objects.all().order_by("order", "name"),
         "supports_room_grouping": False,
@@ -93,8 +148,12 @@ def get_report_config(request):
     config_data = {}
     for section_key, config in COLUMN_CONFIG.items():
         config_data[section_key] = {
-            "label": config["label"],
-            "columns": [{"key": col["key"], "label": col["label"]} for col in config["columns"]],
+            "label_pt": config["label_pt"],
+            "label_en": config["label_en"],
+            "columns": [
+                {"key": col["key"], "label_pt": col["label_pt"], "label_en": col["label_en"]}
+                for col in config["columns"]
+            ],
             "supports_room_grouping": config["supports_room_grouping"],
             "supports_section_grouping": config["supports_section_grouping"],
         }
@@ -116,6 +175,8 @@ def generate_report(request):
     report_name = data.get("name", "").strip()
     output_format = data.get("format", "pdf").lower()
     sections_data = data.get("sections", {})
+    lang = _normalize_lang(data.get("language"))
+    report_tz = _resolve_timezone(data.get("timezone"))
 
     if not report_name:
         return JsonResponse({"error": "O nome do relatório é obrigatório."}, status=400)
@@ -150,24 +211,24 @@ def generate_report(request):
         return JsonResponse({"error": "Nenhuma seção válida selecionada."}, status=400)
 
     if output_format == "xlsx":
-        return _generate_xlsx(report_name, valid_sections)
+        return _generate_xlsx(report_name, valid_sections, lang)
     else:
-        return _generate_pdf(report_name, valid_sections)
+        return _generate_pdf(report_name, valid_sections, lang, report_tz)
 
 
-def _get_column_info(section_key, selected_columns):
+def _get_column_info(section_key, selected_columns, lang):
     config = COLUMN_CONFIG[section_key]
     column_map = {col["key"]: col for col in config["columns"]}
     headers = []
     getters = []
     for col_key in selected_columns:
         if col_key in column_map:
-            headers.append(column_map[col_key]["label"])
+            headers.append(column_map[col_key][f"label_{lang}"])
             getters.append(column_map[col_key]["getter"])
     return headers, getters
 
 
-def _group_items_by_room_section(items, section_key, group_by_room, group_by_section):
+def _group_items_by_room_section(items, section_key, group_by_room, group_by_section, lang):
     if not group_by_room:
         return [{"label": None, "items": list(items)}]
     
@@ -198,12 +259,12 @@ def _group_items_by_room_section(items, section_key, group_by_room, group_by_sec
     
     result = sorted(grouped.values(), key=lambda x: (x["room_order"], x["section_order"]))
     if no_room_items:
-        result.append({"label": "Sem Sala", "items": no_room_items})
+        result.append({"label": UI_STRINGS[lang]["no_room"], "items": no_room_items})
     
     return result
 
 
-def _generate_xlsx(report_name, sections_data):
+def _generate_xlsx(report_name, sections_data, lang):
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
@@ -228,11 +289,11 @@ def _generate_xlsx(report_name, sections_data):
         group_by_room = section_opts["group_by_room"]
         group_by_section = section_opts["group_by_section"]
         
-        headers, getters = _get_column_info(section_key, selected_columns)
-        ws = wb.create_sheet(title=config["label"][:31])
-        
+        headers, getters = _get_column_info(section_key, selected_columns, lang)
+        ws = wb.create_sheet(title=config[f"label_{lang}"][:31])
+
         items = config["get_data"]()
-        groups = _group_items_by_room_section(items, section_key, group_by_room, group_by_section)
+        groups = _group_items_by_room_section(items, section_key, group_by_room, group_by_section, lang)
         
         current_row = 1
         
@@ -253,7 +314,7 @@ def _generate_xlsx(report_name, sections_data):
             
             for item in group["items"]:
                 for col_idx, getter in enumerate(getters, 1):
-                    cell = ws.cell(row=current_row, column=col_idx, value=getter(item))
+                    cell = ws.cell(row=current_row, column=col_idx, value=getter(item, lang))
                     cell.alignment = cell_alignment
                     cell.border = thin_border
                 current_row += 1
@@ -281,7 +342,7 @@ def _generate_xlsx(report_name, sections_data):
     return response
 
 
-def _generate_pdf(report_name, sections_data):
+def _generate_pdf(report_name, sections_data, lang, tz):
     from reportlab.lib.pagesizes import A4, landscape
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet
@@ -307,8 +368,8 @@ def _generate_pdf(report_name, sections_data):
     subtitle_style = styles["Normal"].clone("subtitle")
     subtitle_style.textColor = colors.HexColor("#6B9591")
     subtitle_style.fontSize = 10
-    generated_at = datetime.now().strftime("%d/%m/%Y às %H:%M")
-    elements.append(Paragraph(f"Gerado em {generated_at}", subtitle_style))
+    generated_at = timezone.now().astimezone(tz).strftime(UI_STRINGS[lang]["datetime_format"])
+    elements.append(Paragraph(f"{UI_STRINGS[lang]['generated_at']} {generated_at}", subtitle_style))
     elements.append(Spacer(1, 0.8 * cm))
 
     header_color = colors.HexColor("#2D7A73")
@@ -337,12 +398,12 @@ def _generate_pdf(report_name, sections_data):
         group_by_room = section_opts["group_by_room"]
         group_by_section = section_opts["group_by_section"]
         
-        headers, getters = _get_column_info(section_key, selected_columns)
+        headers, getters = _get_column_info(section_key, selected_columns, lang)
 
         section_title_style = styles["Heading2"].clone(f"section_{section_key}")
         section_title_style.textColor = colors.HexColor("#2D7A73")
         section_title_style.fontSize = 14
-        elements.append(Paragraph(config["label"], section_title_style))
+        elements.append(Paragraph(config[f"label_{lang}"], section_title_style))
         elements.append(Spacer(1, 0.3 * cm))
 
         items = list(config["get_data"]())
@@ -350,11 +411,11 @@ def _generate_pdf(report_name, sections_data):
         if not items:
             empty_style = styles["Normal"].clone(f"empty_{section_key}")
             empty_style.textColor = colors.HexColor("#6B9591")
-            elements.append(Paragraph("Nenhum registro encontrado.", empty_style))
+            elements.append(Paragraph(UI_STRINGS[lang]["no_records"], empty_style))
             elements.append(Spacer(1, 0.6 * cm))
             continue
 
-        groups = _group_items_by_room_section(items, section_key, group_by_room, group_by_section)
+        groups = _group_items_by_room_section(items, section_key, group_by_room, group_by_section, lang)
 
         for group in groups:
             if group["label"]:
@@ -363,7 +424,7 @@ def _generate_pdf(report_name, sections_data):
 
             table_data = [[Paragraph(h, header_cell_style) for h in headers]]
             for item in group["items"]:
-                row = [getter(item) for getter in getters]
+                row = [getter(item, lang) for getter in getters]
                 table_data.append([Paragraph(str(v), cell_style) for v in row])
 
             num_cols = len(headers)
