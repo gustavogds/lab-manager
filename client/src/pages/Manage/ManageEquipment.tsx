@@ -412,9 +412,21 @@ const ManageEquipment = () => {
           <div className="room-empty">{emptyMessage}</div>
         ) : (
           <table className="content-table">
+            <colgroup>
+              <col className="col-checkbox" />
+              <col className="col-drag" />
+              <col className="col-id" />
+              <col className="col-category" />
+              <col className="col-name" />
+              <col className="col-observation" />
+              <col className="col-assigned" />
+              <col className="col-users" />
+              <col className="col-state" />
+              <col className="col-status" />
+            </colgroup>
             <thead>
               <tr>
-                <th className="cell-checkbox" style={{ width: 36 }}>
+                <th className="cell-checkbox">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -425,7 +437,7 @@ const ManageEquipment = () => {
                     title={t("Select all")}
                   />
                 </th>
-                <th style={{ width: 40 }} />
+                <th />
                 <th>{t("ID")}</th>
                 <th>{t("Category")}</th>
                 <th>{t("Name")}</th>
