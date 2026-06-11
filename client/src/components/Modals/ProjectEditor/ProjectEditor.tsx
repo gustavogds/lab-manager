@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { listApprovedUsers } from "helpers/api/content";
-import type { Project, User } from "helpers/api/content";
+import {
+  listApprovedUsers,
+  uploadProjectImage,
+  deleteProjectImage,
+} from "helpers/api/content";
+import type { Project, User, ContentImage } from "helpers/api/content";
 import MultiSelect from "components/MultiSelect/MultiSelect";
 
 interface ProjectEditorProps {
   project: Project;
+  onImagesChange?: (images: ContentImage[]) => void;
   onConfirm: (data: {
     title_pt: string;
     title_en: string;
@@ -19,6 +24,7 @@ interface ProjectEditorProps {
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
   project,
+  onImagesChange,
   onConfirm,
   onCancel,
 }) => {
@@ -31,6 +37,8 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     link: project.link || "",
     members: project.members || [],
   });
+  const [images, setImages] = useState<ContentImage[]>(project.images || []);
+  const [uploading, setUploading] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,6 +62,31 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
 
   const handleMembersChange = (members: User[]) => {
     setFormData((prev) => ({ ...prev, members }));
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const result = await uploadProjectImage(project.id, file);
+    setUploading(false);
+    event.target.value = "";
+
+    if (result.success && result.image) {
+      const newImages = [...images, result.image];
+      setImages(newImages);
+      onImagesChange?.(newImages);
+    }
+  };
+
+  const handleImageDelete = async (imageId: number) => {
+    const result = await deleteProjectImage(imageId);
+    if (result.success) {
+      const newImages = images.filter((img) => img.id !== imageId);
+      setImages(newImages);
+      onImagesChange?.(newImages);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -163,6 +196,37 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
                 placeholder={t("Select members (Order will define display order)...")}
               />
             )}
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="project-images">{t("Images")} <span className="optional-badge">{t("optional")}</span></label>
+            <div className="image-upload-section">
+              <input
+                id="project-images"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="image-upload-input"
+              />
+              {uploading && <p className="upload-status">{t("Sending...")}</p>}
+              {images.length > 0 && (
+                <div className="uploaded-images">
+                  {images.map((img) => (
+                    <div key={img.id} className="image-preview">
+                      <img src={img.image} alt="" />
+                      <button
+                        type="button"
+                        className="delete-image-btn"
+                        onClick={() => handleImageDelete(img.id)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="modal-actions">

@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Max
 
-from .models import ResearchArea, Project, Partnership, Equipment, Room, RoomSection, IdentificationCategory, EquipmentState
+from .models import ResearchArea, ResearchAreaImage, Project, ProjectImage, Partnership, Equipment, Room, RoomSection, IdentificationCategory, EquipmentState
 from accounts.models import User
 
 
@@ -132,6 +132,57 @@ def delete_research_area(request, area_id):
         )
     except ResearchArea.DoesNotExist:
         return JsonResponse({"error": "Research area not found."}, status=404)
+
+
+@login_required
+@require_http_methods(["POST"])
+def upload_research_area_image(request, area_id):
+    try:
+        area = ResearchArea.objects.get(id=area_id)
+    except ResearchArea.DoesNotExist:
+        return JsonResponse({"error": "Research area not found."}, status=404)
+
+    if "image" not in request.FILES:
+        return JsonResponse({"error": "No image uploaded."}, status=400)
+
+    image = request.FILES["image"]
+    if not image.content_type.startswith("image/"):
+        return JsonResponse({"error": "Invalid file type."}, status=400)
+
+    max_order = ResearchAreaImage.objects.filter(research_area=area).aggregate(
+        Max("order")
+    )["order__max"] or 0
+
+    area_image = ResearchAreaImage.objects.create(
+        research_area=area,
+        image=image,
+        order=max_order + 1,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Imagem enviada com sucesso.",
+            "image": {
+                "id": area_image.id,
+                "image": area_image.image.url,
+                "order": area_image.order,
+            },
+        }
+    )
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_research_area_image(request, image_id):
+    try:
+        area_image = ResearchAreaImage.objects.get(id=image_id)
+        area_image.delete()
+        return JsonResponse(
+            {"success": True, "message": "Imagem removida com sucesso."}
+        )
+    except ResearchAreaImage.DoesNotExist:
+        return JsonResponse({"error": "Image not found."}, status=404)
 
 
 @login_required
@@ -294,6 +345,57 @@ def delete_project(request, project_id):
         )
     except Project.DoesNotExist:
         return JsonResponse({"error": "Project not found."}, status=404)
+
+
+@login_required
+@require_http_methods(["POST"])
+def upload_project_image(request, project_id):
+    try:
+        project = Project.objects.get(id=project_id)
+    except Project.DoesNotExist:
+        return JsonResponse({"error": "Project not found."}, status=404)
+
+    if "image" not in request.FILES:
+        return JsonResponse({"error": "No image uploaded."}, status=400)
+
+    image = request.FILES["image"]
+    if not image.content_type.startswith("image/"):
+        return JsonResponse({"error": "Invalid file type."}, status=400)
+
+    max_order = ProjectImage.objects.filter(project=project).aggregate(
+        Max("order")
+    )["order__max"] or 0
+
+    project_image = ProjectImage.objects.create(
+        project=project,
+        image=image,
+        order=max_order + 1,
+    )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Imagem enviada com sucesso.",
+            "image": {
+                "id": project_image.id,
+                "image": project_image.image.url,
+                "order": project_image.order,
+            },
+        }
+    )
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def delete_project_image(request, image_id):
+    try:
+        project_image = ProjectImage.objects.get(id=image_id)
+        project_image.delete()
+        return JsonResponse(
+            {"success": True, "message": "Imagem removida com sucesso."}
+        )
+    except ProjectImage.DoesNotExist:
+        return JsonResponse({"error": "Image not found."}, status=404)
 
 
 @login_required

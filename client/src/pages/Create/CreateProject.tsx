@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { User } from "helpers/api/content";
-import { createProject, listApprovedUsers } from "helpers/api/content";
+import {
+  createProject,
+  listApprovedUsers,
+  uploadProjectImage,
+} from "helpers/api/content";
 import MultiSelect from "components/MultiSelect/MultiSelect";
 import { FaArrowLeft } from "react-icons/fa";
 import "./CreateProject.scss";
@@ -19,6 +23,9 @@ const CreateProject = () => {
     members: [] as User[],
   });
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [pendingImages, setPendingImages] = useState<
+    Array<{ file: File; preview: string }>
+  >([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,6 +49,28 @@ const CreateProject = () => {
 
   const handleMembersChange = (members: User[]) => {
     setFormData((prev) => ({ ...prev, members }));
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setPendingImages((prev) => [...prev, ...newImages]);
+    e.target.value = "";
+  };
+
+  const handleImageRemove = (preview: string) => {
+    setPendingImages((prev) => {
+      const image = prev.find((img) => img.preview === preview);
+      if (image) {
+        URL.revokeObjectURL(image.preview);
+      }
+      return prev.filter((img) => img.preview !== preview);
+    });
   };
 
   const submitForm = async (createAnother: boolean) => {
@@ -70,11 +99,27 @@ const CreateProject = () => {
 
     const response = await createProject(projectData as any);
 
-    setIsSubmitting(false);
-
     if (response.success) {
+      let uploadFailed = false;
+      const projectId = response.data?.id;
+      if (projectId && pendingImages.length > 0) {
+        for (const img of pendingImages) {
+          const uploadResult = await uploadProjectImage(projectId, img.file);
+          if (!uploadResult.success) {
+            uploadFailed = true;
+          }
+          URL.revokeObjectURL(img.preview);
+        }
+        setPendingImages([]);
+      }
+
+      setIsSubmitting(false);
       setMessage(response.message || t("Project created successfully!"));
-      setError("");
+      setError(
+        uploadFailed
+          ? t("Project created, but some images failed to upload.")
+          : ""
+      );
       setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "", link: "", members: [] });
 
       if (createAnother) {
@@ -87,6 +132,7 @@ const CreateProject = () => {
         }, 1500);
       }
     } else {
+      setIsSubmitting(false);
       setError(response.error || t("Failed to create project."));
       setMessage("");
     }
@@ -191,6 +237,36 @@ const CreateProject = () => {
               onChange={handleMembersChange}
               placeholder={t("Select project members...")}
             />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="project-images">{t("Images")} <span className="optional-badge">{t("optional")}</span></label>
+            <div className="image-upload-section">
+              <input
+                id="project-images"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageSelect}
+                className="image-upload-input"
+              />
+              {pendingImages.length > 0 && (
+                <div className="uploaded-images">
+                  {pendingImages.map((img) => (
+                    <div key={img.preview} className="image-preview">
+                      <img src={img.preview} alt="" />
+                      <button
+                        type="button"
+                        className="delete-image-btn"
+                        onClick={() => handleImageRemove(img.preview)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="form-actions">

@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { createResearchArea } from "helpers/api/content";
+import {
+  createResearchArea,
+  uploadResearchAreaImage,
+} from "helpers/api/content";
 import { FaArrowLeft } from "react-icons/fa";
 import "./CreateResearchArea.scss";
 
@@ -15,6 +18,9 @@ const CreateResearchArea = () => {
     description_en: "",
     link: "",
   });
+  const [pendingImages, setPendingImages] = useState<
+    Array<{ file: File; preview: string }>
+  >([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,6 +30,28 @@ const CreateResearchArea = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setPendingImages((prev) => [...prev, ...newImages]);
+    e.target.value = "";
+  };
+
+  const handleImageRemove = (preview: string) => {
+    setPendingImages((prev) => {
+      const image = prev.find((img) => img.preview === preview);
+      if (image) {
+        URL.revokeObjectURL(image.preview);
+      }
+      return prev.filter((img) => img.preview !== preview);
+    });
   };
 
   const submitForm = async (createAnother: boolean) => {
@@ -43,11 +71,27 @@ const CreateResearchArea = () => {
 
     const response = await createResearchArea(formData);
 
-    setIsSubmitting(false);
-
     if (response.success) {
+      let uploadFailed = false;
+      const areaId = response.data?.id;
+      if (areaId && pendingImages.length > 0) {
+        for (const img of pendingImages) {
+          const uploadResult = await uploadResearchAreaImage(areaId, img.file);
+          if (!uploadResult.success) {
+            uploadFailed = true;
+          }
+          URL.revokeObjectURL(img.preview);
+        }
+        setPendingImages([]);
+      }
+
+      setIsSubmitting(false);
       setMessage(response.message || t("Research area created successfully!"));
-      setError("");
+      setError(
+        uploadFailed
+          ? t("Research area created, but some images failed to upload.")
+          : ""
+      );
 
       setFormData({ title_pt: "", title_en: "", description_pt: "", description_en: "", link: "" });
 
@@ -61,6 +105,7 @@ const CreateResearchArea = () => {
         }, 1500);
       }
     } else {
+      setIsSubmitting(false);
       setError(response.error || t("Failed to create research area."));
       setMessage("");
     }
@@ -155,6 +200,36 @@ const CreateResearchArea = () => {
               onChange={handleChange}
               placeholder="https://..."
             />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="ra-images">{t("Images")} <span className="optional-badge">{t("optional")}</span></label>
+            <div className="image-upload-section">
+              <input
+                id="ra-images"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageSelect}
+                className="image-upload-input"
+              />
+              {pendingImages.length > 0 && (
+                <div className="uploaded-images">
+                  {pendingImages.map((img) => (
+                    <div key={img.preview} className="image-preview">
+                      <img src={img.preview} alt="" />
+                      <button
+                        type="button"
+                        className="delete-image-btn"
+                        onClick={() => handleImageRemove(img.preview)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="form-actions">

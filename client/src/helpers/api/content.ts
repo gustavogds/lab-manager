@@ -20,6 +20,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export type ContentImage = {
+  id: number;
+  image: string;
+  order: number;
+};
+
 export type ResearchArea = {
   id: number;
   title_pt: string;
@@ -31,6 +37,7 @@ export type ResearchArea = {
   order: number;
   created_at: string;
   updated_at: string;
+  images?: ContentImage[];
 };
 
 export type Project = {
@@ -50,6 +57,7 @@ export type Project = {
     email: string;
     profile_image: string | null;
   }>;
+  images?: ContentImage[];
 };
 
 export const createResearchArea = async (data: {
@@ -103,6 +111,39 @@ export const updateResearchArea = async (
 ) => {
   const response = await api
     .patch(`/content/research-areas/${areaId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const uploadResearchAreaImage = async (areaId: number, file: File) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await api
+    .post(`/content/research-areas/${areaId}/images/upload/`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const deleteResearchAreaImage = async (imageId: number) => {
+  const response = await api
+    .delete(`/content/research-areas/images/${imageId}/delete/`)
     .catch((error) => {
       return error.response ? error.response : error;
     });
@@ -177,6 +218,39 @@ export const updateProject = async (
 ) => {
   const response = await api
     .patch(`/content/projects/${projectId}/update/`, data)
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const uploadProjectImage = async (projectId: number, file: File) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await api
+    .post(`/content/projects/${projectId}/images/upload/`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .catch((error) => {
+      return error.response ? error.response : error;
+    });
+
+  return {
+    success: response.status === 200,
+    ...response.data,
+  };
+};
+
+export const deleteProjectImage = async (imageId: number) => {
+  const response = await api
+    .delete(`/content/projects/images/${imageId}/delete/`)
     .catch((error) => {
       return error.response ? error.response : error;
     });

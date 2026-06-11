@@ -36,7 +36,26 @@ class ResearchArea(models.Model):
             "order": self.order,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
+            "images": [
+                {"id": img.id, "image": img.image.url, "order": img.order}
+                for img in self.images.all()
+            ],
         }
+
+
+class ResearchAreaImage(models.Model):
+    research_area = models.ForeignKey(
+        ResearchArea, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="research_area_images/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "uploaded_at"]
+
+    def __str__(self):
+        return f"Image {self.id} for research area {self.research_area_id}"
 
 
 class Project(models.Model):
@@ -92,7 +111,26 @@ class Project(models.Model):
                 }
                 for member in ordered_members
             ],
+            "images": [
+                {"id": img.id, "image": img.image.url, "order": img.order}
+                for img in self.images.all()
+            ],
         }
+
+
+class ProjectImage(models.Model):
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="project_images/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "uploaded_at"]
+
+    def __str__(self):
+        return f"Image {self.id} for project {self.project_id}"
 
 
 class Partnership(models.Model):

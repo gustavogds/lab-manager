@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import "./ResearchAreaDetails.scss";
+import ImageCarousel from "components/ImageCarousel/ImageCarousel";
 import type { ResearchArea } from "helpers/api/content";
 import { localized } from "helpers/i18n";
 
@@ -26,6 +27,13 @@ const ResearchAreaDetails = ({ area, onConfirm }: ResearchAreaDetailsProps) => {
             <h3>{t("Description")}</h3>
             <p>{localized(area, "description")}</p>
           </section>
+
+          {area.images && area.images.length > 0 && (
+            <ImageCarousel
+              images={area.images}
+              altPrefix={localized(area, "title")}
+            />
+          )}
 
           {area.link && (
             <a

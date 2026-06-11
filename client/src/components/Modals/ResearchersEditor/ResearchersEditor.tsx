@@ -80,7 +80,7 @@ const ResearchersEditor = ({ researchers, onConfirm, onCancel }: ResearchersEdit
     <div className="researchers-editor-modal" onClick={onCancel}>
       <div className="researchers-editor-content" onClick={(e) => e.stopPropagation()}>
         <header className="modal-header-shared">
-          <h2>{t("Edit Researchers Section")}</h2>
+          <h2>{t("Edit Members Section")}</h2>
           <button className="btn-close-modal" onClick={onCancel}>
             ×
           </button>
