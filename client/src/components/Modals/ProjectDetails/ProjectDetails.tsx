@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import "./ProjectDetails.scss";
 import Icons from "components/Icons/Icons";
+import ImageCarousel from "components/ImageCarousel/ImageCarousel";
 import type { Project } from "helpers/api/content";
 import { localized } from "helpers/i18n";
 
@@ -27,6 +28,13 @@ const ProjectDetails = ({ project, onConfirm }: ProjectDetailsProps) => {
             <h3>{t("Description")}</h3>
             <p>{localized(project, "description")}</p>
           </section>
+
+          {project.images && project.images.length > 0 && (
+            <ImageCarousel
+              images={project.images}
+              altPrefix={localized(project, "title")}
+            />
+          )}
 
           {project.link && (
             <a

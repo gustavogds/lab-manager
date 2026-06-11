@@ -83,7 +83,7 @@ const Home = () => {
     { id: "about", label: t("About"), icon: <FaInfoCircle /> },
     { id: "research", label: t("Research Areas"), icon: <FaFlask /> },
     { id: "projects", label: t("Projects"), icon: <FaProjectDiagram /> },
-    { id: "researchers", label: t("Researchers"), icon: <FaUsers /> },
+    { id: "researchers", label: t("Members"), icon: <FaUsers /> },
     { id: "partnerships", label: t("Partnerships"), icon: <FaHandshake /> },
     { id: "contact-location", label: t("Contact & Location"), icon: <FaEnvelope /> },
   ], [t]);
@@ -557,6 +557,11 @@ const Home = () => {
   const openResearchAreaEditor = async (area: ResearchArea) => {
     const { promise } = ModalsHandler.createModal("ResearchAreaEditor", {
       researchArea: area,
+      onImagesChange: (images: ResearchArea["images"]) => {
+        setResearchAreas((prev) =>
+          prev.map((a) => (a.id === area.id ? { ...a, images } : a))
+        );
+      },
     });
 
     const result = await promise;
@@ -674,6 +679,11 @@ const Home = () => {
   const openProjectEditor = async (project: Project) => {
     const { promise } = ModalsHandler.createModal("ProjectEditor", {
       project,
+      onImagesChange: (images: Project["images"]) => {
+        setProjects((prev) =>
+          prev.map((p) => (p.id === project.id ? { ...p, images } : p))
+        );
+      },
     });
 
     const result = await promise;

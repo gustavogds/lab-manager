@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ResearchArea } from "helpers/api/content";
+import {
+  uploadResearchAreaImage,
+  deleteResearchAreaImage,
+} from "helpers/api/content";
+import type { ResearchArea, ContentImage } from "helpers/api/content";
 
 interface ResearchAreaEditorProps {
   researchArea: ResearchArea;
+  onImagesChange?: (images: ContentImage[]) => void;
   onConfirm: (data: {
     title_pt: string;
     title_en: string;
@@ -16,6 +21,7 @@ interface ResearchAreaEditorProps {
 
 const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
   researchArea,
+  onImagesChange,
   onConfirm,
   onCancel,
 }) => {
@@ -27,6 +33,33 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
     description_en: researchArea.description_en || "",
     link: researchArea.link || "",
   });
+  const [images, setImages] = useState<ContentImage[]>(researchArea.images || []);
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const result = await uploadResearchAreaImage(researchArea.id, file);
+    setUploading(false);
+    event.target.value = "";
+
+    if (result.success && result.image) {
+      const newImages = [...images, result.image];
+      setImages(newImages);
+      onImagesChange?.(newImages);
+    }
+  };
+
+  const handleImageDelete = async (imageId: number) => {
+    const result = await deleteResearchAreaImage(imageId);
+    if (result.success) {
+      const newImages = images.filter((img) => img.id !== imageId);
+      setImages(newImages);
+      onImagesChange?.(newImages);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -130,6 +163,37 @@ const ResearchAreaEditor: React.FC<ResearchAreaEditorProps> = ({
               onChange={handleChange}
               placeholder="https://..."
             />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="ra-images">{t("Images")} <span className="optional-badge">{t("optional")}</span></label>
+            <div className="image-upload-section">
+              <input
+                id="ra-images"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="image-upload-input"
+              />
+              {uploading && <p className="upload-status">{t("Sending...")}</p>}
+              {images.length > 0 && (
+                <div className="uploaded-images">
+                  {images.map((img) => (
+                    <div key={img.id} className="image-preview">
+                      <img src={img.image} alt="" />
+                      <button
+                        type="button"
+                        className="delete-image-btn"
+                        onClick={() => handleImageDelete(img.id)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="modal-actions">
