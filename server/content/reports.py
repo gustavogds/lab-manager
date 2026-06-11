@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
-from content.models import ResearchArea, Project, Partnership, Equipment, Room, RoomSection
+from content.models import ResearchArea, Project, Partnership, Equipment
 from accounts.models import User
 
 
@@ -267,6 +267,7 @@ def _group_items_by_room_section(items, section_key, group_by_room, group_by_sec
 def _generate_xlsx(report_name, sections_data, lang):
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
 
     wb = Workbook()
     wb.remove(wb.active)
@@ -327,7 +328,7 @@ def _generate_xlsx(report_name, sections_data, lang):
                 for cell in row:
                     if cell.value:
                         max_length = max(max_length, min(len(str(cell.value)), 50))
-            ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = max_length + 4
+            ws.column_dimensions[get_column_letter(col_idx)].width = max_length + 4
 
     buffer = io.BytesIO()
     wb.save(buffer)
